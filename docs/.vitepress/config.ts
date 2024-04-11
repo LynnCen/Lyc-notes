@@ -40,7 +40,7 @@ export default defineConfig({
       label: '本页目录',
     },
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/Cencenya/LynnChen-VitePress' }],
+    socialLinks: [{ icon: 'github', link: 'https://lynncen.github.io/Lyc-notes/' }],
 
     footer: {
       message: '如有转载或 CV 的请标注本站原文地址',
@@ -57,11 +57,11 @@ export default defineConfig({
     },
 
     visitor: {
-      badgeId: 'maomao1996.vitepress-nav-template',
+      badgeId: 'lynncen.Lyc-notes',
     },
 
     comment: {
-      repo: 'maomao1996/vitepress-nav-template',
+      repo: 'lynncen/Lyc-notes',
       repoId: 'R_kgDOJC09Jg',
       category: 'Announcements',
       categoryId: 'DIC_kwDOJC09Js4Cekn0',

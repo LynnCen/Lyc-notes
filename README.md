@@ -4,7 +4,7 @@
   <!-- <img src="https://raw.githubusercontent.com/maomao1996/picture/main/vitepress-nav-template/home.webp" alt="home" /> -->
 </p>
 <!-- <p align="center"> 基于 <b>VitePress</b> 的个人前端导航页面模板 </p> -->
-<p align='center'><a href="/guide.md">基础教程</a> | <a href="https://notes.fe-mm.com/">作者博客</a></p>
+<p align='center'><a href="/guide.md">基础教程</a> | <a href="https://lynncen.github.io/Lyc-notes/">作者博客</a></p>
 
 ---
 
@@ -85,4 +85,4 @@ docs: 更新 README
 
 ## 说明
 
-前端导航模块由 [林岑 | LynnCen](https://cencenya.github.io/LynnChen-VitePress/) 开发，如有引用、借鉴的请保留版权声明：<https://cencenya.github.io/LynnChen-VitePress/>
+前端导航模块由 [林岑 | LynnCen](https://lynncen.github.io/Lyc-notes/) 开发，如有引用、借鉴的请保留版权声明：<https://lynncen.github.io/Lyc-notes/>
