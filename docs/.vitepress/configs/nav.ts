@@ -70,8 +70,8 @@ export const nav: DefaultTheme.Config['nav'] = [
   },
 
   {
-    text: '文档',
-    activeMatch: '/docs/',
-    link: '/docs/hello'
+    text: 'Interview',
+    activeMatch: '/interview/',
+    link: '/interview/js'
   },
 ]
