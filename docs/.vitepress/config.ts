@@ -40,7 +40,7 @@ export default defineConfig({
       label: '本页目录',
     },
 
-    socialLinks: [{ icon: 'github', link: 'https://lynncen.github.io/Lyc-notes/' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/LynnCen' }],
 
     footer: {
       message: '如有转载或 CV 的请标注本站原文地址',
@@ -57,14 +57,14 @@ export default defineConfig({
     },
 
     visitor: {
-      badgeId: 'lynncen.Lyc-notes',
+      badgeId: 'LynnCen.Lyc-notes',
     },
 
     comment: {
-      repo: 'lynncen/Lyc-notes',
-      repoId: 'R_kgDOJC09Jg',
+      repo: 'LynnCen/Lyc-notes',
+      repoId: 'R_kgDOLsOwUg',
       category: 'Announcements',
-      categoryId: 'DIC_kwDOJC09Js4Cekn0',
+      categoryId: 'DIC_kwDOLsOwUs4CenzY',
     },
   },
 
