@@ -31,25 +31,28 @@ features:
     details: Learn ReactHooks (づ｡◕‿‿◕｡)づ  <br /> make something customizing hooks 🚀
     link: /react/customHook/hooks
     linkText: hooks
-  - icon: 💡
-    title: Workflow
-    details: 在工作中学到的一切<small>（常用库/工具/奇淫技巧等）</small><br />配合 CV 大法来更好的摸鱼
-    link: /utils/utils
-    linkText: 常用工具库
+  - icon:
+      src: /icons/react.svg
+    title: React with Typescript
+    details: Cheatsheets for experienced React developers getting started with TypeScript</small><br /> Incredible magic o_o ....
+    link: /react/utils/type
+    linkText: React Utils
   - icon: 🧰
     title: Common Tools
     details: To do a good job, an artisan needs the best tools<br />Record software, plug-ins, extensions, etc. used in development and daily use
     link: /nav/
     linkText: Tools
   - icon: 🐞
-    title: 踩坑记录
-    details: 那些年我们踩过的坑<br />总有一些让你意想不到的问题
-    # link: https://notes.fe-mm.com/pit/npm
-    linkText: 踩坑记录 ಥ_ಥ
-  - icon: 💯
-    title: 吾志所向，一往无前。
-    details: '<small class="bottom-small">一个想躺平的小开发</small>'
-    # link: https://notes.fe-mm.com/mao
+    title: Bug Record
+    details: The pitfalls we stepped on over the years<br />There are always some questions that surprise you
+    link: /record/nvm
+    linkText: ಥ_ಥ
+  - icon:
+      src: /icons/Postgraduate。.svg
+    title: Postgraduate。
+    details: <small class="bottom-small">Gods determine what you're going to be</small>
+    link: /Postgraduate/school
+    linkText: ▶►
 ---
 
 <style>
