@@ -2,7 +2,7 @@
 
 ## medium-zoom
 
-![medium-zoom](/logo.png)
+![medium-zoom](/LynnCenLogo.png)
 
 ## vite-plugin-markdown-preview
 

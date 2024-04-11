@@ -22,7 +22,7 @@ hero:
   text: 个人前端导航  //左侧第二行
   tagline: 使用 VitePress 打造个人前端导航  //第三行小注内容
   image:
-    src: /logo.png //页面大图地址（图像最好切圆后使用）
+    src: /LynnCenLogo.png //页面大图地址（图像最好切圆后使用）
     alt: 林岑物语
   actions:  //跳转按钮，可按需增减
     - text: 林岑物语
@@ -186,7 +186,7 @@ export default defineConfig({
   themeConfig: {
     i18nRouting: false,
 
-    logo: '/logo.png',  //更改此处
+    logo: '/LynnCenLogo.png',  //更改此处
 ```
 
 ---

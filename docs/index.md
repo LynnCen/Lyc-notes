@@ -3,21 +3,21 @@ layout: home
 layoutClass: 'm-home-layout'
 
 hero:
-  name: 林岑的
-  text: 个人博客
-  tagline: 基于 VitePress 的搭建
+  name: 林岑LynnCen
+  text: Web Developer Blog
+  tagline: 岑岑日常记录
   image:
-    src: /logo.png
-    alt: 林岑物语
+    src: /LynnCenLogo.png
+    alt: 林岑LynnCen
   actions:
     - text: 林岑物语
       link: https://notes.fe-mm.com
-    - text: 前端导航
+    - text: 点一点
       link: /nav/
       theme: alt
     - text: mmPlayer
       link: https://netease-music.fe-mm.com
-    - text: 测试页
+    - text: Soul
       link: /test
       theme: alt
 features:

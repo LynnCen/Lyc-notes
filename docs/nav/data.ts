@@ -70,13 +70,13 @@ export const NAV_DATA: NavData[] = [
     title: '林岑的站点导航',
     items: [
       {
-        icon: '/logo.png',
+        icon: '/LynnCenLogo.png',
         title: '前端日常笔记',
         desc: '日常笔记记录（零零散散啥都记系列）',
         link: 'https://github.com/maomao1996/daily-notes',
       },
       {
-        icon: '/logo.png',
+        icon: '/LynnCenLogo.png',
         title: '前端思维导图',
         desc: '用思维导图的方式总结个人所学知识',
         link: 'https://mindmap.fe-mm.com',
@@ -88,7 +88,7 @@ export const NAV_DATA: NavData[] = [
         link: 'https://qwerty.fe-mm.com',
       },
       {
-        icon: '/logo.png',
+        icon: '/LynnCenLogo.png',
         title: 'mmPlayer',
         desc: 'mmPlayer 在线音乐播放器',
         link: 'https://netease-music.fe-mm.com',
@@ -224,7 +224,7 @@ export const NAV_DATA: NavData[] = [
         link: 'https://antdv.com',
       },
       {
-        icon: 'https://fastly.jsdelivr.net/npm/@vant/assets/logo.png',
+        icon: 'https://fastly.jsdelivr.net/npm/@vant/assets/LynnCenLogo.png',
         title: 'Vant',
         desc: '轻量、可定制的移动端 Vue 组件库',
         link: 'https://vant-ui.github.io/vant',
