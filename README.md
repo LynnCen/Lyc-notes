@@ -73,13 +73,6 @@ export default defineConfig({
 
 需在指定页面的 `markdown` 文件中添加如下 `frontmatter` 配置
 
-```md
----
-comment: false
----
-
-# 功能测试页
-```
 
 docs: 更新 README
 
