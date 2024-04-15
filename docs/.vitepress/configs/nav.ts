@@ -11,13 +11,7 @@ export const nav: DefaultTheme.Config['nav'] = [
       },
       {
         text: 'Javascript进阶',
-        items: [
-          {
-            text: '调用堆栈',
-            activeMatch: '/Javascript/Javascript进阶/',
-            link: 'Javascript/Javascript进阶/执行上下文和执行栈'
-          }
-        ]
+        link: 'Javascript/Advance/executionContext'
       }
     ],
   },

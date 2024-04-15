@@ -1,14 +1,18 @@
 import type { DefaultTheme } from 'vitepress'
 
 export const sidebar: DefaultTheme.Config['sidebar'] = {
-    '/Javascript/Javascript进阶/': [
+    '/Javascript/Advance/': [
         {
             text: '调用堆栈',
             items: [
                 {
                     text: '执行上下文和执行栈',
-                    link: 'Javascript/Javascript进阶/执行上下文和执行栈'
-                }
+                    link: 'Javascript/Advance/executionContext'
+                },
+                {
+                  text: '执行上下文栈和变量对象',
+                  link: 'Javascript/Advance/executionStack'
+              }
             ]
         }
     ],
