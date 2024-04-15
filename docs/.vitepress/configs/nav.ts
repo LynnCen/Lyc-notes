@@ -11,6 +11,7 @@ export const nav: DefaultTheme.Config['nav'] = [
       },
       {
         text: 'Javascript进阶',
+        activeMatch: 'Javascript/Advance/',
         link: 'Javascript/Advance/executionContext'
       }
     ],
