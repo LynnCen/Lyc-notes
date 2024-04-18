@@ -49,6 +49,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
             text: '网络',
             link: '/interview/network',
         },
+        {
+          text: '项目总结',
+          link: '/project',
+      },
 
 
     ]
