@@ -119,4 +119,36 @@ resolve:{
 
 react$ 只会命中以 react 结尾的导入语句，即只会把 `import 'react' `关键字替换成 `import '/path/to/react.min.js'`。
 
+- `noParse`
+如果一些第三方模块没有 `AMD/CommonJS` 规范版本，可以使用 `noParse` 来标识这个模块，这样 Webpack 会引入这些模块，但是不进行转化和解析，从而提升 Webpack 的构建性能 ，例如：`jquery `、`lodash`。
+
+在上面的 优化 `resolve.alias` 配置 中讲到单独完整的react.min.js文件就没有采用模块化，让我们来通过配置 `module.noParse` 忽略对 react.min.js 文件的递归解析处理， 相关 Webpack 配置如下：
+```js
+const path = require('path');
+
+module.exports = {
+  module: {
+    // 独完整的 `react.min.js` 文件就没有采用模块化，忽略对 `react.min.js` 文件的递归解析处理
+	// noParse 属性的值是一个正则表达式或者是一个 function
+    noParse: [/react\.min\.js$/] // /jquery|lodash/
+  },
+};
+```
+- `resolve.extensions`
+webpack 会根据 `extensions` 定义的后缀查找文件(**频率较高的文件类型优先写在前面**)， 默认是 `extensions: ['.js', '.json']`
+也就是说当遇到 `require('./data') `这样的导入语句时，Webpack 会先去寻找 `./data.js` 文件，如果该文件不存在就去寻找 `./data.json` 文件，如果还是找不到就报错。
+如果这个列表越长，或者正确的后缀在越后面，就会造成尝试的次数越多，所以 `resolve.extensions` 的配置也会影响到构建的性能。 在配置 `resolve.extensions` 时你需要遵守以下几点，以做到尽可能的优化构建性能：
+1. 后缀尝试列表要尽可能的小，不要把项目中不可能存在的情况写到后缀尝试列表中
+2. 频率出现最高的文件后缀要优先放在最前面，以做到尽快的退出寻找过程
+3. 在源码中写导入语句时，要尽可能的带上后缀，从而可以避免寻找过程。例如在你确定的情况下把 `require('./data')` 写成 `require('./data.json')`
+```js
+module.exports = {
+  resolve: {
+    // 尽可能的减少后缀尝试的可能性
+    extensions: ['js'],
+  },
+};
+```
+
+
 ## 减少打包体积
