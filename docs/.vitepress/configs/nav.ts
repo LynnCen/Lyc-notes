@@ -52,8 +52,8 @@ export const nav: DefaultTheme.Config['nav'] = [
     items: [
       {
         text: 'WebPack',
-        items: [
-        ]
+        activeMatch: '/webpack/',
+        link: 'webpack/performance'
       },
       {
         text: 'Vite',
