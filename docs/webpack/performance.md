@@ -149,6 +149,91 @@ module.exports = {
   },
 };
 ```
+### 使用<a href='https://github.com/webpack-contrib/cache-loader'>`cache-loader`</a> ，将结果缓存中磁盘中
+在一些性能开销较大的 loader 之前添加 `cache-loader`，将结果缓存中磁盘中。默认保存在 `node_modueles/.cache/cache-loader` 目录下。它所做的事情很简单，就是 babel-loader 开启 cache 后做的事情，将 loader 的编译结果写入硬盘缓存。再次构建会先比较一下，如果文件较之前的没有发生变化则会直接使用缓存。
 
+cache-loader 的配置很简单，放在其他 loader 之前即可。修改Webpack 的配置如下:
+```js
+module.exports = {
+  module: {
+    // 例如 babel-loader 耗时比较长，给它配置 cache-loader 放在 loader 之前
+    rules: [
+      {
+        test: /\.jsx?$/,
+        use: ['cache-loader','babel-loader']
+      }
+    ]
+  }
+}
+```
+如果只打算给 babel-loader 配置 cache 的话，也可以不使用 cache-loader，给 babel-loader 增加选项 `cacheDirectory`。
+`cacheDirectory`：默认值为 false。当设置为 true 时，指定的目录将用来缓存 loader 的执行结果。之后的 Webpack 构建，将会尝试读取缓存，来避免在每次执行时，可能产生的、高性能消耗的 Babel 重新编译过程。使用默认缓存目录：node_modules/.cache/babel-loader
+```js
+loader: 'babel-loader?cacheDirectory=true'
+```
+
+### 使用 <a href='https://github.com/amireh/happypack'>`happypac`</a>开启多进程打包
+
+受限于 Node 是单线程运行的，所以 Webpack 在打包的过程中也是单线程的，特别是在执行 Loader 的时候，解析转换以及代码的压缩中的时间很长，这样就会导致构建时间变长。
+
+HappyPack 的基本原理是将这部分任务分解到多个子进程中去并行处理，子进程处理完成后把结果发送到主进程中，从而减少总的构建时间:
+
+```js
+const Happypack = require('happypack');
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.js[x]?$/,
+        use: 'Happypack/loader?id=js',
+        include: [path.resolve(__dirname, 'src')]
+      },
+      {
+        test: /\.css$/,
+        use: 'Happypack/loader?id=css',
+        include: [
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, 'node_modules', 'bootstrap', 'dist')
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new Happypack({
+      id: 'js', // 和rule中的 id=js 对应
+      // 将之前 rule 中的 loader 删除，在此配置
+      use: ['babel-loader'] //必须是数组
+    }),
+    new Happypack({
+      id: 'css',// 和rule中的 id=css 对应
+      use: ['style-loader', 'css-loader','postcss-loader'],
+    })
+  ]
+}
+```
+<a href='https://webpack.wuhaolin.cn/4%E4%BC%98%E5%8C%96/4-3%E4%BD%BF%E7%94%A8HappyPack.html'>深入浅出WebPack 使用HappyPack</a>
+
+### <a href='https://github.com/webpack-contrib/thread-loader'>`thread-loader`</a>
+除了使用 Happypack 外，我们也可以使用 thread-loader ，把 thread-loader 放置在其它 loader 之前，那么放置在这个 loader 之后的 loader 就会在一个单独的 worker 池中运行。
+
+在 worker 池(worker pool)中运行的 loader 是受到限制的。例如：
+- 这些 loader 不能产生新的文件。
+
+- 这些 loader 不能使用定制的 loader API（也就是说，通过插件）。
+
+- 这些 loader 无法获取 webpack 的选项设置。
+```js
+module.exports = {
+  module: {
+    // 配置 thread-loader 放在所有 loader 之前（包括 cache-loader）
+    rules: [
+      {
+        test: /\.jsx?$/,
+        use: ['thread-loader', 'cache-loader', 'babel-loader']
+      }
+    ]
+  }
+}
+```
 
 ## 减少打包体积
