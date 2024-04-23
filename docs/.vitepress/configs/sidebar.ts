@@ -1,7 +1,11 @@
 import type { DefaultTheme } from 'vitepress'
 
 export const sidebar: DefaultTheme.Config['sidebar'] = {
-    '/Javascript/Advance/': [
+    '/Javascript/': [
+      {
+        text: 'JS引擎',
+        link: 'Javascript/Advance/execution'
+    },
         {
             text: '调用堆栈',
             items: [
