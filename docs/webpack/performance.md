@@ -235,5 +235,50 @@ module.exports = {
   }
 }
 ```
+### 使用 <a href='https://github.com/mzgoddard/hard-source-webpack-plugin'>`hard-source-webpack-plugin`</a>为模块提供中间缓存
+
+`HardSourceWebpackPlugin` 为模块提供中间缓存，缓存默认的存放路径是: `node_modules/.cache/hard-source`。
+
+配置 `hard-source-webpack-plugin`，首次构建时间没有太大变化，但是第二次开始，构建时间大约可以节约 80%
+
+:warning:  hard-source-webpack-plugin 存在一些坑，如果遇到某些配置不生效了，例如热更新失效，或者某些配置不生效等,详细请查看<a href='https://github.com/mzgoddard/hard-source-webpack-plugin'>官方文档</a>
+```js
+//webpack.config.js
+var HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+module.exports = {
+  plugins: [
+    new HardSourceWebpackPlugin()
+  ]
+}
+```
+### 使用 IgnorePlugin 忽略第三方包指定目录
+
+`IgnorePlugin` 是 webpack 的内置插件，作用是忽略第三方包指定目录。例如: `moment` (2.24.0版本) 会将所有本地化内容和核心功能一起打包，我们就可以使用 `IgnorePlugin` 在打包时忽略本地化内容。
+
+```js
+//webpack.config.js
+module.exports = {
+  plugins: [
+    // 忽略 moment 下的 ./locale 目录
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+  ]
+}
+```
+忽略 moment 下的 ./locale 目录后，如果我们需要指定语言，那么需要我们手动的去引入语言包，例如，引入中文语言包:
+
+```js
+import moment from 'moment';
+import 'moment/locale/zh-cn';// 手动引入自己需要的语言包
+```
+
+index.js 中只引入 moment，打包出来的 bundle.js 大小和配置了 IgnorePlugin，单独引入 moment/locale/zh-cn，构建出来的包大小为大概差距有 200k 左右。
+
+
+### 关于使用 `webpack-parallel-uglify-plugin` 增强代码压缩
+
+在 Webpack3 中，我们一般使用 UglifyJS 来压缩代码，但是这个是单线程运行的，为了加快效率，我们可以使用 `webpack-parallel-uglify-plugin` 来并行运行 UglifyJS，从而提高效率。
+
+但是在 webpack4.x 内置默认使用 `TerserWebpackPlugin`，在 mode 设置为 production 就会默认开启 `TerserWebpackPlugin`，所以可以不用配置 webpack-parallel-uglify-plugin
+
 
 ## 减少打包体积
