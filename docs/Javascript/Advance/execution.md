@@ -57,6 +57,22 @@ JavaScript 引擎既可以是解释器，也可以是编译器，甚至是两者
 
 
 ## 解析流程
+### v8架构
+![alt text](./img/v8struct.png)
+
+### 宏观流程
+
+>1. **生成抽象语法树AST(Parse)**
+
+>2. **生成字节码BytecodeGenerator(Ignition)**
+
+>3. **执行字节码（BytecodeExecution）**
+
+>4. **Turbofan**
+
+参考 https://cloud.tencent.com/developer/article/1554112
+
+### **微观流程**
 
 >1. **词法分析（Lexical Analysis）**
 >
@@ -85,3 +101,25 @@ JavaScript 引擎既可以是解释器，也可以是编译器，甚至是两者
 > 7. **内存管理**
 >
 >   在代码执行过程中，JavaScript 引擎会负责对内存的管理，包括变量的分配、垃圾回收等操作，确保代码的正常执行和内存的有效利用。
+
+
+## 核心原理
+
+
+从JS引擎的执行流程来看，JS 引擎的核心实现原理历经以下几种方式：
+
+> 1. **遍历语法树**
+>     
+> 2. **字节码方式**
+>
+> 3. **JIT编译方式**
+>
+> 4. **WebAssembly**
+
+### 遍历语法树
+
+### 字节码方式
+
+### JIT编译方式
+
+### WebAssembly
