@@ -48,6 +48,20 @@ export const nav: DefaultTheme.Config['nav'] = [
     ],
   },
   {
+    text: 'Frameworks',
+    items: [
+      {
+        text: 'React',
+        activeMatch: '/react/',
+        link: 'react/core/basic'
+      },
+      {
+        text: 'Vue',
+        link:'Vue/basic'
+      }
+    ],
+  },
+  {
     text: 'Engineering',
     items: [
       {

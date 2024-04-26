@@ -20,6 +20,17 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
             ]
         }
     ],
+    '/react/':[
+      {
+        text:'React源码',
+        items:[
+          {
+            text:'核心概念',
+            link:'/react/core/basic'
+          }
+        ]
+      }
+    ],
     '/interview/': [
         {
             text: 'HTML',
@@ -57,7 +68,5 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '项目总结',
           link: '/project',
       },
-
-
     ]
 }
