@@ -23,3 +23,17 @@
    >调度机制的核心实现(**调度器**)，接收**react-reconciler**传入的回调函数任务，并管理这些任务的优先级和执行顺序。
    > - 核心任务就是执行回调(回调函数由`react-reconciler`提供)
    > - 控制由`react-reconciler`送入的回调函数的执行时机, 在concurrent模式下可以实现任务分片, 实现可中断渲染(concurrent模式下才有此特性)
+
+## 架构分层
+
+可将react应用整体结构分为接口层（`api`）和内核层（`core`）
+
+1. **接口层（api）**
+  react包对外暴露api
+
+2. **内核层**
+  由三部分组成，调度器（`scheduler`），构造器（`react-reconciler`），渲染器（`react-dom`）
+
+
+**内核关系**
+![alt text](../img/core-packages.c2850581.png)
