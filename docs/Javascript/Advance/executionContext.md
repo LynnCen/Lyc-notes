@@ -215,7 +215,7 @@ GlobalExectionContext = {
 // 函数上下文
 FunctionExectionContext = {
 
-  ThisBinding: <Global Object>,
+  ThisBinding: <Global Object>, // 有待商榷
 
   LexicalEnvironment: {
     EnvironmentRecord: {
