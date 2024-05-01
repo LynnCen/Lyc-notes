@@ -85,3 +85,61 @@ const closeIcon = new window.AMap.Marker({
 
 :warning: 必须将marker加载到地图上之后，才能renderSurroundMarker，因为此时`document.getElementById(id)`才能拿到DOm！
 
+
+## 对于业务地图组件如何封装
+
+```ts
+export function useHoverMarker(map) {
+  const hoverMarkerRef = useRef<any>(null);
+
+  const createHoverMarker = (info:ShopItem) => {
+    const uid:any = v4();
+    if (hoverMarkerRef.current && hoverMarkerRef.current._opts.extData === info.id) return;
+    if (hoverMarkerRef.current && hoverMarkerRef.current._opts.extData !== info.id)removeHoverMarker();
+    const marker = new window.AMap.Marker({
+      zooms: [CircleBusinessZoom.MinZomm, 20],
+      anchor: 'center',
+      position: new window.AMap.LngLat(+info.lng, +info.lat),
+      extData: info.id,
+      offset: [0, 30],
+      content: `<div id=${uid}></div>`
+    });
+    map.add(marker); // 添加到地图
+    hoverMarkerRef.current = marker;
+    const Node = <div className={styles.hoverMarkerWrapper}>{info.address}</div>;
+    ReactDOM.render(Node, document.getElementById(uid));
+
+  };
+
+  const removeHoverMarker = () => {
+    if (hoverMarkerRef.current) {
+      map.remove(hoverMarkerRef.current);
+      hoverMarkerRef.current = null;
+    }
+
+  };
+
+  return {
+    hoverMarker: hoverMarkerRef.current,
+    createHoverMarker,
+    removeHoverMarker
+  };
+}
+
+```
+
+使用
+
+```ts
+  const { createHoverMarker, removeHoverMarker } = useHoverMarker(mapIns);
+
+    // 监听hover marker
+
+  const mouseMoveMarker = debounce((info) => {
+    createHoverMarker(info);
+  }, 0);
+  const mouseOutMarker = debounce(() => {
+    removeHoverMarker();
+  }, 0);
+
+  ```
