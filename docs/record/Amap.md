@@ -131,7 +131,7 @@ export function useHoverMarker(map) {
 使用
 
 ```ts
-  const { createHoverMarker, removeHoverMarker } = useHoverMarker(mapIns);
+  const { hoverMarker,createHoverMarker, removeHoverMarker } = useHoverMarker(mapIns);
 
     // 监听hover marker
 
@@ -143,3 +143,7 @@ export function useHoverMarker(map) {
   }, 0);
 
   ```
+
+:warning: 存在一个问题，访问不到hoverMarker
+
+在`mouseMoveMarker`中访问hoverMarker为undefined
