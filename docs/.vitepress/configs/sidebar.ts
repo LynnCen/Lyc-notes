@@ -27,6 +27,14 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           {
             text:'核心概念',
             link:'/react/core/basic'
+          },
+          {
+            text:'内核关系',
+            link:'/react/core/innerCore'
+          },
+          {
+            text:'基本数据结构',
+            link:'/react/core/baseStruct'
           }
         ]
       }
