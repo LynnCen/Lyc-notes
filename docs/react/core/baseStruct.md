@@ -153,3 +153,34 @@ jsx ---- creatElement ----> ReactElement ---- createFiberFromElement ----> Fiber
 ```
 
 ![alt text](../img/fiber&reactelement.webp)
+
+
+## UpdateQueue
+
+在fiber对象中有一个属性`fiber.updateQueue`, 是一个链式队列(即使用链表实现的队列存储结构)。
+
+```ts
+export type Update<State> = {|
+  eventTime: number, // 发起update事件的时间(17.0.2中作为临时字段, 即将移出)
+  lane: Lane, // update所属的优先级
+
+  tag: 0 | 1 | 2 | 3, //
+  payload: any, // 载荷, 根据场景可以设置成一个回调函数或者对象
+  callback: (() => mixed) | null, // 回调函数
+
+  next: Update<State> | null, // 指向链表中的下一个, 由于UpdateQueue是一个环形链表, 最后一个update.next指向第一个update对象
+|};
+
+// =============== UpdateQueue ==============
+type SharedQueue<State> = {|
+  pending: Update<State> | null,
+|};
+
+export type UpdateQueue<State> = {|
+  baseState: State,
+  firstBaseUpdate: Update<State> | null,
+  lastBaseUpdate: Update<State> | null,
+  shared: SharedQueue<State>,
+  effects: Array<Update<State>> | null,
+|};
+```
