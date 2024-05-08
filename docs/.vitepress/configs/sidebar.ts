@@ -76,5 +76,9 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '项目总结',
           link: '/project',
       },
+      {
+        text: '笔试题',
+        link: '/interview/coding',
+    },
     ]
 }
