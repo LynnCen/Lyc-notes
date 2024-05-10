@@ -172,15 +172,18 @@ export type Update<State> = {|
 |};
 
 // =============== UpdateQueue ==============
-type SharedQueue<State> = {|
-  pending: Update<State> | null,
+type SharedQueue<State> = {| // 共享队列
+  pending: Update<State> | null, // 指向即将输入的update队列，在class组件中调用setState（）之后，会将新的update对象添加到这个队列中来
 |};
 
 export type UpdateQueue<State> = {|
-  baseState: State,
-  firstBaseUpdate: Update<State> | null,
-  lastBaseUpdate: Update<State> | null,
-  shared: SharedQueue<State>,
-  effects: Array<Update<State>> | null,
+  baseState: State, // 队列的基础State
+  firstBaseUpdate: Update<State> | null, // 指向基础队列的队首
+  lastBaseUpdate: Update<State> | null, // 指向基础队列的队尾
+  shared: SharedQueue<State>, // 共享队列
+  effects: Array<Update<State>> | null, // 用于保存有callback回调函数update对象，在commit之后，会一次调用这里的回调函数
 |};
 ```
+
+![alt text](../img/updatequeue.b3653f69.png)
+
