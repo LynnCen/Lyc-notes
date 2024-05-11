@@ -187,3 +187,6 @@ export type UpdateQueue<State> = {|
 
 ![alt text](../img/updatequeue.b3653f69.png)
 
+
+## Hook 对象
+
