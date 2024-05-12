@@ -31,7 +31,7 @@
   }, [gData, checkedKeys]);
   ```
 
-  最佳实践
+  最佳实践：
   ```ts
     const keyRef = useRef<number>(0);
    const UpdateTable = useMemo<ReactNode>(() => {

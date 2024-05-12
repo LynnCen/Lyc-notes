@@ -37,6 +37,23 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
             link:'/react/core/baseStruct'
           }
         ]
+      },
+      {
+        text:'React实践',
+        items:[
+          {
+            text:'思考',
+            link:'/react/record/thinking'
+          },
+          {
+            text:'自定义Hooks',
+            link:'/react/customHook/hooks'
+          },
+          {
+            text:'React with TS',
+            link:'/react/utils/type'
+          }
+        ]
       }
     ],
     '/interview/': [
