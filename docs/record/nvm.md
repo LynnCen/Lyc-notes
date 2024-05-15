@@ -10,6 +10,5 @@ windows安装完nvm node -v error
 找到系统变量
 
 ![alt text](./img/image.png)
-## Soul
-没必要 心平气静
+
 
