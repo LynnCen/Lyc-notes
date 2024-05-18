@@ -14,6 +14,8 @@ windows安装完nvm node -v error
 
 ## mac 安装nvm
 
+
+
 安装homebrew
 
 `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
