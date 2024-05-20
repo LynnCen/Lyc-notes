@@ -36,8 +36,8 @@ export const nav: DefaultTheme.Config['nav'] = [
       },
       {
         text: '操作系统OS',
-        items: [
-        ]
+        activeMatch:'/os/',
+        link: '/os/chapter1'
       },
       {
         text: '计算机网络',

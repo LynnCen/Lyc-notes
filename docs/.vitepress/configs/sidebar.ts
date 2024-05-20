@@ -97,5 +97,16 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         text: '笔试题',
         link: '/interview/coding',
     },
+    ],
+    '/os/':[
+      {
+        text:'操作系统基础',
+        items:[
+          {
+            text:'第一章 操作系统引论',
+            link:'/os/chapter1'
+          }
+        ]
+      }
     ]
 }
