@@ -108,5 +108,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           }
         ]
       }
+    ],
+    '/webpack/':[
+      {
+        text:'WebPack性能优化',
+        link:'/webpack/performance'
+      },
+      {
+        text:'原子化Css',
+        link:'/webpack/unocss'
+      },
     ]
 }
