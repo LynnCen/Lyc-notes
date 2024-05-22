@@ -13,7 +13,7 @@
 
 3. **react-reconciler**
 
-   > react 的核心包（**构造器**），通过实现协调算法（`diff 算法`）管理 react 应用状态的输入和结果的输出，构造fiber树， 将输入信号最终转换成输出信号传递给**渲染器**（`react-dom`）。主要功能作用：
+   > react 的核心包（**调度构造器**），通过实现协调算法（`diff 算法`）管理 react 应用状态的输入和结果的输出，构造fiber树， 将输入信号最终转换成输出信号传递给**渲染器**（`react-dom`）。主要功能作用：
    > - 接受状态输入(`scheduleUpdateOnFiber`)，将fiber树生成逻辑封装到一个回调函数中(涉及fiber树形结构, fiber.updateQueue队列, 调和算法等)
    > - 把此回调函数(`performSyncWorkOnRoot`或`performConcurrentWorkOnRoot`)送入`scheduler`进行调度
    > - 回调函数执行完成后获取到更新结果，交给**渲染器**（`react-dom`）渲染到页面上
@@ -32,7 +32,7 @@
   react包对外暴露api
 
 2. **内核层**
-  由三部分组成，调度器（`scheduler`），构造器（`react-reconciler`），渲染器（`react-dom`）
+  由三部分组成，调度器（`scheduler`），调度构造器（`react-reconciler`），渲染器（`react-dom`）
 
 
 **内核关系**
