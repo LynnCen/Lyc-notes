@@ -32,12 +32,21 @@ export const nav: DefaultTheme.Config['nav'] = [
       {
         text: '数据结构',
         items: [
+          {
+            text: '数据结构基础',
+            link: '/dataStructure/chapter1'
+          }
         ]
+
       },
       {
         text: '操作系统OS',
-        activeMatch:'/os/',
-        link: '/os/chapter1'
+        items: [
+          {
+            text: '操作系统基础',
+            link: '/os/chapter1',
+          }
+        ]
       },
       {
         text: '计算机网络',
@@ -57,7 +66,7 @@ export const nav: DefaultTheme.Config['nav'] = [
       },
       {
         text: 'Vue',
-        link:'Vue/basic'
+        link: 'Vue/basic'
       }
     ],
   },
