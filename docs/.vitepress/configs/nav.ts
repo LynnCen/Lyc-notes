@@ -2,24 +2,29 @@ import type { DefaultTheme } from 'vitepress'
 
 export const nav: DefaultTheme.Config['nav'] = [
   {
-    text: 'Javascript',
+    text: 'WebFront',
     items: [
       {
         text: 'Javascript基础',
-        items: [
-        ]
+        activeMatch: 'Javascript/basic/',
+        link: 'Javascript/basic/你不知道的js'
       },
       {
         text: 'Javascript进阶',
         activeMatch: 'Javascript/Advance/',
         link: 'Javascript/Advance/executionContext'
+      },
+      {
+        text: 'Typescript',
+        activeMatch: '/typescript/',
+        link: '/typescript/记录'
+      },
+      {
+        text: '浏览器原理',
+        activeMatch: '/browser/',
+        link: '/browser/Chrome架构'
       }
     ],
-  },
-  {
-    text: 'Typescript',
-    activeMatch: '/docs/',
-    link: '/docs/hello'
   },
   {
     text: 'ComputerBasics',
