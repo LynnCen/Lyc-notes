@@ -82,10 +82,97 @@ LNode *LocationElem(LinkList L, ElemType e){
 
 5. 插入结点操作
 
+分前插法和后插法
+![alt text](./img/单链表插入操作.png)
+
 ```c
+// 找到第i-1的节点，再其后插入
 bool ListInsert(LinkList &L , int i , ElemType e){
     LNode *p = L;
     int j=0;
-    while()
+    while( p!= NULL&& j<i-1){
+        p = p->next;
+        j++;
+    }
+
+    if( p ==NULL) return false;
+    LNode *s = (LNode*)malloc(sizeof(LNode));
+    // 后插法
+    s->data = e;
+    s->next = p->next;
+    p->next = s;
+    // 前插法 交换思想
+    s->next = p->next;
+    p->next = s;
+    temp = p->data;
+    p->data = s->data;
+    s->data = temp;
+
+    return true;
+}
+```
+
+6. 删除结点
+   删除结点操作是将单链表的第 i 个结点删除。先检查删除位置的合法性，然后查找表中第 1- 1 个结点，即被删结点的前驱，再删除第之个结点。
+
+```c
+bool ListDelete(LinkList &L, int i, ElemType &e){
+    LNode *p = L;
+    int j=0;
+     while( p!= NULL&& j<i-1){
+        p = p->next;
+        j++;
+    }
+
+    if( p ==NULL) return false;
+    LNode *q = p->next;
+    e = q->data;
+    p->next = q->next;
+    free(q);
+    return true;
+}
+```
+
+7. 采用头插法建立单链表
+
+```c
+LinkList List_HeadInsert(LinkList &L){
+    LNode *s;
+    int x;
+    L = (LNode*)maclloc(sizeof(LNode));
+    L-next = NULL;
+    scanf("%d",&x);
+    while(x!=9999){
+        s = (LNode*)malloc(sizeof(LNode));
+        s->data = x;
+        s->next = L->next;
+        L->next = s;
+        scanf("%d", &x);
+    }
+
+    return L ;
+}
+```
+
+8. 采用尾插法建立单链表
+
+需增加尾指针 r ，使其始终指向当前链表的尾结点
+
+```c
+LinkList List_TailInsert(LinkList &L){
+    int x;
+    L = (LNode*)malloc(sizeof(LNode));
+    LNode *s , *r = L;
+    scanf("%d",&x);
+    while(x!=9999){
+        s = (LNode*)malloc(sizeof(LNode));
+        s->data = x；
+        r->next = s;
+        r = s;
+        scanf("%d",&x);
+    }
+    r->next = NULL;
+    return L
+
 }
 ```

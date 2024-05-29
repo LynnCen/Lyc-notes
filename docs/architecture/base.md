@@ -49,4 +49,4 @@ axios 阿里的 mtop
 2. 测试阶段 基于 develop 拉取 bugfix-name 分支 改完之后删除该分支
 3. 预演阶段 将 develop 合并到 master 修改代码预演问题代码 基于 master 拉取 bugfix-name 分支 改完之后删除该分支
 4. 上线 将 master 发布到 release 修改线上代码如上 基于 release
-5. git 提交规范
+5. git 提交规范 husky feat fix 等
