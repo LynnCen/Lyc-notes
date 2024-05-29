@@ -176,3 +176,63 @@ LinkList List_TailInsert(LinkList &L){
 
 }
 ```
+
+## 双链表
+
+双链表结点中有两个指针`prior`和`next` ，分别指向其直接前驱和直接后继，
+
+结点类型定义
+
+```c
+typedef struct DNode{
+    ElemType data;
+    Struct DNode *prior ,*next;
+}DNode , *DNodeList;
+```
+
+1. 双链表的插入操作
+   p s c 在 p 和 c 中插入 s
+
+```c
+s-next = p->next ;
+p->next-prior = s;
+p->next = s;
+s-prior = p
+```
+
+2. 双链表的删除操作
+
+删除结点*p 的后继结点 *q
+
+```c
+p->next = q->next ;
+q->next->prior = p
+free(q);
+```
+
+## 循环链表
+
+1. 循环单链表
+   表尾结点\*r 的 next 域指向 L，故表中没有指针域为 NULL 的结点，因此，循环单链表的判空条件不是头结点的指针是否为空，而是它是否等于头指针 L。
+   设的是尾指针工， r- >next 即为头指针，对在表头或表尾插入元素都只需要 O(1)的时间复杂度。
+   ![alt text](./img/循环单链表.png)
+2. 循环双链表
+   当循环双链表为空表时，其头结点的 prior 域和 next 域都等于 L。
+   ![alt text](./img/循环双链表.png)
+
+## 静态链表
+
+静态链表是用数组来描述线性表的链式存储结构，结点也有数据域 data 和指针域 next， 与前面所讲的链表中的指针不同的是，这里的指针是结点在数组中的相对地址 (数组下标)，又 称游标 。静态链表也要预先分配一块连续的内存空间。
+![alt text](./img/静态链表.png)
+
+结构类型
+
+```c
+#define MaxSize 50;
+typedef struct{
+    ElemType data;
+    int next;
+} SLinkList[MaxSize]
+```
+
+静态链表以 next==- 1 作为其结束的标志
