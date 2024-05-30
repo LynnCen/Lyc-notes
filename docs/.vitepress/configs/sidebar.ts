@@ -122,6 +122,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第二章 线性表',
           link: '/dataStructure/chapter2'
         },
+        {
+          text: '第二章 栈、队列和数组',
+          link: '/dataStructure/chapter3'
+        }
       ]
     }
   ],
