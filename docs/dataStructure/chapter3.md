@@ -96,3 +96,15 @@ bool GetTop(SqStack S , ElemType &x){
 判满： 两个栈项指针相邻 `(top1 - top0 = 1) `时 ， 判断为栈满。
 进栈： 当 0 号栈进栈时 `S.data[++S.top0] = x`top0 先加 1 再赋值，1 号栈进栈时 ` S.data[--S.top1] = x`top1 先减 1 再赋值。
 出栈： `x = S.data[S.top0--]`,` x = S.data[S.top++];`
+
+#### 栈的链式存储结构
+
+采用链式存储的栈称为链栈，链栈的优点是便于多个栈共享存储空间和提高其效率，且不存 在栈满上溢的情况。通常采用单链表实现，并规定所有操作都是在单链表的表头进行的。这里规 定链栈没有头结点，Lhead 指向栈顶元素。
+![alt text](./img/3.4栈的链式存储结构.png)
+
+```c
+typedef struct Linknode{
+   Elemtype data;
+   struct Linknode *next;
+}LiStack
+```
