@@ -22,3 +22,66 @@
 
 栈的数学性质：当 n 个不同元素进栈时，出栈元素不同排列的个数为 （1 / n+1）C（n 2n）,这个公式称
 为 `卡特兰数(Catalan)`公式，
+
+#### 栈的顺序存储结构
+
+1. 顺序栈的实现
+
+采用顺序存储的栈称为顺序栈，它利用一组地址连续的存储单元存放自栈底到栈项的数据元素，同时附设一个指针`(top)`指示当前栈项元素的位置。
+
+```c
+#define MaxSize 50
+typeof struct{
+   ElemType data[MaxSize];
+   int top;
+}SqStack;
+```
+
+2. 顺序栈的基本操作
+
+**（1）初始化**
+
+```c
+void InitStack(SqStack &S){
+   S.top = -1;
+}
+```
+
+**(2) 判栈空**
+
+```c
+bool StackEmpty(SqStack S){
+   if(S.top === -1)return true;
+   return false;
+}
+```
+
+**(3) 进栈**
+
+```c
+bool Push(SqStack &S,ElemType x){
+   if(S.top == MaxSize - 1) return false;
+   S.data[++S.top] = x; // 指针先加1，再入栈
+   return true;
+}
+```
+
+**（4）出栈**
+
+```c
+bool Pop(SqStack &S , ElemType &x){
+   if(S.top == -1)return false; // 栈空
+   x = S.data[S.top--];
+   return true;
+}
+```
+
+**（5）读栈顶元素**
+
+```c
+bool GetTop(SqStack S , ElemType &x){
+   if(S.top == -1)return false;
+   x = S.data[S.top];
+   return true;
+}
+```
