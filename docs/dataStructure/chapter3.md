@@ -85,3 +85,14 @@ bool GetTop(SqStack S , ElemType &x){
    return true;
 }
 ```
+
+3. 共享栈
+
+利用栈底位置相对不变的特性，可让两个顺序栈共享一个一维数组空间 ，将两个栈的栈底分别设置在共享空间的两端，两个栈项向共享空间的中间延伸。
+
+![alt text](./img/3.3%20共享栈.png)
+
+判空： `top0= -1`时 0 号栈为空，`top1= MaxSize`时 1 号栈为空。
+判满： 两个栈项指针相邻 `(top1 - top0 = 1) `时 ， 判断为栈满。
+进栈： 当 0 号栈进栈时 `S.data[++S.top0] = x`top0 先加 1 再赋值，1 号栈进栈时 ` S.data[--S.top1] = x`top1 先减 1 再赋值。
+出栈： `x = S.data[S.top0--]`,` x = S.data[S.top++];`
