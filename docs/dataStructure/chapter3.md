@@ -150,8 +150,11 @@ typedef struct {
 
 三种处理方式：
 
-1） 牺牲一个单元来区分队空和队满，入队时少用一个队列单元，队头指针在队尾指针的下一位置作为队满的标志.
+1. 牺牲一个单元来区分队空和队满，入队时少用一个队列单元，队头指针在队尾指针的下一位置作为队满的标志.
 
 队满条件：`(Q.rear + 1) % MaxSize = Q.front`
 队空：`Q.front == q.rear`。
 队列中的个数：`(Q.rear - Q.front + MaxSize ) % MaxSize`
+
+2. 类型中增设 size 数据成员，表示元素个数。删除成功 size 减 1，插入成功 size 加 1。队空时 Q.size==0;队满时 Q.size==MaxSize，两种情况都有 Q.front==Q.rear。
+3. 类型中增设 tag 数据成员，以区分是队满还是队空。删除成功置 tag=0，若导致 Q.front==Q.rear，则为队空:插入成功置 tag=1，若导致 Q.front==Q.rear，则为队满。
