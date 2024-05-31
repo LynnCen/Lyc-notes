@@ -108,3 +108,50 @@ typedef struct Linknode{
    struct Linknode *next;
 }LiStack
 ```
+
+## 队列
+
+#### 队列的基本概念
+
+1. 队列的定义
+
+`队列 (Queue)`简称队，也是一种操作受限的线性表，只允许在表的一端进行插入，而在表的另 一端进行删除。其操作特性是`先进先出（FIFO）`。`队头(Front)`允许删除的一端，又称队首。 `队尾(Rear)`允许插入的一端。
+
+![alt text](./img/3.5队列.png)
+
+2. 队列的基本操作
+
+#### 队列的顺序存储结构
+
+1. 队列的顺序存储
+
+队列的顺序实现是指分配一块连续的存储单元存放队列中的元素，并附设两个指针:队头指针 front 指向队头元素，队尾指针 rear 指向队尾元素的下一个位置。
+
+```c
+#define MaxSize 50
+typedef struct {
+   ElemType data[MaxSize];
+   int front,rear;
+}SqQueue;
+```
+
+初始化：`Q.front = Q.rear = 0`;
+进队：队不满时，先送值到队尾元素，再将队尾指针加 1。
+出队：队不空时，先取队头元素值，再将队头指针加 1
+
+2. 循环队列
+
+初始时:`Q.front = Q.rear = 0`。
+队首指针进 1: `Q.front = (Q.front + 1) % Maxsize`。
+队尾指针进 1: `Q.rear=(Q.rear+1)%Maxsize`。
+队列长度:`(Q.rear+MaxSize-Q.front)&Maxsize`
+
+**循环队列的判空/判满**
+
+三种处理方式：
+
+1） 牺牲一个单元来区分队空和队满，入队时少用一个队列单元，队头指针在队尾指针的下一位置作为队满的标志.
+
+队满条件：`(Q.rear + 1) % MaxSize = Q.front`
+队空：`Q.front == q.rear`。
+队列中的个数：`(Q.rear - Q.front + MaxSize ) % MaxSize`
