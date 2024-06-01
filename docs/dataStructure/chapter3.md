@@ -158,3 +158,5 @@ typedef struct {
 
 2. 类型中增设 size 数据成员，表示元素个数。删除成功 size 减 1，插入成功 size 加 1。队空时 Q.size==0;队满时 Q.size==MaxSize，两种情况都有 Q.front==Q.rear。
 3. 类型中增设 tag 数据成员，以区分是队满还是队空。删除成功置 tag=0，若导致 Q.front==Q.rear，则为队空:插入成功置 tag=1，若导致 Q.front==Q.rear，则为队满。
+
+4. 循环队列的操作
