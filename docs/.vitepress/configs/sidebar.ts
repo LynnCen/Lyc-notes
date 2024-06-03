@@ -133,7 +133,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       ]
     }
   ],
-  '/组成原理': [
+  '/组成原理/': [
     {
       text: '计算机组成原理',
       items: [
