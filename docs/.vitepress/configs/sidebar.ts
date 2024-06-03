@@ -105,7 +105,11 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: '第一章 操作系统引论',
           link: '/os/chapter1'
-        }
+        },
+        {
+          text: '第二章 进程与线程',
+          link: '/os/chapter2'
+        },
       ]
     }
   ],
