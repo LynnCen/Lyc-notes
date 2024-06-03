@@ -160,3 +160,52 @@ typedef struct {
 3. 类型中增设 tag 数据成员，以区分是队满还是队空。删除成功置 tag=0，若导致 Q.front==Q.rear，则为队空:插入成功置 tag=1，若导致 Q.front==Q.rear，则为队满。
 
 4. 循环队列的操作
+
+（1）初始化
+
+```c
+void InitQueue(SqQueue &Q){
+   Q.reat = Q.front = 0;
+}
+```
+
+（2）判队空
+
+```c
+bool isEmpty(SqQueue Q){
+  if(Q.rear == Q.front) return true ;
+  return false;
+}
+```
+
+（3）判队满
+
+```c
+bool isFill(SqQueue Q){
+  if((Q.rear+1)%MaxSize == Q.front) return true;
+  return false;
+}
+```
+
+（4）入队
+
+```c
+bool EnQueue(SqQueue &Q, ElemType x){
+   if(isFill(Q)) return false;
+   Q.data[Q.rear] = x;
+   Q.rear = (Q.rear + 1)% MaxSize;
+   return true;
+
+}
+```
+
+（4）出队
+
+```c
+bool DeQueue(SqQueue &Q,Elemtype &x){
+   if(isEmpty(Q)) return false;
+   x = Q.data[Q.front];
+   Q.front = (Q.front+1) % MaxSize;
+   return true;
+}
+```
