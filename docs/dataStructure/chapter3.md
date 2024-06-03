@@ -199,13 +199,79 @@ bool EnQueue(SqQueue &Q, ElemType x){
 }
 ```
 
-（4）出队
+（5）出队
 
 ```c
 bool DeQueue(SqQueue &Q,Elemtype &x){
    if(isEmpty(Q)) return false;
    x = Q.data[Q.front];
    Q.front = (Q.front+1) % MaxSize;
+   return true;
+}
+```
+
+#### 队列的链式存储结构
+
+1. 队列的链式存储
+   队列的链式表示称为链队列，它实际上是一个同时有队头指针和队尾指针的单链表
+
+存储类型描述：
+
+```c
+typedef struct LinkNode {
+   ElemType data;
+   struct LinkNode *next;
+}LinkNode
+
+typedef struct{
+   LinkNode *front,*rear;
+}LinkQueue
+```
+
+2. 链式队列的基本操作
+
+（1）初始化
+
+```c
+void InitQueue(LinkQueue &Q){
+   Q.front = Q.rear = (LinkNode *)malloc(sizeof(LinkNode));
+   Q.front->next = NULL;
+
+}
+```
+
+（2）判队空
+
+```c
+bool IsEmpty(LinkQueue Q){
+   if(Q.front == Q.rear) return true;
+   return false;
+}
+```
+
+（3）入队
+
+```c
+void EnQueue(LinkQueue &Q, ElemType x){
+   LinkNode *s = (LinkNode *)malloc(sizeof(LinkNode));
+   s->data = x;
+   s->next = NULL;
+   Q.rear->next = s;
+   Q.rear = s;
+}
+```
+
+（4）出队
+
+```c
+// 带头节点
+bool DeQueue(LinkQueue &Q , ElemType &x){
+   if(IsEmpty(Q))return false;
+   LinkQueue *p = Q.front->next;
+   x = p->data;
+   Q.front->next = p->next;
+   if(Q.rear == p) Q.rear = Q.front;
+   free(p);
    return true;
 }
 ```
