@@ -32,6 +32,10 @@ export const nav: DefaultTheme.Config['nav'] = [
       {
         text: '计算机组成原理',
         items: [
+          {
+            text: '计算机组成原理基础',
+            link: '/组成原理/chapter1'
+          }
         ]
       },
       {

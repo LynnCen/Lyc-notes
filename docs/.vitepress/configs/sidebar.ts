@@ -133,6 +133,17 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       ]
     }
   ],
+  '/组成原理': [
+    {
+      text: '计算机组成原理',
+      items: [
+        {
+          text: '第一章 计算机系统概述',
+          link: '/组成原理/chapter1'
+        },
+      ]
+    }
+  ],
   '/webpack/': [
     {
       text: 'WebPack性能优化',
