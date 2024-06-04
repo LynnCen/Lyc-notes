@@ -153,5 +153,19 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '原子化Css',
       link: '/webpack/unocss'
     },
+  ],
+  '/browser/': [
+    {
+      text: 'Chorme架构',
+      link: '/browser/Chrome架构'
+    },
+    {
+      text: 'TCP协议',
+      link: '/browser/TCP协议'
+    },
+    {
+      text: 'HTTP协议',
+      link: '/browser/HTTP'
+    },
   ]
 }
