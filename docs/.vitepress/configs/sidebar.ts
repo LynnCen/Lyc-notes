@@ -127,7 +127,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/dataStructure/chapter2'
         },
         {
-          text: '第二章 栈、队列和数组',
+          text: '第三章 栈、队列和数组',
           link: '/dataStructure/chapter3'
         }
       ]
