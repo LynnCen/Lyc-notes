@@ -167,5 +167,9 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: 'HTTP协议',
       link: '/browser/HTTP'
     },
+    {
+      text: '导航流程',
+      link: '/browser/导航流程'
+    },
   ]
 }
