@@ -145,6 +145,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第一章 计算机系统概述',
           link: '/组成原理/chapter1'
         },
+        {
+          text: '第二章 数据的表示和运算',
+          link: '/组成原理/chapter2'
+        },
       ]
     }
   ],
