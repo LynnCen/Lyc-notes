@@ -177,7 +177,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
     },
     {
       text: '渲染流程（上）',
-      link: '/browser/渲染流程（上）'
+      link: '/browser/渲染流程_上'
     },
   ]
 }
