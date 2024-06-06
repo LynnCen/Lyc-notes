@@ -129,6 +129,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: '第三章 栈、队列和数组',
           link: '/dataStructure/chapter3'
+        },
+        {
+          text: '第四章 串',
+          link: '/dataStructure/chapter4'
         }
       ]
     }
@@ -170,6 +174,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
     {
       text: '导航流程',
       link: '/browser/导航流程'
+    },
+    {
+      text: '渲染流程（上）',
+      link: '/browser/渲染流程（上）'
     },
   ]
 }
