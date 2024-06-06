@@ -180,7 +180,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       link: '/browser/导航流程'
     },
     {
-      text: '导航流程',
+      text: '渲染流程（上）',
       link: '/browser/renderfirst'
     },
   ]
