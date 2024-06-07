@@ -183,5 +183,9 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '渲染流程（上）',
       link: '/browser/renderfirst'
     },
+    {
+      text: '渲染流程（下）',
+      link: '/browser/rendersec'
+    },
   ]
 }
