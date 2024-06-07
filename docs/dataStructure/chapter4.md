@@ -56,3 +56,7 @@ int Index (SString S , SString T){
 **移动位数=已匹配的字符数- 对应的部分匹配值**
 
 2. KMP 算法的原理是什么
+
+求部分匹配值、next 数组、nextval
+
+![alt text](./img/kmp.png)
