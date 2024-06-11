@@ -190,5 +190,14 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '渲染流程（下）',
       link: '/browser/rendersec'
     },
+    {
+      text: 'Javascript中的执行机制',
+      items: [
+        {
+          text: '变量提升',
+          link: '/browser/变量提升'
+        },
+      ]
+    },
   ]
 }
