@@ -136,6 +136,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: '第四章 串',
           link: '/dataStructure/chapter4'
+        },
+        {
+          text: '第五章 树与二叉树',
+          link: '/dataStructure/chapter5'
         }
       ]
     }
