@@ -171,29 +171,35 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
   ],
   '/browser/': [
     {
-      text: 'Chorme架构',
-      link: '/browser/Chrome架构'
+      text: '宏观视角下的浏览器',
+      items: [
+        {
+          text: 'Chorme架构',
+          link: '/browser/Chrome架构'
+        },
+        {
+          text: 'TCP协议',
+          link: '/browser/TCP协议'
+        },
+        {
+          text: 'HTTP协议',
+          link: '/browser/HTTP'
+        },
+        {
+          text: '导航流程',
+          link: '/browser/导航流程'
+        },
+        {
+          text: '渲染流程（上）',
+          link: '/browser/renderfirst'
+        },
+        {
+          text: '渲染流程（下）',
+          link: '/browser/rendersec'
+        },
+      ]
     },
-    {
-      text: 'TCP协议',
-      link: '/browser/TCP协议'
-    },
-    {
-      text: 'HTTP协议',
-      link: '/browser/HTTP'
-    },
-    {
-      text: '导航流程',
-      link: '/browser/导航流程'
-    },
-    {
-      text: '渲染流程（上）',
-      link: '/browser/renderfirst'
-    },
-    {
-      text: '渲染流程（下）',
-      link: '/browser/rendersec'
-    },
+
     {
       text: 'Javascript中的执行机制',
       items: [
