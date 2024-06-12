@@ -107,3 +107,146 @@ typedef struct BiTNode{
 ```
 
 > 在 含 有 n 个 结 点 的 二 叉 链 表 中 ， 含 有 n + 1 个 空 链 域
+
+## 二叉树的遍历和线索二叉树
+
+#### 二叉树的遍历
+
+二又树的遍历是指按某条搜索路径访问树中每个结点，使得每个结点均被访问一次，**而且仅被访问一次**
+
+常见的遍历次序有先序(NLR)、中序(LNR)和后序(LRN)三种遍历算法，其中“序”指的是根结点在何时被访问
+
+1. **先序遍历(PreOrder)**
+
+若二叉树为空，则什么也不做:
+
+1. 访问根结点；
+2. 先序遍历左子树
+3. 先序遍历右子树。
+
+```c
+void PreOrder(BiTree T){
+   if(T !== NULL){
+      visit(T);
+      PreOrder(T->lchild);
+      PreOrder(T->rchild);
+   }
+}
+```
+
+2. **中序遍历(InOrder)**
+
+若二叉树为空，则什么也不做:
+
+1. 先序遍历左子树
+2. 访问根结点；
+3. 先序遍历右子树。
+
+```c
+void InOrder(BiTree T){
+   if(T !== NULL){
+      PreOrder(T->lchild);
+      visit(T);
+      PreOrder(T->rchild);
+   }
+}
+```
+
+2. **后序遍历(PostOrder)**
+
+若二叉树为空，则什么也不做:
+
+1. 先序遍历左子树
+2. 先序遍历右子树。
+3. 访问根结点；
+
+```c
+void InOrder(BiTree T){
+   if(T !== NULL){
+      PreOrder(T->lchild);
+      PreOrder(T->rchild);
+      visit(T);
+   }
+}
+```
+
+不管采用哪种遍历算法，每个结点都访问一次且仅访问一次，所以时间复杂度都是 O(n)。在递归遍历中，递归工作栈的栈深恰好为树的深度，所以在最坏情况下，二叉树是有 n 个结点且深度内 n 的单支树，遍历算法的空间复杂度为 O(n)
+
+4. 递归算法和非递归算法的转换
+
+中序：
+1️⃣ 沿着根的左孩子，依次入栈，直到左孩子为空，说明已找到可以输出的结点，此时栈内元
+素依次为 ABD。
+2️⃣ 栈顶元素出栈并访问:若其右孩子为空，继续执行 2️⃣;
+3️⃣ 若其右孩子不空，将右子树转执行 1️⃣
+
+```c
+void InOrder2(BiTree T){
+   InitStack(S);
+   BiTree p =T;
+   while(p || !IsEmpty(S)){
+      if(p){
+         Push(S , p);
+         p = p->lchild
+      }else{
+         Pop(S,p);
+         visit(p);
+         p=p->rchild;
+      }
+   }
+}
+```
+
+先序：
+
+```c
+void InOrder2(BiTree T){
+   InitStack(S);
+   BiTree p =T;
+   while(p || !IsEmpty(S)){
+      if(p){
+         visit(p);
+         Push(S , p);
+         p = p->lchild
+      }else{
+         Pop(S,p);
+         p=p->rchild;
+      }
+   }
+}
+```
+
+5. **层次遍历**
+
+进行层次遍历 ，需要借助一个队列。
+层次遍历的思想如下:
+1️⃣ 首先将二叉树的根结点入队。
+2️⃣ 若队列非空，则队头结点出队，访问该结点，若它有左孩子，则将其左孩子入队;若它有右孩子，则将其右孩子入队。
+3️⃣ 重复 2 步，直至队列为空。
+
+```c
+void LevelOrder(BiTree T ){
+   InitQueue(Q);
+   BiTree p;
+   EnQueue(Q , T);
+   while(!IsEmpty(Q)){
+      DeQueue(Q,p);
+      visit(p);
+      if(p->lchild !== NULL) EnQueue(Q,p->lchild);
+      if(p->rchild !== NULL) EnQueue(Q,p->rchild);
+   }
+}
+```
+
+6. 由遍历序列构造二叉树
+
+> 先序序列对应的不同二叉树的分析(2015)
+
+对于一棵给定的二叉树，其先序序列、中序序列、后序序列和层序序列都是确定的。然而，只给出四种遍历序列中的任意一种，却无法唯一地确定一棵二叉树。若已知中序序列，再给出其他三种遍历序列中的任意一种，就可以唯一地确定一棵二叉树
+
+(1) 由先序序列和中序序列构造二叉树
+
+![alt text](./img/先序和中序构造二叉树.png)
+
+(2) 由后序序列和中序序列构造二叉树
+(3) 由层序序列和中序序列构造二叉树
