@@ -249,4 +249,66 @@ void LevelOrder(BiTree T ){
 ![alt text](./img/先序和中序构造二叉树.png)
 
 (2) 由后序序列和中序序列构造二叉树
+
 (3) 由层序序列和中序序列构造二叉树
+
+#### 线索二叉树
+
+1. **线索二叉树的基本概念**
+
+   遍历二叉树是以一定的规则将二叉树中的结点排列成一个线性序列，从而得到几种遍历序列，使得该序列中的每个结点 (第一个和最后一个除外)都有一个直接前驱和直接后继
+
+引入线索 二叉树正是为了加快查找结点前驱和后继的速度。
+
+规定:若无左子树，令 lchild 指向其前驱结点;若无右子树，令 rchild 指向其后继结点。 如图 5.17 所示，还需增加两个标志域，以标识指针域指向左(右)孩子或前驱(后继)
+
+![alt text](./img/线索二叉树的结点结构.png)
+
+线索二叉树的存储结构描述如下:
+
+```c
+typedef struct ThreadNode{
+   ElemType data;
+   struct ThreadNode *lchild,*rchild;
+   int ltag,rtag;
+}ThreadNode,*ThreadTree
+```
+
+2. **中序线索二叉树的构造**
+
+二叉树的线索化是将二叉链表中的空指针改为指向前驱或后继的线索。而前驱或后继的信息 只有在遍历时才能得到，因此线索化的实质就是遍历一次二叉树
+
+![alt text](./img/中序线索二叉树.png)
+
+```c
+void InThread (ThreadTree &p, ThreadTree &pre) {
+   if(p != NULL){
+      InThread(p->lchild,pre); // 递归，线索化左子树
+      if(p->lchild == NULL){  // 当前结点的左子树为空
+         p->lchild = pre;    //建立当前结点的前驱线索
+         p->ltag = 1;
+      }
+   }
+   if(pre != NULL && pre-rchild == NULL){// 前 驱 结 点 非 空 且 其 右 子 树 为 空
+      pre->rchild = p;  //建立前驱结点的后继线索
+      pre->rtag = 1;
+   }
+   pre = p;       //标记当前结点成为刚刚访问过的结点
+   InThread(p->rchild,pre) // 递 归 ， 线 索 化 右 子树
+}
+
+
+void CreateInThread (ThreadTree T){
+ThreadTree pre=NULL;
+ if (T != NULL){ // 非空二叉树，线索化
+  InThread (T, pre) : // 线 索 化 二叉 树
+  pre->rchild=NULL; // 处 理 遍 历 的 最 后 一个结 点
+  pre-›rtag=1;
+ }
+}
+
+```
+
+3. 中序线索二叉树的遍历
+
+4. 先序线索二叉树和后序线索二叉树
