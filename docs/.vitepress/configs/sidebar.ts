@@ -211,6 +211,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '变量提升',
           link: '/browser/变量提升'
         },
+        {
+          text: '调用栈',
+          link: '/browser/调用栈'
+        },
       ]
     },
   ]
