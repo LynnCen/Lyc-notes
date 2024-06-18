@@ -215,6 +215,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '调用栈',
           link: '/browser/调用栈'
         },
+        {
+          text: '块级作用域',
+          link: '/browser/块级作用域'
+        },
       ]
     },
   ]
