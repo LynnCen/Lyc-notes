@@ -1,0 +1,1 @@
+import{_ as e,c as t,o as r}from"./chunks/framework.CAVwB9kQ.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"browser/作用域链和闭包.md","filePath":"browser/作用域链和闭包.md","lastUpdated":1718762350000}'),a={name:"browser/作用域链和闭包.md"};function o(s,_,c,n,d,p){return r(),t("div")}const f=e(a,[["render",o]]);export{m as __pageData,f as default};
