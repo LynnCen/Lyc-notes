@@ -219,6 +219,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '块级作用域',
           link: '/browser/块级作用域'
         },
+        {
+          text: '作用域链和闭包',
+          link: '/browser/作用域链和闭包'
+        },
       ]
     },
   ]
