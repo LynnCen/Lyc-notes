@@ -360,4 +360,5 @@ void BFS(ALGraph G , int i ){
 
 #### 有向无环图描述表达式
 
+有向无环图:若一个有向图中不存在环，则称有向无环图，简称 DAG 图。
 ![alt text](./img/有向无环图.png)
