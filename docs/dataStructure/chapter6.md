@@ -357,3 +357,7 @@ void BFS(ALGraph G , int i ){
 
 **求最短路径的总结**
 ![alt text](./img/最短路径总结.png)
+
+#### 有向无环图描述表达式
+
+![alt text](./img/有向无环图.png)
