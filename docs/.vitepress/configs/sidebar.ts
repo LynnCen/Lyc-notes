@@ -223,6 +223,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '作用域链和闭包',
           link: '/browser/作用域链和闭包'
         },
+        {
+          text: 'This',
+          link: '/browser/this'
+        },
       ]
     },
   ]
