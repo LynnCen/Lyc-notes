@@ -106,3 +106,12 @@ int BST_Insert(BiTree T , KeyType k){
   else return BST_Insert(T->rchild,k)
 }
 ```
+
+4. **二叉排序树的构造**
+
+![alt text](./img/二叉排序树的构造.png)
+
+5. **二叉排序树的删除**
+   ![alt text](./img/二叉排序树的删除.png)
+
+> 思考:若在 二叉排序树中删除并插入某结点，得到的 二叉排序树是否和原来的相同
