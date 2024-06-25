@@ -233,5 +233,14 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         },
       ]
     },
+    {
+      text: 'V8工作原理',
+      items: [
+        {
+          text: '栈空间和堆空间',
+          link: '/browser/栈和堆'
+        },
+      ]
+    }
   ]
 }
