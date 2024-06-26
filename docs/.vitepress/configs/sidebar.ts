@@ -148,6 +148,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: '第七章 查找',
           link: '/dataStructure/chapter7'
+        },
+        {
+          text: '第八章 排序',
+          link: '/dataStructure/chapter8'
         }
       ]
     }
