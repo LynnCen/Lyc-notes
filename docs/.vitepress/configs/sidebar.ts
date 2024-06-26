@@ -240,6 +240,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '栈空间和堆空间',
           link: '/browser/栈和堆'
         },
+        {
+          text: '垃圾回收',
+          link: '/browser/垃圾回收'
+        },
       ]
     }
   ]
