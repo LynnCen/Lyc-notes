@@ -248,6 +248,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '垃圾回收',
           link: '/browser/垃圾回收'
         },
+        {
+          text: '编译器和解释器',
+          link: '/browser/编译器和解释器'
+        },
       ]
     }
   ]
