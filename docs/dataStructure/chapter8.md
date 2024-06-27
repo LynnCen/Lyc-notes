@@ -18,6 +18,8 @@
 
 ![alt text](./img/直接插入排序.png)
 
+![alt text](./img/insertsort.gif)
+
 ```c
 void InsertSort(Elemtype A[],int n){
   int i,j;
@@ -33,8 +35,6 @@ void InsertSort(Elemtype A[],int n){
 }
 ```
 
-<img src='https://images2018.cnblogs.com/blog/1391679/201806/1391679-20180618165919523-196396537.gif'/>
-
-空间复杂度：O(1)
-时间复杂度：O(n^2)
-稳定性： 稳定
+**空间复杂度：O(1)**
+**时间复杂度：O(n^2)**
+**稳定性： 稳定**
