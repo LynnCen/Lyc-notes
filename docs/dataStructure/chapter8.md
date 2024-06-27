@@ -110,3 +110,38 @@ void BubbleSort(Elemtype A[],int n){
 **空间复杂度：O(1)**
 **时间复杂度：O(n^2)**
 **稳定性： 稳定**
+
+#### 快速排序
+
+基本思想：基于分治法，从待排序序列中选择一个元素 pivot 作为枢轴（通常取首元素），通过一趟排序将待排序序列分为前后两部分，前面的比 pivot 小，后面的比 pivot 大，pivot 放在最终位置上，这个过程称为一次划分。然后对两个子表分别重复上述操作，直到每部分只有一个元素或为空。
+![alt text](./img/快排.png)
+
+![alt text](./img/快排.gif)
+
+```c
+void QuickSort(Elemtype A[] , int low high){
+  if(low < high){
+    int pivotpos = Partition(A,low,high);
+    QuickSort(A,low,pivotpos-1);
+    QuickSort(A,pivotpos+1,high);
+  }
+
+}
+int Partition(Elemtype A[] , int low high){
+  Elemtype pivot = A[low];
+
+  while(low<high){
+    while(low<high && A[high] >= pivot) --high;
+    A[low] = A[high];
+    while(low<high && A[low] <= pivot) ++low;
+    A[high] = A[low];
+  }
+
+  A[low] = pivot;
+  return low;
+}
+```
+
+**空间复杂度：O(log2n)**
+**时间复杂度：O(nlog2n)**
+**稳定性： 不稳定**
