@@ -84,3 +84,29 @@ void InsertSort(ElemType A[] , int n ){
 **稳定性： 不稳定**
 
 ## 交换排序
+
+#### 冒泡排序
+
+基本思想： 从后往前两两比较相邻元素，若为逆序（即`A[i]<A[i-1]`），则交换他们，直到序列比较完毕，称为第一趟排序，结果就是将最小的元素交换到序列的第一个位置。
+
+![alt text](./img/冒泡排序.png)
+![alt text](./img/冒泡排序.gif)
+
+```c
+void BubbleSort(Elemtype A[],int n){
+  for(int i=0;i<n-1;i++){
+    bool flag = false;
+    for(int j=n-1 ; j>i;j--){
+      if(A[j-1]>A[j]){
+        swap(A[j-1] , A[j]);
+        flag = true;
+      }
+    }
+    if(flag == false) return;
+  }
+}
+```
+
+**空间复杂度：O(1)**
+**时间复杂度：O(n^2)**
+**稳定性： 稳定**
