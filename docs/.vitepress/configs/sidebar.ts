@@ -253,6 +253,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/browser/编译器和解释器'
         },
       ]
+    },
+    {
+      text: '浏览器中的页面循环系统',
+      items: [
+        {
+          text: '消息队列和页面循环',
+          link: '/browser/消息队列和页面循环'
+        },
+      ]
     }
   ]
 }
