@@ -258,8 +258,8 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '浏览器中的页面循环系统',
       items: [
         {
-          text: '消息队列和页面循环',
-          link: '/browser/消息队列和页面循环'
+          text: '消息队列和事件循环',
+          link: '/browser/消息队列和事件循环'
         },
       ]
     }
