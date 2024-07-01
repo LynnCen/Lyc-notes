@@ -261,6 +261,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '消息队列和事件循环',
           link: '/browser/消息队列和事件循环'
         },
+        {
+          text: 'WebAPI：setTimeout 是如何实现的？',
+          link: '/browser/setTimeout如何实现'
+        },
       ]
     }
   ]
