@@ -265,6 +265,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: 'WebAPI：setTimeout 是如何实现的？',
           link: '/browser/setTimeout如何实现'
         },
+        {
+          text: 'XMLHttpRequest 是怎么实现的？',
+          link: '/browser/XMLHttpRequest'
+        },
       ]
     }
   ]

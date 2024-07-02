@@ -1,0 +1,1 @@
+# XMLHttpRequest 是怎么实现的？
