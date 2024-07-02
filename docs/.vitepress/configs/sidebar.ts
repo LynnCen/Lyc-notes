@@ -168,6 +168,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第二章 数据的表示和运算',
           link: '/组成原理/chapter2'
         },
+        {
+          text: '第三章 存储系统',
+          link: '/组成原理/chapter3'
+        },
       ]
     }
   ],
