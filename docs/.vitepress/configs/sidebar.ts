@@ -273,6 +273,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: 'XMLHttpRequest 是怎么实现的？',
           link: '/browser/XMLHttpRequest'
         },
+        {
+          text: '宏任务和微任务',
+          link: '/browser/宏任务和微任务'
+        },
       ]
     }
   ]
