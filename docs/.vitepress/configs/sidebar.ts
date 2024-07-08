@@ -283,7 +283,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         },
         {
           text: 'async/await',
-          link: '/browser/async/await'
+          link: '/browser/async&await'
         },
       ]
     }
