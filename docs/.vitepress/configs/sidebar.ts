@@ -277,6 +277,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '宏任务和微任务',
           link: '/browser/宏任务和微任务'
         },
+        {
+          text: 'Promise',
+          link: '/browser/Promise'
+        },
       ]
     }
   ]
