@@ -281,6 +281,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: 'Promise',
           link: '/browser/Promise'
         },
+        {
+          text: 'async/await',
+          link: '/browser/async/await'
+        },
       ]
     }
   ]
