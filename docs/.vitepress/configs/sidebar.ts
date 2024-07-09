@@ -266,7 +266,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/browser/消息队列和事件循环'
         },
         {
-          text: 'WebAPI：setTimeout 是如何实现的？',
+          text: 'setTimeout 是如何实现的？',
           link: '/browser/setTimeout如何实现'
         },
         {
@@ -285,6 +285,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: 'async/await',
           link: '/browser/async&await'
         },
+      ]
+    },
+    {
+      text: '浏览器中的页面',
+      items: [
+        {
+          text: 'Chrome开发者工具',
+          link: '/browser/Chrome开发者工具'
+        }
       ]
     }
   ]
