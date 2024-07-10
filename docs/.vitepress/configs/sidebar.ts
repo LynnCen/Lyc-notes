@@ -293,6 +293,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: 'Chrome开发者工具',
           link: '/browser/Chrome开发者工具'
+        },
+        {
+          text: 'DOM树',
+          link: '/browser/DOM树'
         }
       ]
     }
