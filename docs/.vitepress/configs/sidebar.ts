@@ -297,7 +297,11 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: 'DOM树',
           link: '/browser/DOM树'
-        }
+        },
+        {
+          text: '渲染流水线',
+          link: '/browser/渲染流水线'
+        },
       ]
     }
   ]
