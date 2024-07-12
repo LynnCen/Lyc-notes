@@ -302,6 +302,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '渲染流水线',
           link: '/browser/渲染流水线'
         },
+        {
+          text: '分层和合成机制',
+          link: '/browser/分层和合成'
+        },
       ]
     }
   ]
