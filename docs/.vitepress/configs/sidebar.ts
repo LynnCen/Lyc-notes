@@ -306,6 +306,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '分层和合成机制',
           link: '/browser/分层和合成'
         },
+        {
+          text: '页面性能',
+          link: '/browser/页面性能'
+        },
       ]
     }
   ]
