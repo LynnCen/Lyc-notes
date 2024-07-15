@@ -172,6 +172,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第三章 存储系统',
           link: '/组成原理/chapter3'
         },
+        {
+          text: '第四章 指令系统',
+          link: '/组成原理/chapter4'
+        },
       ]
     }
   ],
