@@ -314,6 +314,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '页面性能',
           link: '/browser/页面性能'
         },
+        {
+          text: '虚拟DOM',
+          link: '/browser/虚拟DOM'
+        },
       ]
     }
   ]
