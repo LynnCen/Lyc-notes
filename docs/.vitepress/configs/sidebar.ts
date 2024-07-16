@@ -318,6 +318,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '虚拟DOM',
           link: '/browser/虚拟DOM'
         },
+        {
+          text: '渐进式网页应用PWA',
+          link: '/browser/渐进式网页应用PWA'
+        },
       ]
     }
   ]
