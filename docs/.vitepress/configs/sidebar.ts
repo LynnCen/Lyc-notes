@@ -323,6 +323,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/browser/渐进式网页应用PWA'
         },
       ]
+    },
+    {
+      text: '浏览器中的网络',
+      items: [
+        {
+          text: 'HTTP1',
+          link: '/browser/HTTP1'
+        }
+      ]
     }
   ]
 }
