@@ -240,6 +240,155 @@ ISA 规定的内容 主要包括:
 
 CF = Count 异或 Sub
 
+## 程序的机器级代码展示
+
+考察 x86 汇编指令
+
+### 常用汇编指令介绍
+
+1. **相关寄存器**
+
+![alt text](./img/相关寄存器.png)
+
+2. **汇编指令格式**
+
+AT&T 格式和 Intel 格式（掌握 Intel 格式）
+
+![alt text](./img/汇编指令格式.png)
+
+3. **常用指令**
+
+数据传输指令、算数和逻辑运算指令和控制流指令
+
+#### 数据传送指令
+
+（1）**mov 指令**
+
+将第二个操作数(寄存器的内容、内存中的内容或常数值)复制到第一个操作数(寄存器或内存)。
+
+```c++
+mov <reg> , <reg>
+mov <mem> , <mem>
+
+mov eax, ebx.  // 将ebx值复制到eax
+mov byte ptr [var], 5 // 将5保存到var值指示的内存地址的一字节中
+```
+
+双操作数不能都是内存，即 mov 指令不能直接将内存复制到内存，需进行中间转换，从内存到寄存器再到内存。
+
+（2）**push 指令**
+
+将操作数压入内存的栈，常用于函数调用。ESP 是栈顶，入栈前先将 ESP 值减 4（栈增长方向与内存地址增长方向相反），然后将将操作数压入 ESP 指示的地址
+
+```c++
+push <reg32>
+push <mem>
+push <con32>
+
+push eax // 将eax值入栈
+push [var] // 将var指示的内存地址的4字节入栈
+```
+
+（3）**pop 指令**
+
+pop 指令执行的是出栈工作，出栈前先将 ESP 指示的地址中的内容出栈，然后将 ESP 值加 4
+
+```c++
+pop eax // 弹出栈顶元素送到eax
+pop 【ebx】 // 弹出栈顶元素送到ebx指示的内存地址的4字节中
+
+```
+
+#### 算数和逻辑指令
+
+（1）**add/sub 指令**
+
+add 指令将两个操作数相加，相加的结果保存到第一个操作数中。sub 指令用于两个操作数相减，相减的结果保存到第一个操作数中。
+
+```c++
+add<reg>，<reg> / sub<reg>，regy
+add<reg>，smem> / sub<reg>，mem
+add‹mem>,<reg> / sub‹mem>,<reg>
+add‹reg>,‹con> / sub<reg>,‹con>
+add‹mem>,‹con> / sub‹mem>,<con>
+
+sub eax , 10  // eax <- eax - 10
+add byte ptr [var], 10 // 10 与var指示的内存地址一字节相加，并将结果保存到var指示的内存地址字节中
+
+```
+
+（2）**inc/dec 指令**
+
+inc 、dec 指令分别表示将操作数自加 1、自減 1。
+
+（3）**imul 指令**
+
+有符号整数乘法指令，有两种格式:1 两个操作数，将两个操作数相乘，将结果保存在第一个操作数中，第一个操作数必须为寄存器;2 三个操作数，将第 二个和 第三个操作数相乘，将结果保存在第一个操作数中，第一个操作数必须为寄存器
+
+（4）**idiv 指令**
+
+有符号整数除法指令，它只有一个操作数，即除数，而被除数则为 e dx"cax 中 的内容(共 64 位)，操作结果有两部分:商和余数，商送到 eax，余数则送到 edx
+
+（5）**and/or/xor 指令**
+
+and 、or、xor 指令分别是逻辑与、逻辑或、逻辑异或操作指令，用于操作数的位操作，操作结果放在第一个操作数中
+
+（6）**not 指令**
+
+位翻转指令，将操作数中的每一位翻转，即 0->1、1->0
+
+（7）**neg 指令**
+
+取负指令
+
+（8）**shl/shr 指令**
+
+逻辑移位指令，shl 为逻辑左移，shr 为逻辑右移，第一个操作数表示被操作数，第二个操作数指示移位的位数
+
+#### 控制流指令
+
+（1）**jmp 指令**
+
+jmp 指令控制 IP 转移到 label 所指示的地址（从 label 中取出指令执行）
+
+```c++
+jmp <label>
+
+jmp begin  // 跳转到begin标记的指令执行
+```
+
+（2）**jcondition 指令**
+
+条件转移指令 依据 CPU 状态字中的一系列条件状态转移。CPU 状态字中包括中指示最后一个算数运算结果是否为 0 等。
+
+```c++
+je <label> (jump when equal)
+jz <label> (jump when last result was zero)
+jne <label> (jump when not equal)
+jg <label> (jump when greater than)
+jge <label> (jump when greater than or equal to)
+jl <label> (jump when less than)
+jle <label> (jump when less than or equal to)
+
+cmp eax , ebx
+jle done // 若eax值 <= ebx值 则跳转done 执行，否则执行下一条
+
+```
+
+（3）**cmp/test 指令**
+
+cmp 指令的功能相当于 sub 指令，用于比较两个操作数的值。test 指令的 功能相当于 and 指令，对两个操作数进行逐位与运算。与 sub 和 and 指令不同的是，这两 类指令都不保存操作结果，仅根据运算结果设置 CPU 状态字中的条件码。
+
+cmp 和 test 指令通常和 jcondition 指令搭配使用，举例
+
+```c++
+cmp dword ptr [var] , 10 // 将var指示的主存地址的4字节内容，与10相比较
+jne loop                 // 若相等则继续顺序执行；否则跳转到loop处执行
+test eax , eax           // 测试test是否为零
+jz xxxx                  // 为零则置标志位ZF为1，则跳转到xxx出执行
+
+```
+
 #### 高级语言于机器级代码之间的对应
 
 ![1694518290426](image/ComputerOrganization/1694518290426.png)
