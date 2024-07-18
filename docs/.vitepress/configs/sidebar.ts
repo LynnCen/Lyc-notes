@@ -330,6 +330,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: 'HTTP1',
           link: '/browser/HTTP1'
+        },
+        {
+          text: 'HTTP2',
+          link: '/browser/HTTP2'
         }
       ]
     }
