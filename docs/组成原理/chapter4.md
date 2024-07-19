@@ -433,6 +433,50 @@ mov eax , dword ptr [eax]    // R[eax] <- M[R[eax]] 即R[eax] = M[p1]
 
 PI 和 p2 是指针型参数，所以在 32 位机中的长度是 dwordptr，比较指令 cmp 的两个操作数都 应来自寄存器，因此应先将 p1 和 p2 对应的实参从栈中取到通用寄存器，比较指令执行后得到各个 条件码，然后根据各条件码值的组合选择执行不同的指令，因此需要用到条件转移指令
 
+### 循环语句的机器级表达
+
+常见的循环语句`do while`,`while`,`for`。汇编指令中没有对应的指令，可以用条件测试和跳转组合起来实现效果，大多数编译器都将这三种循环结构都转为`do-while`形式来产生机器代码。在循环结构中，通常使用条件转移指令来判断循环条件的结束。
+
+下面是一个用 for 循环写的自然数求和的函数：
+
+```c
+int sum_for(int n){
+   int i;
+   int result = 0;
+   for (i=1;i<=n;i++){
+      result +=i;
+   }
+   return result;
+}
+```
+
+这段代码中的 for 循环的不同组成部分：
+
+```c++
+init_expr      i=1
+test_expr      i<=n
+update_expr    i++
+body_statement result += i
+```
+
+将这个函数翻译为 goto 语句代码后，得到其过程体的汇编代码：
+
+```c++
+mov ecx , dword ptr [ebp+8]    # R[ecx] <- M[R[ebp]+8] 即R[ecxx] = n
+mov eax , 0                    # R[eax] <- 0  即result=0
+mov edx , 1                    # R[edx] <- 1  即i=1
+cmp edx , ecx                  # Compare R[edx]:R[ecx] 即比较i：n
+jg  .L2                        # If greater，则跳转到L2执行
+.L1:                           # loop:
+add eax , edx                  # R[eax] <- R[eax] + R[edx]，即result += 1
+add edx , 1                    # R[edx] <- R[edx] + 1 即i++
+cmp edx , ecx                  # Compare R[edx]:R[ecx] 即比较i：n
+jle .L1                        # If less or equal，则跳转到L1执行
+.L2:
+```
+
+已知 n 对应的实参已被压入调用函数的栈帧，其对应的存储地址为`R[ebp]+8` ，过程`nsum_for`中 的局部变量 i 和 result 被分别分配到寄存器 EDX 和 EAX 中，返回参数在 EAX 中。
+
 #### 高级语言于机器级代码之间的对应
 
 ![1694518290426](image/ComputerOrganization/1694518290426.png)
