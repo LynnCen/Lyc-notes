@@ -423,7 +423,7 @@ int get_cont(int *p1 , int *p2){
 mov eax , dword ptr [ebp+8]. // R[eax] <- M[R[ebp] + 8], 即R[eax] = p1
 mov edx , dword ptr [ebp+12] // R[edx] <- M[R[ebp] + 8], 即R[edx] = p2
 cmp eax , edx                // 比较p1和p2，即根据p1-p2的结果置标志
-jbe .L1                      // 若p1<=p2 ， 则转标记L1处执行
+jbe .L1                      // 若p1<=p2 ， 则转标记L1处执行 jbe? <= less than or equal to
 mov eax , dword ptr [edx]    // R[eax]<-M[R[edx]].  R[eax] = M[p2]
 jmp .L2                      // 无条件跳转至标记L2执行
 .L1:
