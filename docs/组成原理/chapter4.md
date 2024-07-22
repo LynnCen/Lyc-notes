@@ -400,6 +400,10 @@ ret
 
 call 指令首先将当前执行指令地址入栈，然后无条件转移到由标签指示的指令。与其他简单的跳转指令不同，call 指令保存调用之前的地址信息(当 call 指令结束后，返回调用之前的地址)。ret 指令实现子程序的返回机制，ret 指令弹出栈中保存的指令地址，然后无条件转移到保存的指令地址执行。call 和 ret 是程序(函数)调用中最关键的两条指令
 
+![1694518313870](image/ComputerOrganization/1694518313870.png)
+
+![1694518290426](image/ComputerOrganization/1694518290426.png)
+
 ### 选择语句的机器级表示
 
 常见的选择结构语句有 if-then、if-then-else 等。编译器通过条件码 (标志位)设置指令和各 类转移指令来实现程序中的选择结构语句。条件码描述了最近的算术或逻辑运算操作的属性，可 以检测这些寄存器来执行条件分支指令，最常用的条件码有 CF、ZF、SF 和 OF。
@@ -432,6 +436,9 @@ mov eax , dword ptr [eax]    // R[eax] <- M[R[eax]] 即R[eax] = M[p1]
 ```
 
 PI 和 p2 是指针型参数，所以在 32 位机中的长度是 dwordptr，比较指令 cmp 的两个操作数都 应来自寄存器，因此应先将 p1 和 p2 对应的实参从栈中取到通用寄存器，比较指令执行后得到各个 条件码，然后根据各条件码值的组合选择执行不同的指令，因此需要用到条件转移指令
+![1694518331921](image/ComputerOrganization/1694518331921.png)
+
+![1694518364500](image/ComputerOrganization/1694518364500.png)![1694518374706](image/ComputerOrganization/1694518374706.png)
 
 ### 循环语句的机器级表达
 
@@ -476,6 +483,8 @@ jle .L1                        # If less or equal，则跳转到L1执行
 ```
 
 已知 n 对应的实参已被压入调用函数的栈帧，其对应的存储地址为`R[ebp]+8` ，过程`nsum_for`中 的局部变量 i 和 result 被分别分配到寄存器 EDX 和 EAX 中，返回参数在 EAX 中。
+
+![1694601803725](image/ComputerOrganization/1694601803725.png)
 
 ### 过程调用的机器级表示
 
@@ -538,30 +547,6 @@ caller:
 call 指令执行后，add 函数的返回参数存放在 EAX 中，因此 call 指令后面的两条指令中，指令`“mov[ebp-4]，eax”`将 add 的结果存入 sum 变量的存储空间，该变量的地址为`R[ebp]-4`;指令`“movcax,dwordptr[ebp-4]”`将 sum 变量的值作为返回值送到寄存器 EAX 中。
 
 ![alt text](./img/call&add的栈帧.png)
-
-#### 高级语言于机器级代码之间的对应
-
-![1694518290426](image/ComputerOrganization/1694518290426.png)
-
-#### 常见的 x86 汇编指令
-
-![1694518300515](image/ComputerOrganization/1694518300515.png)
-
-#### AT&T 格式和 Interl 格式
-
-![1694518313870](image/ComputerOrganization/1694518313870.png)
-
-#### 选择语句的机器级表示
-
-![1694518331921](image/ComputerOrganization/1694518331921.png)
-
-![1694518364500](image/ComputerOrganization/1694518364500.png)![1694518374706](image/ComputerOrganization/1694518374706.png)
-
-#### 循环语句的机器级表示
-
-![1694601803725](image/ComputerOrganization/1694601803725.png)
-
-#### Call 和 Ret 指令（函数调用的机器级表示）
 
 #### 指令系统设计风格
 
