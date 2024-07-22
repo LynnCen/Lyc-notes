@@ -461,7 +461,7 @@ body_statement result += i
 
 将这个函数翻译为 goto 语句代码后，得到其过程体的汇编代码：
 
-```c++
+```asm
 mov ecx , dword ptr [ebp+8]    # R[ecx] <- M[R[ebp]+8] 即R[ecxx] = n
 mov eax , 0                    # R[eax] <- 0  即result=0
 mov edx , 1                    # R[edx] <- 1  即i=1
@@ -476,6 +476,68 @@ jle .L1                        # If less or equal，则跳转到L1执行
 ```
 
 已知 n 对应的实参已被压入调用函数的栈帧，其对应的存储地址为`R[ebp]+8` ，过程`nsum_for`中 的局部变量 i 和 result 被分别分配到寄存器 EDX 和 EAX 中，返回参数在 EAX 中。
+
+### 过程调用的机器级表示
+
+前面提到的`call/ret`指令主要用于过程调用，它们都是属于一种无条件转移指令。
+
+假定过程 P 调用过程 Q，过程调用的执行步骤如下：
+
+（1）P 将入口参数（实参）放到 Q 能访问到的地方。
+
+（2）P 将返回地址存到特定的地方，然后将控制转移到 Q。
+
+（3）Q 保存 P 的现场（通用寄存器的内容），并为自己的非静态局部变量分配空间。
+
+（4）执行过程 Q。
+
+（5）Q 恢复 P 的现场，将返回结果放到 P 能访问到的地方，并释放局部变量所占空间
+
+（6）Q 取出返回地址，将控制转移到 P。
+
+步骤 2 是 call 指令实现的，步骤 6 是 ret 指令返回到过程 P。在上述步骤中，需要为入口参数、返回地址、过程 P 的现场、过程 Q 的局部变量、返回结果找到存放空间。
+
+用户可见的寄存器数量有限，调用者和被调用者需要共享寄存器，若直接覆盖对方的寄存器，则会导致程序出错，故有一下规范：寄存器 EAX、ECX 和 EDX 是调用者保存寄存器，当 P 调用 Q 时，若 Q 需要用到这些寄存器，则由 P 将这些寄存器的内容保存到栈中，并在返回后由 P 恢复它们的值。寄存器 EBX、ESI、EDI 是被调用者保存寄存器，当 P 调用时，Q 必须先将这些寄存器的内容保存在栈中才能使用它们，并在返回 P 之前先恢复它们的值。
+
+每个过程都有自己的栈区，称为栈帧，因此，一个栈由若干栈帧组成，寄存器 EBP 指示栈帧的起始位置，寄存器 ESP 指示栈顶，栈从高地址向低地址增长。过程执行时，ESP 会随着数据的入栈而动态变化，而 EBP 固定不变。当前栈帧的范围在 EBP 和 ESP 指向的区域之间。
+
+```c
+int add(int x ,int y){
+   return x + y;
+}
+int caller(){
+   int temp1 = 125;
+   int temp2 = 80;
+   int sum = add(temp1 , temp2);
+   return sum;
+}
+```
+
+经过 GCC 编译后，caller 过程独赢的代码如下：
+
+```asm
+caller:
+    push ebp
+    mov ebp , esp
+    sub esp , 24                 # GCC为caller的参数分配了24字节的空间
+    mov [ebp - 12] , 125         # M[R[ebp - 12]] <- 125 即temp1 = 125
+    mov [ebp - 8]  , 80          # M[R[ebp -8]]  <- 80  即temp2 = 80
+    mov eax,dword ptr [ebp -8]   # R[eax] <- M[R[ebp] -8], 即R[eax]=temp2
+    mov [esp + 4] ,eax           # M[R[esp + 4]] <- R[eax], 即temp2入栈
+    mov eax,dword ptr [ebp -12]  # R[eax] <- M[R[ebp] -12], 即R[eax]=temp1
+    mov [esp] ,eax               # M[R[esp + 4]] <- R[eax], 即temp1入栈
+    call add                     # 调用add，将返回结果保存在eax中
+    mov  [ebp-4],eax             #M[R[ebp]-4] <- R[eax]     即add返回值送sum
+    mov eax,dword ptr [ebp -4]   # R[eax] <- M[R[ebp]-4]    即sum作为返回值
+    leave
+    ret
+```
+
+图 4.12 给出了 caller 栈帧的状态，假定 caller 被过程 P 调用。执行第 4 行的指令后，ESP 所指的位置如图中所示，可以看出 GCC 为 caller 的参数分配了 24 字节的空间。从汇编代码中可以看出，caller 中只使用了调用者保存寄存器 EAX，没有使用任何被调用者保存寄存器，因此在 caller 栈帧中无须保存除 EBP 外的任何寄存器的值;caller 有三个局部变量 templ、temp2 和 sum，皆被分配在栈帧中;在用 call 指令调用 add 函数之前，caller 先将入又参数从右向左依次将 temp2 和 templ 的值(即 80 和 125)保存到栈中。在执行 call 指令时再把返回地址压入栈中。此外，在最初进入 caller 时，还将 EBP 的值压入了栈，因此 caller 的栈帧中用到的空间占 4+12+8+4=28 字节。但是，caller 的栈帧共有 4+24+4=32 字节，其中浪费了 4 字节的空间(未使用)。这是因为 GCC 为保证数据的严格对齐而规定每个函数的栈帧大小必须是 16 字节的倍数
+
+call 指令执行后，add 函数的返回参数存放在 EAX 中，因此 call 指令后面的两条指令中，指令`“mov[ebp-4]，eax”`将 add 的结果存入 sum 变量的存储空间，该变量的地址为`R[ebp]-4`;指令`“movcax,dwordptr[ebp-4]”`将 sum 变量的值作为返回值送到寄存器 EAX 中。
+
+![alt text](./img/call&add的栈帧.png)
 
 #### 高级语言于机器级代码之间的对应
 
