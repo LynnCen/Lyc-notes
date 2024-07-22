@@ -336,6 +336,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/browser/HTTP2'
         }
       ]
+    },
+    {
+      text: "浏览器安全",
+      items: [
+        {
+          text: '同源策略',
+          link: '/browser/同源策略'
+        }
+      ]
     }
   ]
 }
