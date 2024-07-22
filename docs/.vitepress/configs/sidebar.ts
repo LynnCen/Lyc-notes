@@ -176,6 +176,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第四章 指令系统',
           link: '/组成原理/chapter4'
         },
+        {
+          text: '第五章 中央处理器',
+          link: '/组成原理/chapter5'
+        },
       ]
     }
   ],
@@ -343,7 +347,8 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: '同源策略',
           link: '/browser/同源策略'
-        }
+        },
+
       ]
     }
   ]
