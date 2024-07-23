@@ -348,6 +348,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '同源策略',
           link: '/browser/同源策略'
         },
+        {
+          text: '跨站脚本攻击XSS',
+          link: '/browser/跨站脚本攻击XSS'
+        },
 
       ]
     }
