@@ -352,6 +352,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '跨站脚本攻击XSS',
           link: '/browser/跨站脚本攻击XSS'
         },
+        {
+          text: 'CSRF攻击',
+          link: '/browser/CSRF攻击'
+        },
 
       ]
     }
