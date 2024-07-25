@@ -356,7 +356,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: 'CSRF攻击',
           link: '/browser/CSRF攻击'
         },
-
+        {
+          text: '安全沙箱',
+          link: '/browser/安全沙箱'
+        },
       ]
     }
   ]
