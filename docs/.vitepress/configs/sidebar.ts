@@ -360,6 +360,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '安全沙箱',
           link: '/browser/安全沙箱'
         },
+        {
+          text: 'HTTPS',
+          link: '/browser/HTTPS'
+        },
       ]
     }
   ]
