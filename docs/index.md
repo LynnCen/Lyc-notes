@@ -24,7 +24,7 @@ features:
   - icon: 📖
     title: WebFrontEnd Interview
     details: Prepare for the interviews and sum up the most popular interview problems for front-end Web development, full-stack. <small> ( ͡° ͜ʖ ͡°)  </small><br />
-    link: /interview/js
+    link: /interview/browser
     linkText: Common knowledge
   - icon: 📘
     title: Custom Hooks
