@@ -11,7 +11,7 @@ hero:
     alt: 林岑LynnCen
   actions:
     - text: LynnCen物语
-      link: /
+      link: /TODO/index
     - text: WebFrontEnd Navigation
       link: /nav/
       theme: alt
