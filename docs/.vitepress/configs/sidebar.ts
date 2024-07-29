@@ -365,6 +365,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/browser/HTTPS'
         },
       ]
-    }
+    },
+    {
+      text: '浏览上下文组',
+      link: '/browser/浏览上下文组'
+    },
   ]
 }
