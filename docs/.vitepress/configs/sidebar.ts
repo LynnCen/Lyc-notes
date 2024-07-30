@@ -370,5 +370,9 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '浏览上下文组',
       link: '/browser/浏览上下文组'
     },
+    {
+      text: '任务调度',
+      link: '/browser/任务调度'
+    },
   ]
 }
