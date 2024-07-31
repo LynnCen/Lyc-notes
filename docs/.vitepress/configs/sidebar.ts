@@ -374,5 +374,9 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '任务调度',
       link: '/browser/任务调度'
     },
+    {
+      text: '加载阶段性能',
+      link: '/browser/加载阶段性能'
+    },
   ]
 }
