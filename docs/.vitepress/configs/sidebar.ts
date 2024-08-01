@@ -180,6 +180,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第五章 中央处理器',
           link: '/组成原理/chapter5'
         },
+        {
+          text: '第六章 总线',
+          link: '/组成原理/chapter6'
+        },
       ]
     }
   ],
