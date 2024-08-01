@@ -378,5 +378,9 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '加载阶段性能',
       link: '/browser/加载阶段性能'
     },
+    {
+      text: 'Performance',
+      link: '/browser/Performance'
+    },
   ]
 }
