@@ -342,6 +342,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: 'HTTP2',
           link: '/browser/HTTP2'
+        },
+        {
+          text: 'HTTP3',
+          link: '/browser/HTTP3'
         }
       ]
     },
@@ -385,6 +389,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
     {
       text: 'Performance',
       link: '/browser/Performance'
+    },
+    {
+      text: 'Performance中的Main指标',
+      link: '/browser/Performance中的Main指标'
     },
   ]
 }
