@@ -26,7 +26,8 @@ features:
     details: Prepare for the interviews and sum up the most popular interview problems for front-end Web development, full-stack. <small> ( ͡° ͜ʖ ͡°)  </small><br />
     link: /interview/browser
     linkText: Common knowledge
-  - icon: 📘
+  - icon:
+      src: /icons/react.svg
     title: Custom Hooks
     details: Learn ReactHooks (づ｡◕‿‿◕｡)づ  <br /> make something customizing hooks 🚀
     link: /react/customHook/hooks
@@ -37,15 +38,17 @@ features:
     details: Cheatsheets for experienced React developers getting started with TypeScript</small><br /> Incredible magic o_o ....
     link: /browser/Chrome架构
     linkText: React Utils
-  - icon: 🧰
-    title: Common Tools
+  - icon:
+      src: /icons/048CPU.svg
+    title: 计算机组成原理
     details: To do a good job, an artisan needs the best tools<br />Record software, plug-ins, extensions, etc. used in development and daily use
-    link: /nav/
+    link: /组成原理/chapter1
     linkText: Tools
-  - icon: 🐞
-    title: Bug Record
+  - icon:
+      src: /icons/数据结构1.svg
+    title: 数据结构
     details: The pitfalls we stepped on over the years<br />There are always some questions that surprise you
-    link: /record/nvm
+    link: /dataStructure/chapter1
     linkText: ಥ_ಥ
   - icon:
       src: /icons/Postgraduate。.svg
