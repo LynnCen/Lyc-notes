@@ -32,10 +32,10 @@ features:
     link: /react/customHook/hooks
     linkText: hooks
   - icon:
-      src: /icons/react.svg
-    title: React with Typescript
+      src: /icons/浏览器.svg
+    title: Browser
     details: Cheatsheets for experienced React developers getting started with TypeScript</small><br /> Incredible magic o_o ....
-    link: /react/utils/type
+    link: /browser/Chrome架构
     linkText: React Utils
   - icon: 🧰
     title: Common Tools
