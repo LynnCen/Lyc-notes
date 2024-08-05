@@ -184,6 +184,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第六章 总线',
           link: '/组成原理/chapter6'
         },
+        {
+          text: '第七章 输入/输出系统',
+          link: '/组成原理/chapter7'
+        },
       ]
     }
   ],
