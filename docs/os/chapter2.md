@@ -895,11 +895,99 @@ CPU 调度是多道程序操作系统的基础，是操作系统设计的核心�
 
    ![10](./img/临界区的循环进程.png)
 
+### 实现临界区互斥的基本方法
+
+<br/>
+
+#### 软件实现方法
+
+1. **单标志法**
+
+```c
+// 进程P0:                   // 进程P1:
+while(turn != 0);           while(turn != 1);      // 进入区
+critical section;           critical section ;     // 临界区
+turn = 1;                   turn = 0;              // 退出区
+remainder section ;         remainder section ;    // 剩余区
+```
+
+该算法设置 一个公用整型变量 turn，指示允许进入临界区的进程编号，当 turn = 0 时，表示 允许 P0 进入临界区;当 turn = 1 时，表示允许 P1，进入临界区。
+
+缺点：违反**空闲让进**（若某个进程不再进入临界区，则另一个进程也无法进入临界区）
+
+2. **双标志先检查法**
+
+该算法设置 一个布尔型数组 flag[2]，用来标记各个进程想进入临界区的意愿，`flag[i] =true`表示 Pi，想要进入临界区(i=0 或 1)。P0 进入临界区前，先检查对方是否想进入临界区，若想，则等待;否则，将 flag 回置为 true 后，再进入临界区;当 Pi 退出临界区时，将 flagli 置为 false
+
+```c
+// 进程P0:                   // 进程P1:
+while(flag[1]);          while(flag[0]);           // 进入区
+flag[0] = true;          flag[1] = true;           // 进入区
+critical section;        critical section;         // 临界区
+flag[0] = false;         flag[1] = false;          // 退出区
+remainder section ;      remainder section ;    // 剩余区
+```
+
+优点：不用交替进入，可连续使用
+
+缺点：P0 和 P1 可能同时进入临界区，违反**忙则等待**
+
+3. **双标志后检查**
+
+先设置自己的标志，再检查对方的标志，若对方的标志为 true，则等待;否则，进入临界区
+
+```c
+// 进程P0:                // 进程P1:
+flag[0] = true;          flag[1] = true;         // 进入区
+while(flag[1]);          while(flag[0]);         // 进入区
+critical section;        critical section;       // 临界区
+flag[0] = false;         flag[1] = false;        // 退出区
+remainder section ;      remainder section ;    // 剩余区
+```
+
+缺点：违背**空闲让进**，存在饥饿现象，违背有限等待
+
+4. **Peterson**
+
+Peterson 算法结合了算法一和算法三的思想，利用 flag 解决互斥访问问题，而利用 turn 解决“饥饿”问题。
+
+若双方试图同时进入，则 turn 几乎同时被置为 i 和 j，但只有一个赋值语句的结果会保持，另一个也会执行，但会被立即重写。变量 turn 的最终值决定了哪个进程被允许先进入临界区
+
+```c
+// 进程P0:                // 进程P1:
+flag[0] = true;          flag[1] = true;         // 进入区
+turn = 1;                turn = 0;               // 进入区
+while(flag[1]&&turn==1); while(flag[0]&&turn==0);         // 进入区
+critical section;        critical section;       // 临界区
+flag[0] = false;         flag[1] = false;        // 退出区
+remainder section ;      remainder section ;    // 剩余区
+```
+
+优点：遵循“空闲让进”“忙则等待”“有限等待”三个准则
+缺点：未遵循**让权等待**
+
 #### 硬件同步机制
 
-1. 关中断
-2. 利用 Test-and-Set 指令实现互斥
+1. **中断屏蔽方法**
+
+当一个进程正在执行它的临界区代码时，防止其他进程进入其临界区的最简单方法是关中断。因为 CPU 只在发生中断时引起进程切换，因此屏蔽中断能够保证当前运行的进程让临界区代码顺利地执行完，进而保证互斥的正确实现，然后执行开中断。
+
+```text
+   .
+   .
+   .
+   关中断
+   临界区
+   开中断
+   .
+   .
+   .
+```
+
+2.利用 Test-and-Set 指令实现互斥
+
 3. 利用 Swap 指令实现进程互斥
+
    不符合“让权等待”
 
 #### 信号量机制
