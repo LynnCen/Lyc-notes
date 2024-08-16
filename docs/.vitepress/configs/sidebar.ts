@@ -113,6 +113,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第二章 进程与线程',
           link: '/os/chapter2'
         },
+        {
+          text: '第三章 内存管理',
+          link: '/os/chapter3'
+        },
       ]
     }
   ],
