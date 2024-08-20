@@ -117,6 +117,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第三章 内存管理',
           link: '/os/chapter3'
         },
+        {
+          text: '第四章 文件管理',
+          link: '/os/chapter4'
+        },
       ]
     }
   ],
