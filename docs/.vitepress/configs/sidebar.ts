@@ -121,6 +121,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第四章 文件管理',
           link: '/os/chapter4'
         },
+        {
+          text: '第五章 磁盘和固态硬盘',
+          link: '/os/chapter5'
+        },
       ]
     }
   ],
