@@ -60,6 +60,10 @@ export const nav: DefaultTheme.Config['nav'] = [
       {
         text: '计算机网络',
         items: [
+          {
+            text: '计算机网络基础',
+            link: '/计网/chapter1',
+          }
         ]
       },
 

@@ -410,5 +410,16 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: 'Performance中的Main指标',
       link: '/browser/Performance中的Main指标'
     },
+  ],
+  '/计网/': [
+    {
+      text: '计算机组成原理',
+      items: [
+        {
+          text: '第一章 计算机网络体系结构',
+          link: '/计网/chapter1'
+        },
+      ]
+    }
   ]
 }
