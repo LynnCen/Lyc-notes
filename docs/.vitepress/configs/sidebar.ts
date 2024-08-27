@@ -419,6 +419,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第一章 计算机网络体系结构',
           link: '/计网/chapter1'
         },
+        {
+          text: '第二章 物理层',
+          link: '/计网/chapter2'
+        },
       ]
     }
   ]
