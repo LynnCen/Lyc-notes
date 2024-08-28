@@ -423,6 +423,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第二章 物理层',
           link: '/计网/chapter2'
         },
+        {
+          text: '第三章 数据链路层',
+          link: '/计网/chapter3'
+        },
       ]
     }
   ]
