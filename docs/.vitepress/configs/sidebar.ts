@@ -173,7 +173,12 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: '第一章 绪论',
           link: '/dataStructure/chapter1_ex'
-        }
+        },
+        {
+          text: '第二章 线性表',
+          link: '/dataStructure/chapter2_ex'
+        },
+
       ]
     }
   ],
