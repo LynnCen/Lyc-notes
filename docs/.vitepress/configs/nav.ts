@@ -44,6 +44,10 @@ export const nav: DefaultTheme.Config['nav'] = [
           {
             text: '数据结构基础',
             link: '/dataStructure/chapter1'
+          },
+          {
+            text: '课后习题',
+            link: '/dataStructure/chapter1_ex'
           }
         ]
 

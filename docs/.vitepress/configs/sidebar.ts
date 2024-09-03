@@ -166,6 +166,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/dataStructure/chapter8'
         }
       ]
+
+    }, {
+      text: '课后习题',
+      items: [
+        {
+          text: '第一章 绪论',
+          link: '/dataStructure/chapter1_ex'
+        }
+      ]
     }
   ],
   '/组成原理/': [
