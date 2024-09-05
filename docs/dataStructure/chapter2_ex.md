@@ -55,5 +55,23 @@ Reverse(0,n-1)得到defghabc。
 2️⃣ 如下
 ```c
 
+void Reverse(int A[],int from , int to){
+  int temp;
+  for(int i=0; i< (to - from + 1)/2;i++){
+    temp = A[from+i];
+    A[from+i] = A[to-i];
+    A[to -i] = temp;
+  }
+}
+
+int[] Converse(int A[],int n , int p){
+  Reverse(A,0,p-1);
+  Reverse(A,p,n-1);
+  Reverse(A,0,n-1);
+}
+
 ```
 
+Reverse函数的时间复杂度为O(p/2),O((n-p)/2),O(n/2);
+
+3️⃣ 故时间复杂度O(n),空间复杂度O(1)
