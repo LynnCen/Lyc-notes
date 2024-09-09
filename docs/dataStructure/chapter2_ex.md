@@ -91,7 +91,7 @@ Reverse函数的时间复杂度为O(p/2),O((n-p)/2),O(n/2);
 1️⃣ 定义两个指针，分别代表
 
 ```c
-int SearchBinary(int A ,int l1,int B,int l2){
+int SearchBinary(int A[] ,int l1,int B,int l2){
   int i = 0 ,j = 0,binary = 0;
   for(int k=0;k<(l1+l2 - 1)/2;k++){
     if(A[i]>b[j]){
@@ -107,13 +107,31 @@ int SearchBinary(int A ,int l1,int B,int l2){
 ```
 
 
-找主元素x x的个数大于/2n
+**找主元素x x的个数大于/2n**
 
-暴力解
+1️⃣ 定义一个新数组B，初始值全为0，遍历数组A，数组A中的值作为B的数组下标，用数组B来记录各元素出现的次数，最后遍历数组B找出次数最大，判断是否大于n/2。
 
-两次遍历，记录当前元素出现的次数为
+2️⃣ 空间换时间
 
 ```c
 
+int SearchMain(int A[],int n){
+  int B[];
+  int index=0;
+
+  for(int i=0; i<n;i++){
+    B[A[i]]++;
+  }
+
+  for(int j=1 ; j<n;j++){
+    if(B[index]<B[j])index = j;
+  }
+
+  if(B[index]>(n/2)) return index;
+  return -1;
+
+}
 
 ```
+
+3️⃣ 时间复杂度O(n),空间复杂度O(n)
