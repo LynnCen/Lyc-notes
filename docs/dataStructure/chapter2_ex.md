@@ -109,9 +109,11 @@ int SearchBinary(int A[] ,int l1,int B,int l2){
 
 **找主元素x x的个数大于/2n**
 
+算法一：空间换时间
+
 1️⃣ 定义一个新数组B，初始值全为0，遍历数组A，数组A中的值作为B的数组下标，用数组B来记录各元素出现的次数，最后遍历数组B找出次数最大，判断是否大于n/2。
 
-2️⃣ 空间换时间
+2️⃣ 
 
 ```c
 
@@ -135,3 +137,57 @@ int SearchMain(int A[],int n){
 ```
 
 3️⃣ 时间复杂度O(n),空间复杂度O(n)
+
+算法二：先排序再统计
+
+1️⃣ 将原数组A快速排序后，再对有序数据统计出现的最大次数
+
+2️⃣ 
+
+```c
+int Majority(int A[],int n ){
+
+  QuickSort(A,0,n);
+  int count =0;
+  int pre = A[0];
+  int index;
+
+  for(int i=1; i<n;i++){
+    if(A[i]==pre){
+      count++
+    }else{
+      pre = A[i];
+      // 为主元素
+      if(count>n/2){
+        break;
+
+      }else{
+        count =0;
+      }
+    }
+  }
+}
+
+int Partiton(int A[],int low , int high){
+  int pivot = A[low];
+  while(low<high){
+    while(low<high&&A[high]>=pivot) --high;
+    A[low] = A[high];
+    while(low<high**A[low]<= pivot) ++low;
+    A[high] = A[low]; 
+  }
+  A[low] = pivot;
+  return low;
+
+}
+
+void QuickSort(int A[],int low,int high){
+  if(low<high){
+    int pivot = Partiton(A,low,high);
+    QuickSort(A,low,pivot-1);
+    QuickSort(A,pivot+1,high);
+  }
+}
+```
+
+3️⃣ 时间复杂度O(nlogn) 空间复杂度O(1)
