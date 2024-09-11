@@ -191,3 +191,86 @@ void QuickSort(int A[],int low,int high){
 ```
 
 3️⃣ 时间复杂度O(nlogn) 空间复杂度O(1)
+
+
+**给定一个含n(n≥1)个整数的数组，请设计一个在时间上尽可能高效的算法，找出数组中未出现的最小正整数。例如，数组{-5，3，2，3}中未出现的最小正整数是1;数组{1,2,3}中未出现的最小正整数是4**
+
+**空间化换时间**
+
+1️⃣ 时间上尽可能高效，则利用空间换时间，新标识一个数组B，初始值为-1，数组下标作为正整数，若原数据出现，则令对应的下标值为1，最后从1开始遍历B，找到第一个为-1的下标，即为未出现的最小正整数。
+
+2️⃣ 
+
+```c
+int findMinNum(int A[],int n ){
+  int B[n];
+  int min = -1;
+
+  for(int i=1;i<n;i++){
+    B[i] = -1;
+  }
+
+  for(int j=0;j<n;j++){
+    if(A[j]>0){
+      B[A[j]] = 1;
+    }
+  }
+
+  for(int k=1;k<n;k++){
+    if(B[k]==-1){
+      min = k;
+      return;
+    }
+  }
+
+  if(min==-1) min = n+1;
+
+  return min;
+
+
+}
+```
+
+3️⃣ 时间复杂度O(n),空间复杂度O(n);
+
+**先排序，再找最小正整数**
+
+1️⃣ 对原数据使用快速排序，定义当前最小未出现的正整数`min=1`，再依次遍历排序后的数组，若`A[i]==min`，则min++；遍历结束min为最小未出现的正整数。
+
+2️⃣ 
+
+```c
+int Partion(int A[],int low ,int high){
+  int pivot = A[low];
+
+  while(low<high){
+    while(low<high && A[high] >= pivot) high--;
+    A[low] = A[high];
+    while(low<high && A[low] <= pivot) low++;
+    A[high] = A[low];
+  }
+
+  A[low] = pivot;
+  return low;
+}
+
+void QuickSort(int A[],int low ,int high){
+  if(low < high){
+    int pivot = Partion(A,low ,high);
+    QuickSort(A,low,pivot-1);
+    QuickSort(A,pivot+1,high)
+  }
+}
+
+int findMinNum(int A[],int n){
+  int min=1;
+  QuickSort(A,0,n-1);
+  for(int i=0;i<n;i++){
+    if(A[i]==min) min++
+  }
+
+  return min;
+}
+```
+
+3️⃣ 时间复杂度O(nlogn),空间复杂度O(1);
