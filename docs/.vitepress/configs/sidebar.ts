@@ -178,6 +178,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第二章 线性表',
           link: '/dataStructure/chapter2_ex'
         },
+        {
+          text: '强化',
+          link: '/dataStructure/强化'
+        }
 
       ]
     }
