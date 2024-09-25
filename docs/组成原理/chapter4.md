@@ -676,7 +676,37 @@ JAVA 虚拟机采用的是栈型指令系统。FILO。操作数总是来自栈�
 
 堆栈寻址：硬堆栈（寄存器）和软堆栈（内存）堆栈指针SP
 
+9. 汇编指令
 
+常见的寄存器表示 E开头 EAX EBX 
 
+汇编指令的格式 AT&T和Intel格式 （只需要掌握Intel）
 
+不区分大小写
+
+第一个为源操作数、第二个为目的操作数 从左到右
+
+表示寄存器和立即数不需要加前缀
+
+内存寻址`[x]` `[edx + eax*2 + 8]`
+
+指定数据长度b、w、l、（byte ptr word ptr dword ptr）
+
+mov
+
+push 将操作数压入内存的栈，ESP代表栈顶，入栈前，ESP先减“4”（栈的增长方向和内存地址增长方向相反）
+
+pop指令 出栈 ESP + 
+
+add/sub指令
+
+shl/shr 逻辑移位
+
+jump 转移指令 IP（指定位置）
+
+jcondition 条件转移指令 
+
+cmp/test指令
+
+call/ret
 
