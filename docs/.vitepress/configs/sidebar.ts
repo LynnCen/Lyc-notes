@@ -125,8 +125,33 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '第五章 磁盘和固态硬盘',
           link: '/os/chapter5'
         },
+        {
+          text: '强化',
+          link: '/os/强化'
+        },
       ]
     }
+  ],
+
+  '/408/': [
+    {
+      text: '2009真题',
+      link: '/408/2009'
+    },
+    {
+      text: '2010真题',
+      link: '/408/2010'
+    },
+    {
+      text: '2011真题',
+      link: '/408/2011'
+    },
+  ],
+  '计网': [
+    {
+      text: '强化',
+      link: '/计网/强化'
+    },
   ],
 
   '/dataStructure/': [
@@ -217,6 +242,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
         {
           text: '第七章 输入/输出系统',
           link: '/组成原理/chapter7'
+        },
+        {
+          text: '强化',
+          link: '/组成原理/强化'
         },
       ]
     }

@@ -70,6 +70,15 @@ export const nav: DefaultTheme.Config['nav'] = [
           }
         ]
       },
+      {
+        text: '408',
+        items: [
+          {
+            text: '48真题',
+            link: '/408/2009',
+          }
+        ]
+      },
 
     ],
   },
