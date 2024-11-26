@@ -150,6 +150,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '2012真题',
       link: '/408/2012'
     },
+    {
+      text: '2013真题',
+      link: '/408/2013'
+    },
   ],
   '计网': [
     {
