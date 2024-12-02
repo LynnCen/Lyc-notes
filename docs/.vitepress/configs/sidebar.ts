@@ -158,6 +158,10 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '2014真题',
       link: '/408/2014'
     },
+    {
+      text: '2015真题',
+      link: '/408/2015'
+    },
   ],
   '计网': [
     {
