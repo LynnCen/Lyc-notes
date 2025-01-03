@@ -308,6 +308,8 @@ https://tmg-odin.pages.alibaba-inc.com/usage/skelon
 
 ### @ali/odin-jp-icon
 
+**[icon-generate实现原理](./generate_icon.md)**
+
 合并了@ali/comet-icon和@ali/comet-icons两个icon库，icon详情
 
 icon统一用最新的iconfont，均以Tbj为前缀，icon详情
@@ -329,6 +331,8 @@ import { TbjIcAdd } from '@ali/odin-jp-icon';
 fork自`@ali/comet-hooks`
 
 目前提供了两个hook `useResponsive`和`useCountdown`，主要是原AE项目中存在判断pc和移动端的需求，本次日本站关于`useResponsive`的逻辑可以移除掉，默认都是用移动端的逻辑，使用方法
+
+新增`useSetState`hook
 
 ###  @ali/odin-jp-api
 
@@ -419,7 +423,7 @@ https://tmg-odin.pages.alibaba-inc.com/windvane
 
 统一使用 aem 
 
-aem 支持
+### aem 支持
 
 aem 地址：https://sg.aem.alibaba-inc.com/project/taobaojp/page/setting/base/code
 
@@ -436,7 +440,7 @@ createAEM({
 });
 ```
 
-有些必要参数（如uid）可能需要异步获取，但我们又不希望延迟初始化导致期间的埋点丢失，这时可以在初始化时或者在SDK加载前配置requiredFields参数，配置完之后再进行发送
+<div class='text-red-600'>有些必要参数（如uid）可能需要异步获取，但我们又不希望延迟初始化导致期间的埋点丢失，这时可以在初始化时或者在SDK加载前配置requiredFields参数，配置完之后再进行发送</div>
 ```ts
 import { getAESInstance } from "@ali/odin-jp-api";
 const aes = getAESInstance()
@@ -459,31 +463,25 @@ import AESPluginAutolog from '@ali/aes-tracker-plugin-autolog';
 - 本期统一采用 CSR 的方案
 - 核心页面，目标要求在算上容器时间，首屏时间控制在 1s 以内
 
-**Zcache **
+**Zcache**
 
-配置手册
+1. 预加载资源管理：平台以ZCache包为单位管理预加载资源，目前有两种资源组织类型：前缀类型和页面URL类型
+2. 多客户端投放：同一ZCache包可投放到多个客户端
+3. 灰度能力：支持按百分比放量
+4. 数据分析能力：平台提供 ZCache 包的完整实时数据，包括命中率、版本分布情况和更新成功率。支持天、小时、分钟三种级别的报表和分客户端查看。
 
-参考： 接入端可以搜索关键词【日本】
 
-目前已接入的有 jp-fe/pay，
+**Dataprefetch**
 
-如何验证
-
-https://appdevtools.alibaba-inc.com/，扫码后，点击【跨端实时日志】
-
-如果 Zcache/Access ok，说明已成功。
-
-Dataprefetch ？
-
-### 稳定性
+## 稳定性
 
 目标：1）可监控 2）高可用在 99.99% 以内
 
-#### 稳定性监控
+### 稳定性监控
 
 统一使用 aem 
 
-稳定性埋点
+### 稳定性埋点
 ```ts
 import { sendEvent } from "@ali/odin-jp-api";
 sendEvent('事件ID', {
@@ -497,7 +495,8 @@ sendEvent('事件ID', {
 })
 ```
 
-埋点规范
+### 埋点规范
+
 由于日本站埋点域名使用jp.mmstat.com，所以发送埋点前需要在 document 文档中设置如下meta
 
 //pv日志
@@ -505,7 +504,7 @@ sendEvent('事件ID', {
 //黄金令箭
 `<meta name="aplus-rhost-g" content="sg.mmstat.com"> `
 
-埋点使用
+### 埋点使用
 ```ts
 import { tracker } from "@ali/odin-jp-api";
 export const recordLog = (type: string, values?: any) => {
@@ -516,19 +515,19 @@ export const recordLog = (type: string, values?: any) => {
 };
 ```
 
-常用方法
+### 常用方法
 
-```ts
-trackExpose(logKey: string, params?: IParams)
-```
+`trackExpose(logKey: string, params?: IParams)`
 
 aplus曝光埋点
 
 参数
 
-logKey: 用于记录的唯一标识符。
+`logKey:` 用于记录的唯一标识符。
 
-params: (可选) 需要追踪的附加参数。
+`params:` (可选) 需要追踪的附加参数。
+
+
 
 `trackClick(logKey: string, params?: IParams)`
 
@@ -536,43 +535,36 @@ aplus点击埋点
 
 参数
 
-logKey: 用于记录的唯一标识符。
+`logKey`: 用于记录的唯一标识符。
 
-params: (可选) 需要追踪的附加参数。
+`params`: (可选) 需要追踪的附加参数。
 
 `trackSetPageSPM(spmA: string, spmB: string) `
 
-⚠️ pha容器需要在每个页面入口 手动设置page spm （原因）
+> ⚠️ pha容器需要在每个页面入口 手动设置page spm （原因）
 
 设置当前页面的SPM值。
 
 参数
 
-spmA: SPM A字段值。
+`spmA`: SPM A字段值。
 
-spmB: SPM B字段值。
+`spmB`: SPM B字段值。
 
-A+分析站点
+### [A+分析站点](../blog/埋点.md)
 
-- A+采集管理 https://log2.alibaba-inc.com/track/tools/spm?tenantId=44
-- 注意⚠️
-  ○ 访问新版需要找 加下灰度
-  ○ 按业务创建应用
+通识基础：
+- 分析指标概念，如PV（页面浏览量），UV（独立访客数），跳转点击，访问时长。
+- 埋点与事件，如点击，浏览，停留时间和黄金令箭。
+- SPM，如A位，B位，C位，D位
+- SCM
 
-注意：A+采集正在切换为新版本，事件与spm注册均需在埋点管理中进行，若打开后仍然为旧版页面，可联系 江柏 添加灰度名单解决
+● A+采集工作台：https://log2.alibaba-inc.com/track?tenantId=10&spm=aplus_put_channel.29903622.0.0 
+● A+流量分析：https://aplus2.alibaba-inc.com/platform/dashboard?spm=aplus_put_channel.29903622.0.0 
 
-https://aliyuque.antfin.com/tqigeb/np7bku/vki8p6s2bsk1bgfh?spm=loginner.28437197.header.1.54c6717dEFBNy5#HuTEl
+## APP 容器能力
 
-踩坑：事件编码需要填写完整的编码，/业务.场景.事件
-
-
- 新版A+分析产品中，租户为“AIDC日本”
-
-https://aplus2.alibaba-inc.com/platform/basic-analysis-app?tenantId=44
-
-APP 容器能力
-
-一期用到的容器：ADC ，涉及到几个关键的 Native Module
+一期用到的容器：ADC ，涉及到几个关键的 Native Module，weex容器，pha容器，rax容器，
 
 模块名	解释	备注
 
@@ -582,11 +574,11 @@ component-pha	基于手淘 PHA 的业务封装，大部分的容器增强能力�
 
 module-adc	AE 基于 component-pha 抽离的 ADC 基座	一期不用
 
-半浮层
+### 半浮层
 
 url 加：adc_popup=true&adc_popup_ratio=0.9&pha_manifest=true
 
-隐藏头部
+### 隐藏头部
 
 - 方案1：disableNav=YES&status_bar_transparent=true&status_bar_hidden=true&pha_manifest=default
 - 方案2：_immersiveMode=true
@@ -595,7 +587,7 @@ url 加：adc_popup=true&adc_popup_ratio=0.9&pha_manifest=true
 
 隐藏分享按钮 _addShare=false
 
-下拉刷新
+### 下拉刷新
 
 使用软刷新的能力：
 
