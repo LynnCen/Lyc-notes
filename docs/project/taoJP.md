@@ -7,7 +7,7 @@
 - 基础物料：涉及到的全部 Fork 一轮
 - 监控平台：经过 AE 内部几个团队的调研，综合对比易用性下来，计划使用 aem-sg（参考 SuperBuy）
 - 性能：基于 CSR 架构的性能优化方案，后续长期再看 SSR 、流式 SSR 等。
-- 图片：背后 Filebroker，业务层使用 @车铭 开发的上传平台
+- 图片：背后 Filebroker，业务层使用 开发的上传平台
   ○ 由于目前日本站的域名还在申请中，因此先到纵横平台上传图片资源，后续域名开通后，再将图片资源上传到诺亚提供的上传平台，再对项目中的链接做替换。
 - 搭建：本期不涉及
 
@@ -168,7 +168,7 @@ export const click = (type: string, values?: any) => {
 
 `"@alife/zoro-cookie": "^3.0.4"`,
 
-现在收敛到如下包
+使用[lerna_monorepo](./lerna_monorepo.md)统一收敛进`odin-jp`现在收敛到如下包
 
 `@ali/comet-hooks` 替换为 `@ali/odin-jp-hook`
 
@@ -190,13 +190,17 @@ export const click = (type: string, values?: any) => {
 
 注意，当前均处于beta版本，安装时请带详细版本号, 版本信息
 
-###  @ali/odin-jp-ui
+### [odin-jp组件库文档](./odin_document.md)
 
-#### 组件库预览文档
+组件库预览文档
 
 文档地址：[https://tmg-odin.pages.alibaba-inc.com/components/button](https://tmg-odin.pages.alibaba-inc.com/)
 
 组件库需求请填写至组件库需求文档
+
+###  @ali/odin-jp-ui
+
+`@ali/comet-ui`替换为`@ali/odin-jp-ui`，本质上是对`@ali/comet-ui`的封装
 
 #### 样式覆盖
 
@@ -303,7 +307,7 @@ const Component: FC = () => {
 
 https://tmg-odin.pages.alibaba-inc.com/usage/skelon
 
-[核心原理](../blog/skelon.md)
+[核心原理](../posts/skelon.md)
 
 
 ### @ali/odin-jp-icon
@@ -551,7 +555,7 @@ aplus点击埋点
 
 `spmB`: SPM B字段值。
 
-### [A+分析站点](../blog/埋点.md)
+### [A+分析站点](../posts/埋点.md)
 
 通识基础：
 - 分析指标概念，如PV（页面浏览量），UV（独立访客数），跳转点击，访问时长。
