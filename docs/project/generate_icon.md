@@ -36,9 +36,51 @@
 4. 通过命令行接口获取用户输入：
 
 - 使用readline模块创建一个交互式命令行界面，让用户输入需要更新的图标名称列表。
-- 根据用户输入的名称，发送HTTP GET请求到指定API，获取图标数据。
+- 根据用户输入的名称，发送HTTP GET请求到指定API，获取图标数据([图标数据来源](#图标数据来源))。
 - 解析返回的数据，过滤出用户感兴趣的图标，调用genIcons函数生成相应文件。
 
+### 图标数据来源
+
+> https://juejin.cn/post/7189164727485300793#heading-5
+
+- iconfont
+- figma
+
+`iconify` 的方案充分利用 svg 能力，利用 `iconify.json` 存储图标矢量信息。再通过下游的不同消费方式，开发者可以制作任意自己喜欢的图标消费方式。
+
+```json
+{
+  "data":{
+    "icons":[
+      {
+        "id": 42969018,
+        "icon_id": 42969018,
+        "project_id": 4571638,
+        "icon_name": null,
+        "unicode": "59006",
+        "slug": null,
+        "width": 1024,
+        "height": 1024,
+        "svg": "M229.2 704.6l603.4-603.4-37.7-37.7-603.5 603.3 37.7 37.7zM832.6 666.8L229.2 63.4l-37.7 37.7 603.3 603.5 37.7-37.7z",
+        "prototype_svg": "M229.2 191.4l603.4 603.4-37.7 37.7-603.5-603.3 37.7-37.7z|M832.6 229.2L229.2 832.6l-37.7-37.7 603.3-603.5 37.7 37.7z",
+        "fills": "1",
+        "freeze": 0,
+        "defs": null,
+        "path_attributes": "fill=\"#333333\"|fill=\"#333333\"",
+        "font_class": "icClose321",
+        "deleted_at": null,
+        "created_at": "2024-12-27T11:36:23.000Z",
+        "projectId": 4571638,
+        "name": "icClose32",
+        "status": 1,
+        "project_has_icon_id": 142434440,
+        "project_icon_name": "icClose32",
+        "show_svg": "<svg class=\"icon\" style=\"width: 1em;height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M229.2 191.4l603.4 603.4-37.7 37.7-603.5-603.3 37.7-37.7z\" fill=\"#333333\" /><path d=\"M832.6 229.2L229.2 832.6l-37.7-37.7 603.3-603.5 37.7 37.7z\" fill=\"#333333\" /></svg>"
+      }
+    ]
+  }
+}
+```
 ## icon生成
 
 ```ts
