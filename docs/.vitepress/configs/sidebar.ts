@@ -94,7 +94,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
     },
     {
       text: '项目总结',
-      link: '/project',
+      link: '/project/index',
     },
     {
       text: '笔试题',
