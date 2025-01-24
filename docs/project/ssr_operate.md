@@ -322,3 +322,82 @@ function Document() {
 
 - defer：等待所有流式内容加载完成后，再执行 JS。适用于流式内容能较快返回的页面。
 - async： JS 加载过程中，流式内容先上屏，一旦 JS 加载完成后，先执行 JS。适用于流式内容返回耗时较长，希望页面中其他区块尽快可交互的页面
+
+
+## 首屏优化建议
+
+
+### 慎用 defineServerDataLoader
+
+defineServerDataLoader 是阻塞型的，会先进行数据请求，然后开始再页面渲染
+
+对于流式 SSR 应用，应尽可能的先返回首 Chunk，推荐在组件级别使用 useSuspenseData 进行数据请求
+
+
+### 避免流式组件嵌套 
+
+两个流式组件如果存在嵌套关系，被嵌套的组件请求发起时间会在父组件完成请求后。下面的示例中，A 组件和 B 组件的请求是串行的。
+
+```tsx
+<SuspenseA>
+  <SuspenseB />
+</SuspenseA>
+```
+而如果 A、B 组件不存在嵌套关系，A、B 组件的数据请求会被第一时间并行发起。
+
+```tsx
+<SuspenseA />
+<SuspenseB />
+```
+
+### 精简阻塞型 CSS
+
+Gzip 大小 100kb 的 CSS 文件在 Y67 下大约需要 500ms 左右的加载解析时间，这会导致页面的白屏时间过长。应尽可能的精简 CSS 的大小。
+
+
+对于一些不在首屏渲染的模块，可以采用异步加的方式，来精简主 Bundle 的 CSS 和 JS 大小。示例：
+```tsx
+import { lazy, Suspense } from 'react';
+import { ClientOnly } from 'ice';
+
+const Modal = lazy(() => import('@/components/Modal'));
+
+export default function() {
+  return (
+    <div>
+      <Header />
+      <Feeds />
+      <ClientOnly>
+        {() => (
+          <Suspense>
+            <Modal />
+          </Suspense>
+        )}
+      </ClientOnly>
+    </div>
+  )
+}
+```
+使用上述方式，异步加载的组件，其 CSS 也会被打包为独立 Chunk，按需加载。
+
+### 使用 defer 模式加载脚本
+
+确保页面的自定义脚本是使用 defer 模式加载的。
+
+非 defer 模式加载的脚本会在加载完成后立即执行，从而阻塞流式内容上屏。正确的加载方式示例：
+
+```html
+<body>
+  <Main />
+  <Logger />
+  <script src="//g.alicdn.com/jstracker/sdk-assests/5.6.34/index.js" crossOrigin="anonymous" defer />
+  <script src="//g.alicdn.com/alilog/mlog/aplus_wap.js" crossOrigin="anonymous" defer />
+  <Scripts defer crossOrigin="anonymous" />
+</body>
+```
+
+### 尽可能的减少首屏的渲染内容
+
+首屏的 HTML 大小会直接影响内容的上屏时间，在 Y67 下，10kb 的 HTML 大约需要 100ms 的上屏时间。为了达到更好的首屏时间，应该尽可能的精简 SSR 的渲染内容。
+
+对于不在首屏展示的内容，可以使用 ClientOnly 组件包裹
