@@ -10,8 +10,8 @@ hero:
     src: /LynnCenLogo.png
     alt: 林岑LynnCen
   actions:
-    - text: LynnCen物语
-      link: /TODO/index
+    - text: About Me
+      link: /mine/resume
     - text: WebFrontEnd Navigation
       link: /nav/
       theme: alt
