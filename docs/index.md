@@ -11,7 +11,7 @@ hero:
     alt: 林岑LynnCen
   actions:
     - text: About Me
-      link: /mine/resume
+      link: /mine/about
     - text: WebFrontEnd Navigation
       link: /nav/
       theme: alt
