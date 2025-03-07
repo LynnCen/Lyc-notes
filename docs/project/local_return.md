@@ -146,19 +146,20 @@ const StateManager = {
 - 硬件状态监控
 
 **安装配置流程**
+
 1. 硬件准备
-   - 组装台式Windows工作站
+   - 组装台式Windows工作站，安装操作系统
    - 接入扫描仪设备
    - 安装打印机设备
 
 2. 软件配置
-   - 安装扫描仪驱动程序和厂商应用程序
+   - 安装扫描仪驱动程序和厂商应用程序（牧炫软件）
    - 安装打印机驱动程序
-   - 配置访问链接和通信脚本
+   - 在商家软件中配置访问链接和通信脚本
 
 3. 通信配置
    - 注入`getScanData`全局方法
-   - 配置扫描回调处理
+   - 扫描仪配置扫描回调处理，调用全局方法传入人脸、单号、重量信息
    - 设置打印任务处理
 
 4. 验证测试
@@ -234,7 +235,7 @@ const useScanData = () => {
   return scanData;
 };
 
-// 3. 图片压缩处理
+// 3. 图片压缩处理 // Canvas 基础压缩法
 interface CompressOptions {
   maxWidth: number;
   maxHeight: number;
@@ -322,6 +323,42 @@ const calculateAspectRatioFit = (
 - 支持批量扫描，效率提升200%
 - 异常自动处理率达95%，减少人工处理时间
 
+### 5.仓库数据导出系统
+
+实现基于xlsx的数据导出：
+```ts
+
+// @param excelData 待导出的数据
+// @param header 列头
+// @param name 文件名
+export async function exportToExcel<T extends Object, K extends Extract<keyof T, string>>(excelData: T[], header: K[], name: string) {
+  const XLSX = await import("xlsx");
+  const worksheet = XLSX.utils.json_to_sheet(excelData, {
+    header,
+  });
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  XLSX.writeFile(workbook, `${name}.xlsx`);
+};
+ const headersMap = {
+          disputeOrderId: "核销码",
+          lrType: "本地退版本",
+          fetchTime: "取件时间",
+          site: "站点",
+          status: "处理结果",
+        };
+
+        const header = Object.values(headersMap);
+        const excelData = list.map((item) => ({
+          [headersMap.disputeOrderId]: item.disputeOrderId,
+          [headersMap.lrType]: item.lrType,
+          [headersMap.site]: item.site,
+          [headersMap.status]: ConfirmResult[item.status],
+          [headersMap.fetchTime]: moment(item.fetchTime).format(
+            "YYYY-MM-DD HH:mm:ss"
+          ),
+        }));
+```
 ## 🌟 技术亮点
 
 ### 1. 性能优化
