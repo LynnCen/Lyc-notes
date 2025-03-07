@@ -13,11 +13,31 @@
 
 ### 如何将骨架屏和真实DOM隔离开？
 
+```mermaid
+flowchart TD
+  A[SSG构建阶段] -->|生成| B(骨架屏HTML)
+  B --> C{客户端环境}
+  C -->|浏览器| D[展示骨架屏]
+  C -->|Node环境| E[保留占位符]
+  D --> F[执行Hydration]
+  F --> G[切换真实内容]
+```
+
+<div class="tip">
+⚠️ 注意：环境判断逻辑需要在SSG构建阶段和客户端运行时保持一致性
+</div>
+
 可通过`isClient`或着` import.meta.renderer === 'server'`判断所处环境，从而区分出真实DOM和骨架屏
 
 
 ```tsx
-import React, { useState, ComponentType, ReactNode, useEffect } from 'react';
+// 核心高阶组件实现
+import React, { 
+  useState, 
+  ComponentType, 
+  ReactNode, 
+  useEffect 
+} from 'react';
 import { windVaneBase, isTaobaoJP } from '@ali/odin-jp-api';
 import Skeleton from './base-skeleton.js';
 
@@ -32,10 +52,15 @@ interface HOCProps {
   skeletonComp?: ReactNode;
 }
 
-// 兜底骨架图
+// ======================
+// 默认骨架屏配置
+// ======================
 const normalSkeleton: ReactNode = <Skeleton />;
 
-const SkeletonWrap = (ComponentOrFunction: ComponentOrFunctionType & HOCProps) => {
+// 骨架屏包装器
+const SkeletonWrap = (
+  ComponentOrFunction: ComponentOrFunctionType & HOCProps
+) => {
   // 老版本的
   return () => {
     const [loading, setLoading] = useState<boolean>(true);
@@ -110,7 +135,9 @@ const __dirname = path.dirname(__filename);
 
 export default () => ({
   name: 'ssg-shim',
+  // 构建阶段空操作
   setup: ({ onHook }) => {},
+  // 运行时注入Shim配置
   runtime: path.resolve(`${__dirname}/ssg_shim_config.js`),
 });
 ```
@@ -119,6 +146,7 @@ export default () => ({
 // @ts-nocheck
 
 if (import.meta.renderer === 'server') {
+  // 模拟浏览器全局对象
   global.lib = {
     mtop: {
       request: () => Promise.resolve(),
@@ -220,9 +248,13 @@ export default () => {
 
 ```
 
-## 具体使用
+## 最佳实践
 
-### 1. 修改ice配置文件(ice.config.mts)，开启ssg
+### 配置SSG构建
+
+<div class="warn">
+❗ 确保Node版本 > 14.0 且 ice.js版本 > 3.0
+</div>
 
 ```ts
 // ....ssgShimPlugin为ssg渲染页面的垫片
