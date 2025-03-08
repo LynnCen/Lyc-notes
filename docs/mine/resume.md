@@ -188,7 +188,7 @@
    - 设计并实现了一套基于[React的图标自动化生成器](/project/generate_icon)，通过Node.js脚本实现从API数据拉取到React组件生成的端到端自动化，显著提升项目中图标资源的管理效率和工程化水平。
 
 2. 🚀 **性能优化**
-   - 设计CSR架构性能优化方案，结合 ZCache 预加载与 Dataprefetch 数据预取，优化首屏加载。
+   - 设计CSR架构性能优化方案，结合 ZCache 预加载与 [Dataprefetch](/posts/dataPreFetch) 数据预取，优化首屏加载。
    - 设计基于[SSG的骨架屏方案](/project/skelon)，通过构建时预渲染生成带骨架屏的HTML，结合客户端动态加载真实DOM，有效解决了首屏白屏问题。
    - 通过[ssgShimPlugin插件](/project/ssg_shim)在Node环境中模拟客户端环境变量，确保SSG模式下代码的兼容性与稳定性。
 
