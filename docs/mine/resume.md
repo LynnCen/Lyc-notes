@@ -189,13 +189,13 @@
 
 2. 🚀 **性能优化**
    - 设计CSR架构性能优化方案，结合 ZCache 预加载与 [Dataprefetch](/posts/dataPreFetch) 数据预取，优化首屏加载。
-   - 设计基于[SSG的骨架屏方案](/project/skelon)，通过构建时预渲染生成带骨架屏的HTML，结合客户端动态加载真实DOM，有效解决了首屏白屏问题。
-   - 通过[ssgShimPlugin插件](/project/ssg_shim)在Node环境中模拟客户端环境变量，确保SSG模式下代码的兼容性与稳定性。
+   - 设计基于[SSG的骨架屏方案](/posts/skelon)，通过构建时预渲染生成带骨架屏的HTML，结合客户端动态加载真实DOM，有效解决了首屏白屏问题。
+   - 通过[ssgShimPlugin插件](/posts/skelon#node环境下如何访问客户端环境变量-ssgshimplugin)在Node环境中模拟客户端环境变量，确保SSG模式下代码的兼容性与稳定性。
 
 3. 📦 **组件库建设**
    - 主导 odin-jp 系列基础物料库建设，收敛原集团 7+ 分散组件库（如 comet-ui、cosmos-base）。
    - 统一封装为轻量化、高内聚的monorepo组件库（UI、Hooks、API等），降低维护成本并提升复用率。
-   - 实现UI主题色动态配置与 [UnoCSS 预设](/project/uno-css-jp) 集成，支持响应式布局与移动端优先策略。
+   - 实现UI主题色动态配置与 [UnoCSS 预设](/posts/uno-css-jp) 集成，支持响应式布局与移动端优先策略。
 
 4. 📊 **监控与优化**
    - 通过 [AEM埋点系统](/project/aem) 实现业务全链路监控，埋点规范覆盖点击、曝光、页面 SPM 等场景。
