@@ -3,7 +3,7 @@
 ## 视频通信系统架构设计
 
 ### 1. 首先是类型定义 `types.ts`：
-目标：
+**目标：**
 - 构建完整的TypeScript类型系统，为整个视频通信应用提供类型安全保障
 - 设计清晰的接口规范，便于团队协作和代码维护
 - 实现状态和事件的标准化定义
@@ -80,7 +80,7 @@ export interface RemoteUser {
 
 ### 2. 状态管理 `CallStateManager.ts`
 
-采用分层状态管理策略：
+**采用分层状态管理策略：**
 
 - 核心状态层：管理通话状态、设备状态等基础状态
 - 业务状态层：处理业务逻辑相关的状态
@@ -138,14 +138,44 @@ export class CallStateManager {
 - 状态同步：确保重连后的状态一致性
 
 ```ts
+/**
+ * 重连管理器
+ * 实现指数退避算法的断线重连机制
+ */
 export class ReconnectionManager {
   private reconnectAttempts = 0;
   private readonly MAX_ATTEMPTS = 3;
-  private readonly RECONNECT_INTERVAL = 5000;
+  private readonly INITIAL_INTERVAL = 1000; // 初始重连间隔1秒
+  private readonly MAX_INTERVAL = 30000;    // 最大重连间隔30秒
+  private readonly BACKOFF_MULTIPLIER = 2;  // 退避指数
+  private readonly JITTER_FACTOR = 0.1;     // 抖动因子
   private reconnectTimer?: NodeJS.Timeout;
 
   constructor(private stateManager: CallStateManager) {}
 
+  /**
+   * 计算下一次重连间隔
+   * 使用指数退避算法并添加随机抖动
+   */
+  private getNextInterval(): number {
+    // 基础间隔时间（指数增长）
+    const baseInterval = Math.min(
+      this.INITIAL_INTERVAL * Math.pow(this.BACKOFF_MULTIPLIER, this.reconnectAttempts),
+      this.MAX_INTERVAL
+    );
+
+    // 添加随机抖动，避免多个客户端同时重连
+    const jitter = baseInterval * this.JITTER_FACTOR;
+    const randomJitter = Math.random() * jitter * 2 - jitter;
+
+    return Math.min(baseInterval + randomJitter, this.MAX_INTERVAL);
+  }
+
+  /**
+   * 处理断线重连
+   * @param client Agora客户端实例
+   * @param channelParams 频道连接参数
+   */
   async handleDisconnection(client: IAgoraRTCClient, channelParams: {
     appid: string;
     channel: string;
@@ -158,45 +188,126 @@ export class ReconnectionManager {
     }
 
     try {
+      // 更新状态为重连中
+      this.stateManager.updateCallStatus(CallingStatus.RECONNECTING);
+      
+      // 尝试重连
       await this.reconnect(client, channelParams);
+      
+      // 重连成功，重置计数器
       this.reconnectAttempts = 0;
       this.stateManager.updateCallStatus(CallingStatus.IN_CALL);
+      
+      // 触发重连成功事件
+      this.onReconnectSuccess();
     } catch (error) {
       this.reconnectAttempts++;
+      
+      // 计算下一次重连间隔
+      const nextInterval = this.getNextInterval();
+      
+      // 更新重连状态
+      this.updateReconnectionStatus();
+      
+      // 设置下一次重连定时器
       this.reconnectTimer = setTimeout(
         () => this.handleDisconnection(client, channelParams),
-        this.RECONNECT_INTERVAL
+        nextInterval
       );
     }
   }
 
+  /**
+   * 执行重连
+   * @param client Agora客户端实例
+   * @param params 连接参数
+   */
   private async reconnect(client: IAgoraRTCClient, params: {
     appid: string;
     channel: string;
     token: string;
     uid?: UID;
-  }) {
-    await client.join(params.appid, params.channel, params.token, params.uid);
+  }): Promise<void> {
+    try {
+      // 确保之前的连接已经断开
+      if (client.connectionState !== 'DISCONNECTED') {
+        await client.leave();
+      }
+
+      // 重新加入频道
+      await client.join(params.appid, params.channel, params.token, params.uid);
+    } catch (error) {
+      console.error('Reconnection failed:', error);
+      throw error;
+    }
   }
 
+  /**
+   * 更新重连状态
+   */
+  private updateReconnectionStatus(): void {
+    const remainingAttempts = this.MAX_ATTEMPTS - this.reconnectAttempts;
+    this.stateManager.updateReconnectionStatus({
+      attempts: this.reconnectAttempts,
+      remaining: remainingAttempts,
+      nextInterval: this.getNextInterval()
+    });
+  }
+
+  /**
+   * 重连成功后的处理
+   */
+  private onReconnectSuccess(): void {
+    // 可以添加重连成功后的逻辑，比如恢复之前的状态
+    this.stateManager.updateReconnectionStatus({
+      attempts: 0,
+      remaining: this.MAX_ATTEMPTS,
+      nextInterval: this.INITIAL_INTERVAL
+    });
+  }
+
+  /**
+   * 清理重连状态
+   */
   clearReconnection() {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = undefined;
     }
     this.reconnectAttempts = 0;
+    this.updateReconnectionStatus();
+  }
+
+  /**
+   * 获取当前重连状态
+   */
+  getReconnectionStatus() {
+    return {
+      attempts: this.reconnectAttempts,
+      remaining: this.MAX_ATTEMPTS - this.reconnectAttempts,
+      isReconnecting: this.reconnectTimer !== undefined
+    };
   }
 }
+```
 
+```ts
+// 在连接状态变化时调用
+client.on('connection-state-change', (curState, prevState) => {
+  if (curState === 'DISCONNECTED') {
+    reconnectionManager.handleDisconnection(client, channelParams);
+  }
+});
 ```
 
 ### 4. 设备健康检测 DeviceHealthCheck.ts
 
-设计目标：
+**设计目标：**
 - 实现设备状态的全面检测
 - 提供网络质量评估
 - 预防可能的设备问题
 
-实现思路，构建完整的设备健康检测体系：
+**实现思路，构建完整的设备健康检测体系：**
 - 权限检测：检查摄像头和麦克风权限
 - 设备测试：验证设备是否正常工作
 - 网络诊断：评估网络质量和稳定性
@@ -269,13 +380,13 @@ export class DeviceHealthCheck {
 
 ### 5. 通话超时管理 `CallTimeoutManager.ts`
 
-设计目标
+**设计目标**
 
 - 控制异常状态下的资源占用
 - 提供及时的用户反馈
 - 确保系统稳定性
 
-实现思路，建立多层级的超时控制机制：
+**实现思路，建立多层级的超时控制机制：**
 
 - 呼叫超时：控制呼叫等待时间
 - 响应超时：监控信令交互超时
@@ -308,12 +419,12 @@ export class CallTimeoutManager {
 
 ### 6. 视频通信主类 AgoraRtc.ts
 
-设计目标：
+**设计目标：**
 - 整合所有功能模块
 - 提供统一的接口
 - 管理整个通话生命周期
 
-实现思路采用模块化的设计架构：
+**实现思路采用模块化的设计架构：**
 
 - 核心模块：处理基础的WebRTC功能
 - 状态管理：集成MobX状态管理
