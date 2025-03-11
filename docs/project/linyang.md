@@ -978,7 +978,7 @@ function ChatComponent() {
 
 **目标**
 - 实现智能轮询机制
-- 支持指数退避
+- 支持[指数退避](/algorithm/退避算法.md)
 - 控制请求频率
 - 处理异常情况
 
@@ -989,13 +989,17 @@ function ChatComponent() {
  * 轮询配置接口
  */
 export interface PollingConfig {
-  initialInterval: number;  // 初始轮询间隔
-  maxInterval: number;     // 最大轮询间隔
-  backoffMultiplier: number; // 退避系数
-  maxAttempts: number;     // 最大尝试次数
-  retryOnError?: boolean;  // 错误时是否重试
-  onSuccess?: () => void;  // 成功回调
+  initialInterval: number;     // 初始轮询间隔
+  maxInterval: number;        // 最大轮询间隔
+  backoffMultiplier: number;  // 退避系数
+  maxAttempts: number;        // 最大尝试次数
+  timeout?: number;           // 请求超时时间
+  immediate?: boolean;        // 是否立即执行
+  retryOnError?: boolean;     // 错误时是否重试
+  resetAttemptsOnSuccess?: boolean; // 成功时是否重置重试次数
+  onSuccess?: (data: any) => void;  // 成功回调
   onError?: (error: Error) => void; // 错误回调
+  onTimeout?: () => void;     // 超时回调
 }
 
 /**
@@ -1005,7 +1009,10 @@ export interface PollingStatus {
   isPolling: boolean;
   attempts: number;
   currentInterval: number;
+  lastExecuteTime?: number;
+  lastSuccessTime?: number;
   error?: Error;
+  data?: any;
 }
 
 /**
@@ -1022,13 +1029,19 @@ export function usePolling(
   });
 
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const abortControllerRef = useRef<AbortController>();
   const mountedRef = useRef(true);
+  const executingRef = useRef(false);
 
   // 清理函数
   const cleanup = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
+    }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = undefined;
     }
   }, []);
 
@@ -1039,38 +1052,75 @@ export function usePolling(
       config.maxInterval
     );
     // 添加随机抖动
-    return baseInterval + (Math.random() * baseInterval * 0.1);
+    const jitter = baseInterval * 0.1;
+    return baseInterval + (Math.random() * jitter * 2 - jitter);
   }, [config.initialInterval, config.backoffMultiplier, config.maxInterval, status.attempts]);
+
+  // 执行带超时的请求
+  const executeWithTimeout = useCallback(async () => {
+    abortControllerRef.current = new AbortController();
+    
+    const timeoutPromise = config.timeout
+      ? new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error('Request timeout'));
+            config.onTimeout?.();
+          }, config.timeout);
+        })
+      : null;
+
+    try {
+      const result = await Promise.race([
+        callback(),
+        timeoutPromise
+      ].filter(Boolean));
+
+      return result;
+    } finally {
+      abortControllerRef.current = undefined;
+    }
+  }, [callback, config]);
 
   // 执行轮询
   const poll = useCallback(async () => {
-    if (!mountedRef.current || status.attempts >= config.maxAttempts) {
-      cleanup();
+    if (!mountedRef.current || status.attempts >= config.maxAttempts || executingRef.current) {
       return;
     }
 
+    executingRef.current = true;
+
     try {
-      await callback();
+      const result = await executeWithTimeout();
       
       if (mountedRef.current) {
-        setStatus({
+        setStatus(prev => ({
           isPolling: true,
-          attempts: 0,
-          currentInterval: config.initialInterval
-        });
-        config.onSuccess?.();
+          attempts: config.resetAttemptsOnSuccess ? 0 : prev.attempts,
+          currentInterval: config.initialInterval,
+          lastSuccessTime: Date.now(),
+          lastExecuteTime: Date.now(),
+          data: result,
+          error: undefined
+        }));
+
+        config.onSuccess?.(result);
+
+        // 安排下一次轮询
+        timeoutRef.current = setTimeout(poll, config.initialInterval);
       }
     } catch (error) {
       if (mountedRef.current) {
         const newAttempts = status.attempts + 1;
         const shouldContinue = config.retryOnError && newAttempts < config.maxAttempts;
 
-        setStatus({
+        setStatus(prev => ({
+          ...prev,
           isPolling: shouldContinue,
           attempts: newAttempts,
           currentInterval: shouldContinue ? getNextInterval() : 0,
+          lastExecuteTime: Date.now(),
           error: error as Error
-        });
+        }));
 
         config.onError?.(error as Error);
 
@@ -1078,18 +1128,21 @@ export function usePolling(
           timeoutRef.current = setTimeout(poll, getNextInterval());
         }
       }
+    } finally {
+      executingRef.current = false;
     }
-  }, [callback, config, status.attempts, getNextInterval, cleanup]);
+  }, [callback, config, status.attempts, getNextInterval, executeWithTimeout]);
 
   // 开始轮询
   const start = useCallback(() => {
+    cleanup();
     setStatus({
       isPolling: true,
       attempts: 0,
       currentInterval: config.initialInterval
     });
     poll();
-  }, [poll, config.initialInterval]);
+  }, [poll, config.initialInterval, cleanup]);
 
   // 停止轮询
   const stop = useCallback(() => {
@@ -1100,57 +1153,146 @@ export function usePolling(
     }));
   }, [cleanup]);
 
-  // 组件卸载时清理
+  // 重置状态
+  const reset = useCallback(() => {
+    cleanup();
+    setStatus({
+      isPolling: false,
+      attempts: 0,
+      currentInterval: config.initialInterval
+    });
+  }, [cleanup, config.initialInterval]);
+
+  // 组件挂载时自动开始轮询（如果配置了immediate）
   useEffect(() => {
     mountedRef.current = true;
+    if (config.immediate) {
+      start();
+    }
     return () => {
       mountedRef.current = false;
       cleanup();
     };
-  }, [cleanup]);
+  }, [config.immediate, start, cleanup]);
 
   return {
     status,
     start,
-    stop
+    stop,
+    reset,
+    isPolling: status.isPolling
   };
 }
+
 
 ```
 
 **使用实例：**
 
 ```ts
-function MyComponent() {
-    const { status, start, stop } = usePolling(
+// 示例1：基础使用
+function DataFetchComponent() {
+  const { status, start, stop } = usePolling(
     async () => {
       const response = await fetch('https://api.example.com/data');
-      const data = await response.json();
-      return data;
+      return response.json();
     },
     {
-      initialInterval: 1000,
-      maxInterval: 30000,
-      backoffMultiplier: 2,
-      maxAttempts: 5,
-      retryOnError: true,
-      onSuccess: () => console.log('Poll successful'),
-      onError: (error) => console.error('Poll failed:', error)
+      initialInterval: 1000,    // 初始间隔1秒
+      maxInterval: 30000,       // 最大间隔30秒
+      backoffMultiplier: 2,     // 退避系数2
+      maxAttempts: 5,          // 最大重试5次
+      immediate: true,          // 立即开始
+      timeout: 5000,           // 5秒超时
+      retryOnError: true,      // 错误时重试
+      resetAttemptsOnSuccess: true, // 成功时重置重试次数
+      onSuccess: (data) => console.log('数据获取成功:', data),
+      onError: (error) => console.error('发生错误:', error),
+      onTimeout: () => console.warn('请求超时')
     }
   );
-   useEffect(() => {
-    // 开始轮询
-    start();
 
-    return () => {
-      // 组件卸载时停止轮询
-      stop();
-    };
-  }, []);
   return (
     <div>
+      <div>状态: {status.isPolling ? '轮询中' : '已停止'}</div>
+      <div>重试次数: {status.attempts}</div>
+      <div>当前间隔: {status.currentInterval}ms</div>
+      {status.error && <div>错误: {status.error.message}</div>}
       <button onClick={start}>开始轮询</button>
       <button onClick={stop}>停止轮询</button>
     </div>
   );
 }
+
+// 示例2：与其他状态管理结合
+function UserStatusComponent() {
+  const [userData, setUserData] = useState(null);
+  
+  const { status, start, stop } = usePolling(
+    async () => {
+      const response = await fetch('/api/user/status');
+      const data = await response.json();
+      setUserData(data);
+      
+      // 如果用户状态为"完成"，则停止轮询
+      if (data.status === 'completed') {
+        stop();
+      }
+      
+      return data;
+    },
+    {
+      initialInterval: 2000,
+      maxInterval: 10000,
+      backoffMultiplier: 1.5,
+      maxAttempts: 10,
+      immediate: true
+    }
+  );
+
+  return (
+    <div>
+      <div>用户状态: {userData?.status}</div>
+      <div>轮询状态: {status.isPolling ? '活跃' : '停止'}</div>
+    </div>
+  );
+}
+
+// 示例3：条件轮询
+function ConditionalPollingComponent() {
+  const [shouldPoll, setShouldPoll] = useState(false);
+  
+  const { status, start, stop } = usePolling(
+    async () => {
+      if (!shouldPoll) {
+        stop();
+        return;
+      }
+      // 执行轮询逻辑
+    },
+    {
+      initialInterval: 1000,
+      maxInterval: 5000,
+      backoffMultiplier: 2,
+      maxAttempts: 3
+    }
+  );
+
+  useEffect(() => {
+    if (shouldPoll) {
+      start();
+    } else {
+      stop();
+    }
+  }, [shouldPoll]);
+
+  return (
+    <div>
+      <button onClick={() => setShouldPoll(!shouldPoll)}>
+        {shouldPoll ? '停止轮询' : '开始轮询'}
+      </button>
+    </div>
+  );
+}
+
+```
