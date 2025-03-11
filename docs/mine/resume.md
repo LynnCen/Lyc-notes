@@ -224,9 +224,9 @@
    - 客户端采用分层状态机设计(Context+useReducer)，封装useCallControl Hook管理通话操作（接通/挂断/静音/设备切换），用户端通过Mobx响应式状态流实现双端实时状态管理。
    - 实现WebRTC级联重连策略（断网5秒内自动重连）、通话超时熔断（30秒无响应自动挂断），系统异常率下降15%。开发设备健康度检测模块，预检摄像头/麦克风权限、网络质量评分（基于RTT与丢包率），增强异常拦截准确率。
 
-2. 🤖 **AI智能客服**
-   - 设计多模态消息协议，新增chaAIMessage（闲聊）、docAiMessage（文档解析）、summaryAiMessage（会话总结）三类消息，通过SSE流式渲染引起实现实时内容逐字输出。
-   - 开发轮训调度器（usePolling），结合指数退避算法动态调整请求间隔，压缩大模型响应时间。
+2. 🤖 **[AI智能客服](/project/linyang#ai智能客服)**
+   - 设计[多模态消息协议](/project/linyang#_1-消息类型-messageprotocol-ts)，新增chaAIMessage（闲聊）、docAiMessage（文档解析）、summaryAiMessage（会话总结）三类消息，通过[SSE流式渲染](/project/linyang#_2-sse流式渲染系统)引起实现实时内容逐字输出。
+   - 开发[轮训调度器（usePolling）](/project/linyang#_3-轮询调度器)，结合指数退避算法动态调整请求间隔，压缩大模型响应时间。
    - 搭建Agent-lab可视化配置系统，支持拖拽式AI技能编排、话术模版动态绑定等。
 
 ### TMMTMM实时聊天软件(对标土耳其版微信) | 四川盛通智联网络科技有限公司 
