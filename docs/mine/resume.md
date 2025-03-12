@@ -229,7 +229,7 @@
    - 开发[轮训调度器（usePolling）](/project/linyang#_3-轮询调度器)，结合指数退避算法动态调整请求间隔，压缩大模型响应时间。
    - 搭建Agent-lab可视化配置系统，支持拖拽式AI技能编排、话术模版动态绑定等。
 
-### [TMMTMM实时聊天软件](/project/tmm/index.md)(对标土耳其版微信) | 四川盛通智联网络科技有限公司 
+### TMMTMM实时聊天软件(对标土耳其版微信) | 四川盛通智联网络科技有限公司 
 
 
 **项目描述：**
@@ -240,15 +240,15 @@
 
 **责任描述：**
 
-1. 🔄 **模块重构与架构设计**
+1. 🔄 **[模块重构与架构设计](/project/tmm/architecture)**
    - 基于关注点分离原则，将聊天模块重构为API（接口聚合）、DB（数据持久化）、Event（跨模块通信）、Data（状态管理）、UI（视图渲染）五层架构，通过依赖注入解耦逻辑。
 
-2. ⚡ **性能优化**
+2. ⚡ **[性能优化](/project/tmm/performance_optimization)**
    - 结合React的memo与虚拟列表实现消息动态渲染，减少不必要的DOM操作。
    - 利用Mobx的细粒度响应式更新，优化复杂状态同步场景。
 
-3. ☁️ **云端资源管理**
-   - 采用流式读写策略，基于fs.createReadStream与AWS SDK分片上传接口，实现大文件传输与并行下载。
+3. ☁️ **[云端资源管理](/project/tmm/resources_manner)**
+   - 采用[流式读写策略](/project/tmm/resources_manner#一、aws流式文件下载与本地文件流写入实现)，基于fs.createReadStream与AWS SDK分片上传接口，实现大文件传输与并行下载。
    - 通过背压控制平衡内存与I/O吞吐量，有效解决文件下载卡顿问题。
    - 采用LUR算法管理本地资源缓存，结合Service Worker实现离线资源预加载。
 
