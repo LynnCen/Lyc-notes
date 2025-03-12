@@ -30,6 +30,32 @@ interface StreamExample {
 **实现流程图**
 ![alt text](../img/streamflow.png)
 
+### 1.3 背压控制
+
+> node中pipe自带背压控制机制
+
+---
+**什么是背压？**
+
+背压是在数据流传输过程中，当下游消费数据的速度慢于上游生产数据的速度时，为了防止内存溢出而采取的一种流量控制机制。
+
+**为什么要背压控制**
+
+1. 防止内存溢出
+
+ - 没有背压控制时，数据会不断累积在内存中
+ - 最终可能导致程序崩溃
+
+2. 保证数据处理质量
+
+ - 确保下游有足够时间处理数据
+ - 避免数据丢失或处理错误
+
+3. 系统稳定性
+
+ - 合理利用系统资源
+ - 防止系统过载
+
 ### 1.3 实现步骤
 
 ---
@@ -255,6 +281,114 @@ class S3StreamDownloader extends EventEmitter {
  * }
  */
 
+
+```
+
+#### 背压控制转换流createTransformStream
+
+```ts
+/**
+ * 创建转换流
+ * 用于处理下载进度、速率限制等
+ * 
+ * 功能:
+ * 1. 统计下载字节数
+ * 2. 触发进度事件
+ * 3. 背压控制
+ * 4. 速率限制
+ * 
+ * @returns Transform流实例
+ */
+private createTransformStream() {
+  const { Transform } = require('stream');
+  const self = this;
+
+  // 配置参数
+  const CHUNK_SIZE = 64 * 1024; // 64KB 块大小
+  const HIGH_WATER_MARK = 1024 * 1024; // 1MB 高水位线
+  const RATE_LIMIT = 10 * 1024 * 1024; // 10MB/s 速率限制
+  
+  let lastTime = Date.now();
+  let bytesThisSecond = 0;
+
+  return new Transform({
+    // 设置高水位线，用于背压控制
+    highWaterMark: HIGH_WATER_MARK,
+
+    transform(chunk: Buffer, encoding: string, callback: Function) {
+      try {
+        // 速率限制检查
+        const now = Date.now();
+        const timeDiff = now - lastTime;
+        
+        if (timeDiff >= 1000) {
+          // 重置计数器
+          bytesThisSecond = 0;
+          lastTime = now;
+        }
+
+        bytesThisSecond += chunk.length;
+        const currentRate = bytesThisSecond * (1000 / timeDiff);
+
+        if (currentRate > RATE_LIMIT) {
+          // 如果超过速率限制，延迟处理
+          const delay = Math.ceil((bytesThisSecond / RATE_LIMIT) * 1000 - timeDiff);
+          setTimeout(() => {
+            this.processChunk(chunk, callback);
+          }, delay);
+          return;
+        }
+
+        this.processChunk(chunk, callback);
+      } catch (error) {
+        callback(error);
+      }
+    },
+
+    // 自定义方法处理数据块
+    processChunk(chunk: Buffer, callback: Function) {
+      // 更新下载进度
+      self.downloadedBytes += chunk.length;
+
+      // 计算下载速度
+      const now = Date.now();
+      const speed = self.downloadedBytes / ((now - self.startTime) / 1000);
+
+      // 触发进度事件
+      self.emit('progress', {
+        downloadedBytes: self.downloadedBytes,
+        chunk: chunk.length,
+        speed,
+        timestamp: now
+      });
+
+      // 检查写入流的背压状态
+      const canContinue = this.push(chunk);
+
+      if (!canContinue) {
+        // 如果下游背压已经触发，等待 drain 事件
+        this.once('drain', () => {
+          callback(null);
+        });
+      } else {
+        // 否则直接继续处理
+        callback(null);
+      }
+    },
+
+    // 可选: 实现 flush 方法处理剩余数据
+    flush(callback: Function) {
+      // 处理任何剩余的数据
+      callback();
+    },
+
+    // 可选: 实现 destroy 方法清理资源
+    destroy(error: Error | null, callback: Function) {
+      // 清理任何资源
+      callback(error);
+    }
+  });
+}
 
 ```
 
@@ -485,3 +619,4 @@ downloader.on('error', (error) => {
 
 
 ```
+
