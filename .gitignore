@@ -3,6 +3,7 @@
 # editor directories and files
 .idea
 .vscode
+.dinamicx
 
 # dependencies
 node_modules
