@@ -1155,16 +1155,27 @@ async function uploadChunks(
 ### 2.7 核心代码
 ---
 
-#### S3Client
+#### S3 客户端封装 (S3Client.ts)
+
 
 ```ts
 import AWS from 'aws-sdk';
 import { S3Config } from './types';
 
+/**
+ * AWS S3客户端封装类
+ * 处理与AWS S3的所有交互操作
+ */
 export class S3Client {
+  /** AWS S3 SDK实例 */
   private s3: AWS.S3;
 
+  /**
+   * 初始化S3客户端
+   * @param config S3配置信息
+   */
   constructor(config: S3Config) {
+    // 创建S3实例并配置认证信息
     this.s3 = new AWS.S3({
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey,
@@ -1172,6 +1183,14 @@ export class S3Client {
     });
   }
 
+  /**
+   * 初始化分片上传任务
+   * 创建一个新的multipart upload任务
+   * 
+   * @param key 文件在S3中的键值(路径)
+   * @returns uploadId 分片上传任务的唯一标识符
+   * @throws 初始化失败时抛出错误
+   */
   async initializeMultipartUpload(key: string) {
     try {
       const response = await this.s3.createMultipartUpload({
@@ -1185,6 +1204,18 @@ export class S3Client {
     }
   }
 
+  /**
+   * 上传单个分片
+   * 将文件分片上传到已初始化的multipart upload任务中
+   * 
+   * @param params 上传参数
+   * @param params.key 文件键值
+   * @param params.uploadId 上传任务ID
+   * @param params.partNumber 分片序号(1-10000)
+   * @param params.body 分片数据
+   * @returns 上传成功的分片信息(序号和ETag)
+   * @throws 上传失败时抛出错误
+   */
   async uploadPart(params: {
     key: string,
     uploadId: string,
@@ -1202,13 +1233,23 @@ export class S3Client {
 
       return {
         PartNumber: params.partNumber,
-        ETag: response.ETag
+        ETag: response.ETag // 分片的MD5校验值
       };
     } catch (error) {
       throw new Error(`Failed to upload part: ${error.message}`);
     }
   }
 
+  /**
+   * 完成分片上传
+   * 合并所有已上传的分片完成上传任务
+   * 
+   * @param params 完成上传参数
+   * @param params.key 文件键值
+   * @param params.uploadId 上传任务ID
+   * @param params.parts 所有已上传分片的信息
+   * @throws 完成上传失败时抛出错误
+   */
   async completeMultipartUpload(params: {
     key: string,
     uploadId: string,
@@ -1226,6 +1267,14 @@ export class S3Client {
     }
   }
 
+  /**
+   * 取消分片上传
+   * 清理未完成的上传任务和相关资源
+   * 
+   * @param key 文件键值
+   * @param uploadId 上传任务ID
+   * @throws 取消上传失败时抛出错误
+   */
   async abortMultipartUpload(key: string, uploadId: string) {
     try {
       await this.s3.abortMultipartUpload({
