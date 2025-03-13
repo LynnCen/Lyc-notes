@@ -1102,26 +1102,53 @@ async uploadPart(params: {
 ```
 
 ```ts
-// 并发控制
-async function uploadChunks(chunks: Chunk[], maxConcurrent: number) {
+/**
+ * 控制分片并发上传
+ * 使用Promise池实现并发控制
+ * 
+ * @param chunks 待上传的分片数组
+ * @param maxConcurrent 最大并发数
+ * 
+ * @example
+ * await uploadChunks(fileChunks, 3); // 最多同时上传3个分片
+ */
+async function uploadChunks(
+  chunks: Chunk[],      // 分片数组
+  maxConcurrent: number // 最大并发数
+) {
+  // 创建任务队列(复制数组避免修改原数据)
   const queue = [...chunks];
-  const executing = new Set();
   
+  // 正在执行的任务集合
+  // 使用Set存储正在执行的Promise
+  const executing = new Set<Promise<any>>();
+  
+  // 持续处理队列直到所有分片上传完成
   while(queue.length > 0) {
+    // 检查是否达到并发上限
     if(executing.size >= maxConcurrent) {
+      // 等待任意一个任务完成
+      // Promise.race 返回最先完成的Promise
       await Promise.race(executing);
-      continue;
+      continue; // 继续下一次循环
     }
     
-    const chunk = queue.shift();
+    // 从队列中取出一个分片
+    const chunk = queue.shift()!;
+    
+    // 创建上传Promise
     const promise = uploadChunk(chunk)
+      // finally确保任务完成后从执行集合中移除
       .finally(() => executing.delete(promise));
       
+    // 将任务添加到执行集合
     executing.add(promise);
   }
   
+  // 等待所有正在执行的任务完成
   await Promise.all(executing);
 }
+
 ```
 
 
