@@ -1292,35 +1292,79 @@ export class S3Client {
 
 #### 文件处理器 (FileHandler.ts)
 
+工具类模式：静态方法设计、职责单一、方法独立
+
+流式处理：避免内存溢出、支持大文件
+
+分片策略： 固定分片大小、边界处理
+
+文件校验： MD5哈希
 ```ts
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
 import { UploadChunk } from './types';
 
+/**
+ * 文件处理工具类
+ * 提供文件分片、校验等基础操作
+ */
 export class FileHandler {
+  /**
+   * 计算文件的MD5哈希值
+   * 使用流式读取避免一次性加载大文件
+   * 
+   * @param filePath 文件路径
+   * @returns Promise<string> 文件的MD5哈希值(16进制字符串)
+   * 
+   * @example
+   * const md5 = await FileHandler.calculateMD5('/path/to/file.txt');
+   */
   static async calculateMD5(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
+      // 创建MD5哈希对象
       const hash = createHash('md5');
+      // 创建文件读取流
       const stream = createReadStream(filePath);
 
+      // 处理数据块
       stream.on('data', data => hash.update(data));
+      // 完成后返回哈希值
       stream.on('end', () => resolve(hash.digest('hex')));
+      // 错误处理
       stream.on('error', reject);
     });
   }
 
+  /**
+   * 生成文件分片信息
+   * 将文件划分为固定大小的分片
+   * 
+   * @param fileSize 文件总大小(字节)
+   * @param partSize 分片大小(字节)
+   * @returns UploadChunk[] 分片信息数组
+   * 
+   * @example
+   * const chunks = FileHandler.createChunks(
+   *   fileSize,
+   *   5 * 1024 * 1024 // 5MB分片
+   * );
+   */
   static createChunks(fileSize: number, partSize: number): UploadChunk[] {
     const chunks: UploadChunk[] = [];
     let index = 0;
     
+    // 循环生成分片信息
     for (let start = 0; start < fileSize; start += partSize) {
+      // 计算分片结束位置(不超过文件大小)
       const end = Math.min(start + partSize, fileSize);
+      
+      // 创建分片信息
       chunks.push({
-        index,
-        start,
-        end,
-        size: end - start,
-        status: ChunkStatus.PENDING
+        index,          // 分片索引
+        start,          // 起始位置
+        end,            // 结束位置
+        size: end - start, // 分片大小
+        status: ChunkStatus.PENDING // 初始状态
       });
       index++;
     }
@@ -1328,18 +1372,46 @@ export class FileHandler {
     return chunks;
   }
 
-  static async readChunk(filePath: string, start: number, end: number): Promise<Buffer> {
+  /**
+   * 读取指定范围的文件内容
+   * 使用流式读取并返回Buffer
+   * 
+   * @param filePath 文件路径
+   * @param start 起始字节位置
+   * @param end 结束字节位置
+   * @returns Promise<Buffer> 文件内容Buffer
+   * 
+   * @example
+   * const data = await FileHandler.readChunk(
+   *   'file.txt',
+   *   0,
+   *   1024 // 读取前1KB
+   * );
+   */
+  static async readChunk(
+    filePath: string,
+    start: number,
+    end: number
+  ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
+      // 存储数据块
       const chunks: Buffer[] = [];
-      const stream = createReadStream(filePath, { start, end: end - 1 });
+      
+      // 创建范围读取流
+      const stream = createReadStream(filePath, {
+        start,
+        end: end - 1 // end是包含的,所以减1
+      });
 
+      // 收集数据块
       stream.on('data', chunk => chunks.push(chunk));
+      // 合并所有数据块
       stream.on('end', () => resolve(Buffer.concat(chunks)));
+      // 错误处理
       stream.on('error', reject);
     });
   }
 }
-
 ```
 
 #### 上传任务类 (UploadTask.ts)
