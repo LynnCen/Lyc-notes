@@ -864,43 +864,197 @@ s3.uploadPart() -> 上传分片到S3
 ```
 **分片处理：**
 ```ts
-// 分片处理
+/**
+ * 将文件分割成固定大小的分片
+ * 用于大文件分片上传
+ * 
+ * @param file 要上传的文件对象
+ * @param chunkSize 分片大小(单位:字节)
+ * @returns 分片信息数组
+ * 
+ * @example
+ * const file = new File(['content'], 'test.txt');
+ * const chunks = createChunks(file, 1024 * 1024); // 1MB分片
+ */
 function createChunks(file: File, chunkSize: number) {
+  // 存储所有分片信息
   const chunks = [];
+  
+  // 循环生成分片
+  // start: 当前分片的起始位置
+  // file.size: 文件总大小
+  // chunkSize: 每次增加一个分片大小
   for(let start = 0; start < file.size; start += chunkSize) {
     chunks.push({
+      // 分片起始位置
       start,
+      
+      // 分片结束位置
+      // Math.min确保最后一个分片不会超出文件大小
       end: Math.min(start + chunkSize, file.size)
     });
   }
+  
   return chunks;
 }
+
+/**
+ * 使用示例:
+ */
+interface Chunk {
+  start: number;  // 分片起始字节
+  end: number;    // 分片结束字节
+}
+
+// 优化版本
+function createChunksOptimized(file: File, options: {
+  chunkSize?: number;      // 分片大小
+  maxChunks?: number;      // 最大分片数
+  minChunkSize?: number;   // 最小分片大小
+}) {
+  const {
+    chunkSize = 5 * 1024 * 1024,  // 默认5MB
+    maxChunks = 10000,            // 最大分片数
+    minChunkSize = 1024 * 1024    // 最小1MB
+  } = options;
+
+  // 计算最优分片大小
+  const optimalChunkSize = Math.max(
+    minChunkSize,
+    Math.ceil(file.size / maxChunks)
+  );
+
+  // 使用优化后的分片大小
+  return createChunks(file, optimalChunkSize);
+}
+
+// 使用方法
+const file = new File(['content'], 'test.txt');
+
+// 基础用法
+const chunks = createChunks(file, 1024 * 1024);
+
+// 优化用法
+const optimizedChunks = createChunksOptimized(file, {
+  chunkSize: 2 * 1024 * 1024,  // 2MB分片
+  maxChunks: 1000,             // 最多1000个分片
+  minChunkSize: 1024 * 1024    // 最小1MB
+});
+
+/**
+ * 注意事项:
+ * 1. 分片大小建议:
+ *    - 最小 1MB (过小会增加请求次数)
+ *    - 最大 5GB (S3单片上传限制)
+ *    - 推荐 5MB (AWS官方建议)
+ * 
+ * 2. 分片数量建议:
+ *    - 最大 10000 (S3 multipart限制)
+ *    - 建议控制在1000以内
+ * 
+ * 3. 性能考虑:
+ *    - 分片太小: 请求次数多,效率低
+ *    - 分片太大: 单片失败影响大,重试代价高
+ *    - 需要根据网络状况和文件大小调整
+ * 
+ * 4. 内存使用:
+ *    - 分片信息数组占用空间小
+ *    - 实际分片数据使用流式处理
+ *    - 不会一次性加载整个文件
+ */
+
 ```
 **分片上传：**
 ```ts
- async uploadPart(params: {
+/**
+ * 上传单个分片到 AWS S3
+ * 使用 multipart upload API 上传文件分片
+ * 
+ * @param params 上传参数
+ * @param params.key 文件在S3中的唯一标识符(文件路径)
+ * @param params.uploadId 分片上传任务的ID
+ * @param params.partNumber 分片序号(1-10000)
+ * @param params.body 分片数据Buffer
+ * 
+ * @returns 上传成功的分片信息
+ * @returns {number} PartNumber - 分片序号
+ * @returns {string} ETag - 分片的MD5校验值
+ * 
+ * @throws 上传失败时抛出错误
+ * 
+ * @example
+ * const result = await uploadPart({
+ *   key: 'path/to/file.txt',
+ *   uploadId: 'xxx',
+ *   partNumber: 1,
+ *   body: Buffer.from('data')
+ * });
+ */
+async uploadPart(params: {
+    /** 文件在S3中的键值 */
     key: string,
+    /** Multipart Upload ID */
     uploadId: string,
+    /** 分片序号(1-10000) */
     partNumber: number,
+    /** 分片数据 */
     body: Buffer
   }) {
     try {
+      // 调用S3 API上传分片
       const response = await this.s3.uploadPart({
+        // S3存储桶名称
         Bucket: this.config.bucket,
+        // 文件键值(路径)
         Key: params.key,
+        // 分片上传ID
         UploadId: params.uploadId,
+        // 分片序号
         PartNumber: params.partNumber,
+        // 分片数据
         Body: params.body
       }).promise();
 
+      // 返回上传成功的分片信息
       return {
         PartNumber: params.partNumber,
-        ETag: response.ETag
+        ETag: response.ETag // 用于后续完成上传时的分片验证
       };
     } catch (error) {
+      // 包装错误信息
       throw new Error(`Failed to upload part: ${error.message}`);
     }
   }
+
+/**
+ * 使用说明:
+ * 
+ * 1. 分片大小限制:
+ *    - 最小: 5MB
+ *    - 最大: 5GB
+ *    - 最后一片可以小于5MB
+ * 
+ * 2. 分片序号范围:
+ *    - 最小: 1
+ *    - 最大: 10000
+ * 
+ * 3. 注意事项:
+ *    - ETag需要保存用于完成上传
+ *    - 分片必须按顺序上传
+ *    - 建议实现重试机制
+ * 
+ * 4. 错误处理:
+ *    - 网络错误
+ *    - 超时错误
+ *    - 权限错误
+ *    - 存储桶不存在
+ * 
+ * 5. 优化建议:
+ *    - 实现并发控制
+ *    - 添加进度回调
+ *    - 支持取消上传
+ *    - 实现断点续传
+ */
 ```
 --- 
 
