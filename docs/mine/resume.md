@@ -241,15 +241,15 @@
 **责任描述：**
 
 1. 🔄 **[模块重构与架构设计](/project/tmm/architecture)**
-   - 基于关注点分离原则，将聊天模块重构为API（接口聚合）、DB（数据持久化）、Event（跨模块通信）、Data（状态管理）、UI（视图渲染）五层架构，通过依赖注入解耦逻辑。
+   - 基于[关注点分离原则](/project/tmm/architecture#_1-1-关注点分离)，将聊天模块重构为API（接口聚合）、DB（数据持久化）、Event（跨模块通信）、Data（状态管理）、UI（视图渲染）五层架构，通过依赖注入解耦逻辑。
 
 2. ⚡ **[性能优化](/project/tmm/performance_optimization)**
-   - 结合React的memo与虚拟列表实现消息动态渲染，减少不必要的DOM操作。
-   - 利用Mobx的细粒度响应式更新，优化复杂状态同步场景。
+   - 结合React的memo与[虚拟列表](/project/tmm/performance_optimization#一、虚拟消息列表)实现消息动态渲染，减少不必要的DOM操作。
+   - 利用[Mobx的细粒度响应式更新](/project/tmm/performance_optimization#二、mobx状态优化)，优化复杂状态同步场景。
 
 3. ☁️ **[云端资源管理](/project/tmm/resources_manner)**
-   - 采用[流式读写策略](/project/tmm/resources_manner#一、aws流式文件下载与本地文件流写入实现)，基于fs.createReadStream与AWS SDK分片上传接口，实现大文件传输与并行下载。
-   - 通过背压控制平衡内存与I/O吞吐量，有效解决文件下载卡顿问题。
+   - 采用[流式读写策略](/project/tmm/resources_manner#一、aws流式文件下载与本地文件流写入实现)，基于node的FS模块与AWS SDK分片上传接口，[实现大文件下载](/project/tmm/resources_manner#一、aws流式文件下载与本地文件流写入实现)、[分片上传](/project/tmm/resources_manner#分片上传)、[断点续传](/project/tmm/resources_manner#断点续传)和[并行上传](/project/tmm/resources_manner#并行上传)。
+   - 通过[背压控制](/project/tmm/resources_manner#_1-3-背压控制)平衡内存与I/O吞吐量，有效解决文件下载卡顿问题。
    - 采用LUR算法管理本地资源缓存，结合Service Worker实现离线资源预加载。
 
 4. 🔌 **实时通信系统**
