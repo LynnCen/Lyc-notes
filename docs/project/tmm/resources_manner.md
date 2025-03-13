@@ -620,6 +620,942 @@ downloader.on('error', (error) => {
 
 ```
 
-## 二、大文件分片上传、断点续传、并行上传
+## 二、ELectron大文件分片上传、断点续传、并行上传
 
+
+### 2.1 基础系统架构
+
+![alt text](../img/fileUpload.png)
+
+
+### 2.2 文件夹结构
+```markdown
+src/
+  ├── main/
+  │   ├── s3/
+  │   │   ├── S3Client.ts       // S3 操作封装
+  │   │   └── types.ts          // 类型定义
+  │   ├── upload/
+  │   │   ├── FileHandler.ts    // 文件处理
+  │   │   ├── UploadManager.ts  // 上传管理
+  │   │   ├── UploadTask.ts     // 上传任务
+  │   │   └── utils.ts          // 工具函数
+  │   └── index.ts              // 主进程入口
+  └── renderer/
+      ├── components/
+      │   └── Upload.tsx        // 上传组件
+      └── index.tsx             // 渲染进程入口
+```
+
+### 2.3 基本数据结构
+
+**基本配置项**
+```ts
+export interface S3Config {
+  accessKeyId: string;
+  secretAccessKey: string;
+  region: string;
+  bucket: string;
+}
+
+export interface UploadChunk {
+  index: number;
+  start: number;
+  end: number;
+  size: number;
+  status: ChunkStatus;
+  etag?: string;
+}
+
+export interface CheckpointData {
+  fileId: string;
+  fileName: string;
+  uploadId: string;
+  chunks: UploadChunk[];
+  progress: number;
+}
+
+```
+
+**状态管理**
+```ts
+export enum UploadStatus {
+  PENDING = 'pending',
+  UPLOADING = 'uploading',
+  PAUSED = 'paused',
+  COMPLETED = 'completed',
+  ERROR = 'error'
+}
+
+export enum ChunkStatus {
+  PENDING = 'pending',
+  UPLOADING = 'uploading',
+  SUCCESS = 'success',
+  ERROR = 'error'
+}
+
+export interface UploadProgress {
+  taskId: string;
+  loaded: number;
+  total: number;
+  progress: number;
+}
+```
+
+### 2.4 核心模块功能
+
+```markdown
+- FileHandler - 文件处理模块
+  - 文件分片
+  - 计算MD5
+  - 读取文件流
+
+- UploadManager - 上传管理模块  
+  - 任务队列管理
+  - 并发控制
+  - 断点续传管理
+  - 进度跟踪
+
+- S3Client - S3操作模块
+  - 初始化上传
+  - 上传分片
+  - 合并分片
+  - 中止上传
+
+```
+
+### 2.5 主要流程
+
+```ts
+1. 初始化上传
+- 检查是否存在断点记录
+- 计算文件MD5作为唯一标识
+- 调用 S3 createMultipartUpload
+- 保存 uploadId
+
+2. 分片处理  
+- 根据文件大小和分片大小计算分片
+- 生成每个分片的信息(序号、偏移量、大小)
+- 存储分片信息用于断点续传
+
+3. 并行上传
+- 维护上传队列
+- 控制并发数量
+- 处理超时和重试
+- 记录已上传分片
+
+4. 断点续传
+- 定期保存上传状态
+- 启动时检查断点记录
+- 仅上传未完成的分片
+- 超时/错误时保存进度
+
+5. 完成上传
+- 验证所有分片上传成功
+- 调用 completeMultipartUpload
+- 清理断点记录
+
+```
+
+### 2.6 核心技术
+
+ --- 
+
+#### 分片上传
+实现：
+```markdown
+- 使用 File API 的 slice 方法将文件切分成固定大小的块
+- 每个分片包含: 序号、起始位置、结束位置、大小等信息
+- 使用 createReadStream 读取分片内容
+- 利用 S3 的 multipart upload API 上传每个分片
+
+主要代码逻辑:
+file.slice(start, end) -> 生成分片
+createReadStream(file, {start, end}) -> 读取分片内容 
+s3.uploadPart() -> 上传分片到S3
+```
+**分片处理：**
+```ts
+// 分片处理
+function createChunks(file: File, chunkSize: number) {
+  const chunks = [];
+  for(let start = 0; start < file.size; start += chunkSize) {
+    chunks.push({
+      start,
+      end: Math.min(start + chunkSize, file.size)
+    });
+  }
+  return chunks;
+}
+```
+**分片上传：**
+```ts
+ async uploadPart(params: {
+    key: string,
+    uploadId: string,
+    partNumber: number,
+    body: Buffer
+  }) {
+    try {
+      const response = await this.s3.uploadPart({
+        Bucket: this.config.bucket,
+        Key: params.key,
+        UploadId: params.uploadId,
+        PartNumber: params.partNumber,
+        Body: params.body
+      }).promise();
+
+      return {
+        PartNumber: params.partNumber,
+        ETag: response.ETag
+      };
+    } catch (error) {
+      throw new Error(`Failed to upload part: ${error.message}`);
+    }
+  }
+```
+--- 
+
+#### 断点续传
+
+**实现思路：**
+```markdown
+- 使用 electron-store 持久化存储上传状态
+- 记录: uploadId、已上传分片信息、文件标识等
+- 启动时检查是否存在未完成的上传任务
+- 只上传未完成的分片
+
+核心数据结构:
+{
+  fileId: string,      // 文件唯一标识
+  uploadId: string,    // S3上传ID 
+  chunks: [            // 分片信息
+    {
+      index: number,   // 分片序号
+      status: string,  // 上传状态
+      etag: string     // S3返回的标识
+    }
+  ]
+}
+```
+
+--- 
+
+#### 并行上传
+
+
+**实现思路：**
+```ts
+- 维护上传队列和并发计数
+- 使用 Promise.all 控制并发数
+- 任务池模式管理上传任务
+- 错误重试机制
+
+实现思路:
+1. 初始化任务队列
+2. 取出 N 个任务并行执行
+3. 某个任务完成后,立即开始下一个
+4. 控制最大并发数
+
+```
+
+```ts
+// 并发控制
+async function uploadChunks(chunks: Chunk[], maxConcurrent: number) {
+  const queue = [...chunks];
+  const executing = new Set();
+  
+  while(queue.length > 0) {
+    if(executing.size >= maxConcurrent) {
+      await Promise.race(executing);
+      continue;
+    }
+    
+    const chunk = queue.shift();
+    const promise = uploadChunk(chunk)
+      .finally(() => executing.delete(promise));
+      
+    executing.add(promise);
+  }
+  
+  await Promise.all(executing);
+}
+```
+
+
+### 2.7 核心代码
+---
+
+#### S3Client
+
+```ts
+import AWS from 'aws-sdk';
+import { S3Config } from './types';
+
+export class S3Client {
+  private s3: AWS.S3;
+
+  constructor(config: S3Config) {
+    this.s3 = new AWS.S3({
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
+      region: config.region
+    });
+  }
+
+  async initializeMultipartUpload(key: string) {
+    try {
+      const response = await this.s3.createMultipartUpload({
+        Bucket: this.config.bucket,
+        Key: key
+      }).promise();
+      
+      return response.UploadId;
+    } catch (error) {
+      throw new Error(`Failed to initialize multipart upload: ${error.message}`);
+    }
+  }
+
+  async uploadPart(params: {
+    key: string,
+    uploadId: string,
+    partNumber: number,
+    body: Buffer
+  }) {
+    try {
+      const response = await this.s3.uploadPart({
+        Bucket: this.config.bucket,
+        Key: params.key,
+        UploadId: params.uploadId,
+        PartNumber: params.partNumber,
+        Body: params.body
+      }).promise();
+
+      return {
+        PartNumber: params.partNumber,
+        ETag: response.ETag
+      };
+    } catch (error) {
+      throw new Error(`Failed to upload part: ${error.message}`);
+    }
+  }
+
+  async completeMultipartUpload(params: {
+    key: string,
+    uploadId: string,
+    parts: AWS.S3.CompletedPart[]
+  }) {
+    try {
+      await this.s3.completeMultipartUpload({
+        Bucket: this.config.bucket,
+        Key: params.key,
+        UploadId: params.uploadId,
+        MultipartUpload: { Parts: params.parts }
+      }).promise();
+    } catch (error) {
+      throw new Error(`Failed to complete multipart upload: ${error.message}`);
+    }
+  }
+
+  async abortMultipartUpload(key: string, uploadId: string) {
+    try {
+      await this.s3.abortMultipartUpload({
+        Bucket: this.config.bucket,
+        Key: key,
+        UploadId: uploadId
+      }).promise();
+    } catch (error) {
+      throw new Error(`Failed to abort multipart upload: ${error.message}`);
+    }
+  }
+}
+
+```
+
+#### 文件处理器 (FileHandler.ts)
+
+```ts
+import { createHash } from 'crypto';
+import { createReadStream } from 'fs';
+import { UploadChunk } from './types';
+
+export class FileHandler {
+  static async calculateMD5(filePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const hash = createHash('md5');
+      const stream = createReadStream(filePath);
+
+      stream.on('data', data => hash.update(data));
+      stream.on('end', () => resolve(hash.digest('hex')));
+      stream.on('error', reject);
+    });
+  }
+
+  static createChunks(fileSize: number, partSize: number): UploadChunk[] {
+    const chunks: UploadChunk[] = [];
+    let index = 0;
+    
+    for (let start = 0; start < fileSize; start += partSize) {
+      const end = Math.min(start + partSize, fileSize);
+      chunks.push({
+        index,
+        start,
+        end,
+        size: end - start,
+        status: ChunkStatus.PENDING
+      });
+      index++;
+    }
+
+    return chunks;
+  }
+
+  static async readChunk(filePath: string, start: number, end: number): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      const stream = createReadStream(filePath, { start, end: end - 1 });
+
+      stream.on('data', chunk => chunks.push(chunk));
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+      stream.on('error', reject);
+    });
+  }
+}
+
+```
+
+#### 上传任务类 (UploadTask.ts)
+
+```ts
+import { EventEmitter } from 'events';
+import { S3Client } from '../s3/S3Client';
+import { FileHandler } from './FileHandler';
+import { CheckpointData, UploadStatus, ChunkStatus } from './types';
+
+export class UploadTask extends EventEmitter {
+  private status: UploadStatus = UploadStatus.PENDING;
+  private checkpoint: CheckpointData;
+  private uploadingChunks: Set<number> = new Set();
+
+  constructor(
+    public readonly taskId: string,
+    private filePath: string,
+    private fileName: string,
+    private s3Client: S3Client,
+    private config: {
+      partSize: number;
+      maxConcurrent: number;
+      retryTimes: number;
+    }
+  ) {
+    super();
+  }
+
+  async start() {
+    try {
+      this.status = UploadStatus.UPLOADING;
+      
+      // 初始化或恢复检查点
+      await this.initializeCheckpoint();
+      
+      // 开始上传
+      await this.uploadChunks();
+      
+      // 完成上传
+      if (this.allChunksUploaded()) {
+        await this.completeUpload();
+      }
+    } catch (error) {
+      this.status = UploadStatus.ERROR;
+      this.emit('error', error);
+    }
+  }
+
+  pause() {
+    this.status = UploadStatus.PAUSED;
+    this.emit('pause');
+  }
+
+  resume() {
+    if (this.status === UploadStatus.PAUSED) {
+      this.status = UploadStatus.UPLOADING;
+      this.uploadChunks();
+      this.emit('resume');
+    }
+  }
+
+  private async initializeCheckpoint() {
+    if (!this.checkpoint) {
+      const fileId = await FileHandler.calculateMD5(this.filePath);
+      const uploadId = await this.s3Client.initializeMultipartUpload(this.fileName);
+      
+      this.checkpoint = {
+        fileId,
+        fileName: this.fileName,
+        uploadId,
+        chunks: FileHandler.createChunks(this.fileSize, this.config.partSize),
+        progress: 0
+      };
+    }
+  }
+
+  private async uploadChunks() {
+    while (this.status === UploadStatus.UPLOADING) {
+      if (this.uploadingChunks.size >= this.config.maxConcurrent) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        continue;
+      }
+
+      const chunk = this.getNextChunk();
+      if (!chunk) break;
+
+      this.uploadChunk(chunk);
+    }
+  }
+
+  private async uploadChunk(chunk: UploadChunk) {
+    this.uploadingChunks.add(chunk.index);
+    chunk.status = ChunkStatus.UPLOADING;
+
+    try {
+      const data = await FileHandler.readChunk(
+        this.filePath,
+        chunk.start,
+        chunk.end
+      );
+
+      const result = await this.s3Client.uploadPart({
+        key: this.fileName,
+        uploadId: this.checkpoint.uploadId,
+        partNumber: chunk.index + 1,
+        body: data
+      });
+
+      chunk.status = ChunkStatus.SUCCESS;
+      chunk.etag = result.ETag;
+      
+      this.updateProgress();
+    } catch (error) {
+      chunk.status = ChunkStatus.ERROR;
+      this.emit('error', error);
+    } finally {
+      this.uploadingChunks.delete(chunk.index);
+    }
+  }
+
+  private getNextChunk(): UploadChunk | null {
+    return this.checkpoint.chunks.find(
+      chunk => chunk.status === ChunkStatus.PENDING
+    );
+  }
+
+  private updateProgress() {
+    const uploaded = this.checkpoint.chunks.reduce(
+      (sum, chunk) => sum + (chunk.status === ChunkStatus.SUCCESS ? chunk.size : 0),
+      0
+    );
+
+    this.checkpoint.progress = uploaded / this.fileSize;
+    this.emit('progress', {
+      taskId: this.taskId,
+      loaded: uploaded,
+      total: this.fileSize,
+      progress: this.checkpoint.progress
+    });
+  }
+
+  private async completeUpload() {
+    const parts = this.checkpoint.chunks
+      .map(chunk => ({
+        PartNumber: chunk.index + 1,
+        ETag: chunk.etag
+      }))
+      .sort((a, b) => a.PartNumber - b.PartNumber);
+
+    await this.s3Client.completeMultipartUpload({
+      key: this.fileName,
+      uploadId: this.checkpoint.uploadId,
+      parts
+    });
+
+    this.status = UploadStatus.COMPLETED;
+    this.emit('complete');
+  }
+}
+
+```
+
+#### 上传管理器 (UploadManager.ts)
+
+```ts
+import { EventEmitter } from 'events';
+import Store from 'electron-store';
+import { S3Client } from '../s3/S3Client';
+import { UploadTask } from './UploadTask';
+import { S3Config, CheckpointData } from './types';
+
+export class UploadManager extends EventEmitter {
+  private tasks: Map<string, UploadTask> = new Map();
+  private store: Store;
+  private s3Client: S3Client;
+
+  constructor(
+    s3Config: S3Config,
+    private config = {
+      partSize: 5 * 1024 * 1024,
+      maxConcurrent: 3,
+      retryTimes: 3
+    }
+  ) {
+    super();
+    this.s3Client = new S3Client(s3Config);
+    this.store = new Store({ name: 'upload-checkpoint' });
+    this.loadCheckpoints();
+  }
+
+  addTask(filePath: string, fileName: string): string {
+    const taskId = Date.now().toString();
+    const task = new UploadTask(
+      taskId,
+      filePath,
+      fileName,
+      this.s3Client,
+      this.config
+    );
+
+    this.tasks.set(taskId, task);
+    
+    task.on('progress', this.handleProgress.bind(this));
+    task.on('error', this.handleError.bind(this));
+    task.on('complete', () => this.handleComplete(taskId));
+
+    return taskId;
+  }
+
+  startUpload(taskId: string) {
+    const task = this.tasks.get(taskId);
+    if (task) {
+      task.start();
+    }
+  }
+
+  pauseUpload(taskId: string) {
+    const task = this.tasks.get(taskId);
+    if (task) {
+      task.pause();
+    }
+  }
+
+  resumeUpload(taskId: string) {
+    const task = this.tasks.get(taskId);
+    if (task) {
+      task.resume();
+    }
+  }
+
+  private handleProgress(progress: UploadProgress) {
+    this.emit('progress', progress);
+    this.saveCheckpoint(progress.taskId);
+  }
+
+  private handleError(taskId: string, error: Error) {
+    this.emit('error', taskId, error);
+  }
+
+  private handleComplete(taskId: string) {
+    this.emit('complete', taskId);
+    this.clearCheckpoint(taskId);
+    this.tasks.delete(taskId);
+  }
+
+  private saveCheckpoint(taskId: string) {
+    const task = this.tasks.get(taskId);
+    if (task) {
+      this.store.set(`checkpoints.${taskId}`, task.checkpoint);
+    }
+  }
+
+  private loadCheckpoints() {
+    const checkpoints = this.store.get('checkpoints') as Record<string, CheckpointData>;
+    if (checkpoints) {
+      Object.entries(checkpoints).forEach(([taskId, checkpoint]) => {
+        // 恢复上传任务
+        const task = new UploadTask(
+          taskId,
+          checkpoint.fileName,
+          this.s3Client,
+          this.config
+        );
+        task.checkpoint = checkpoint;
+        this.tasks.set(taskId, task);
+      });
+    }
+  }
+
+  private clearCheckpoint(taskId: string) {
+    this.store.delete(`checkpoints.${taskId}`);
+  }
+}
+
+```
+
+#### 渲染进程上传组件 (Upload.tsx)
+
+```ts
+import React, { useState, useCallback, useEffect } from 'react';
+import { ipcRenderer } from 'electron';
+
+// 上传文件的状态类型
+interface UploadFile {
+  id: string;          // 文件唯一标识
+  file: File;          // 原始文件对象
+  progress: number;    // 上传进度(0-100)
+  status: 'pending' | 'uploading' | 'paused' | 'completed' | 'error';
+  error?: string;      // 错误信息
+}
+
+// 上传进度事件数据类型
+interface ProgressEvent {
+  taskId: string;
+  loaded: number;
+  total: number;
+  progress: number;
+}
+
+export const Upload: React.FC = () => {
+  // 上传文件列表状态
+  const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
+  
+  // 是否正在上传标志
+  const [isUploading, setIsUploading] = useState(false);
+
+  /**
+   * 组件卸载时清理事件监听
+   */
+  useEffect(() => {
+    return () => {
+      // 清理所有上传相关的事件监听
+      uploadFiles.forEach(file => {
+        ipcRenderer.removeAllListeners(`upload:progress:${file.id}`);
+        ipcRenderer.removeAllListeners(`upload:error:${file.id}`);
+        ipcRenderer.removeAllListeners(`upload:complete:${file.id}`);
+      });
+    };
+  }, [uploadFiles]);
+
+  /**
+   * 处理文件选择
+   */
+  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      // 将选择的文件转换为上传文件对象
+      const newFiles: UploadFile[] = Array.from(event.target.files).map(file => ({
+        id: `file_${Date.now()}_${file.name}`, // 生成唯一ID
+        file,
+        progress: 0,
+        status: 'pending'
+      }));
+
+      setUploadFiles(prev => [...prev, ...newFiles]);
+    }
+  }, []);
+
+  /**
+   * 开始上传所有文件
+   */
+  const handleUploadAll = useCallback(async () => {
+    setIsUploading(true);
+
+    // 遍历待上传文件列表
+    for (const uploadFile of uploadFiles.filter(f => f.status === 'pending')) {
+      try {
+        // 调用主进程的上传方法
+        const taskId = await ipcRenderer.invoke('upload:start', {
+          filePath: uploadFile.file.path,
+          fileName: uploadFile.file.name
+        });
+
+        // 更新文件状态为上传中
+        setUploadFiles(prev => 
+          prev.map(f => 
+            f.id === uploadFile.id 
+              ? { ...f, status: 'uploading' }
+              : f
+          )
+        );
+
+        // 监听上传进度
+        ipcRenderer.on(`upload:progress:${taskId}`, (_, data: ProgressEvent) => {
+          setUploadFiles(prev =>
+            prev.map(f =>
+              f.id === uploadFile.id
+                ? { ...f, progress: Math.round(data.progress * 100) }
+                : f
+            )
+          );
+        });
+
+        // 监听上传完成
+        ipcRenderer.once(`upload:complete:${taskId}`, () => {
+          setUploadFiles(prev =>
+            prev.map(f =>
+              f.id === uploadFile.id
+                ? { ...f, status: 'completed', progress: 100 }
+                : f
+            )
+          );
+        });
+
+        // 监听上传错误
+        ipcRenderer.once(`upload:error:${taskId}`, (_, error: string) => {
+          setUploadFiles(prev =>
+            prev.map(f =>
+              f.id === uploadFile.id
+                ? { ...f, status: 'error', error }
+                : f
+            )
+          );
+        });
+
+      } catch (error) {
+        // 处理启动上传失败的情况
+        setUploadFiles(prev =>
+          prev.map(f =>
+            f.id === uploadFile.id
+              ? { ...f, status: 'error', error: error.message }
+              : f
+          )
+        );
+      }
+    }
+
+    setIsUploading(false);
+  }, [uploadFiles]);
+
+  /**
+   * 暂停指定文件的上传
+   */
+  const handlePause = useCallback((fileId: string) => {
+    ipcRenderer.invoke('upload:pause', fileId);
+    setUploadFiles(prev =>
+      prev.map(f =>
+        f.id === fileId
+          ? { ...f, status: 'paused' }
+          : f
+      )
+    );
+  }, []);
+
+  /**
+   * 恢复指定文件的上传
+   */
+  const handleResume = useCallback((fileId: string) => {
+    ipcRenderer.invoke('upload:resume', fileId);
+    setUploadFiles(prev =>
+      prev.map(f =>
+        f.id === fileId
+          ? { ...f, status: 'uploading' }
+          : f
+      )
+    );
+  }, []);
+
+  /**
+   * 移除指定文件
+   */
+  const handleRemove = useCallback((fileId: string) => {
+    ipcRenderer.invoke('upload:cancel', fileId);
+    setUploadFiles(prev => prev.filter(f => f.id !== fileId));
+  }, []);
+
+  /**
+   * 重试上传失败的文件
+   */
+  const handleRetry = useCallback((fileId: string) => {
+    setUploadFiles(prev =>
+      prev.map(f =>
+        f.id === fileId
+          ? { ...f, status: 'pending', progress: 0, error: undefined }
+          : f
+      )
+    );
+  }, []);
+
+  return (
+    <div className="upload-container">
+      {/* 文件选择区域 */}
+      <div className="upload-input">
+        <input
+          type="file"
+          multiple
+          onChange={handleFileSelect}
+          disabled={isUploading}
+        />
+        <button 
+          onClick={handleUploadAll}
+          disabled={isUploading || !uploadFiles.some(f => f.status === 'pending')}
+        >
+          Upload All
+        </button>
+      </div>
+
+      {/* 文件列表 */}
+      <div className="upload-list">
+        {uploadFiles.map(file => (
+          <div key={file.id} className="upload-item">
+            {/* 文件信息 */}
+            <div className="file-info">
+              <span className="file-name">{file.file.name}</span>
+              <span className="file-size">
+                {(file.file.size / 1024 / 1024).toFixed(2)} MB
+              </span>
+            </div>
+
+            {/* 进度条 */}
+            <div className="progress-bar">
+              <div 
+                className="progress" 
+                style={{ width: `${file.progress}%` }}
+              />
+            </div>
+
+            {/* 状态和操作按钮 */}
+            <div className="actions">
+              <span className="status">{file.status}</span>
+              
+              {file.status === 'uploading' && (
+                <button onClick={() => handlePause(file.id)}>
+                  Pause
+                </button>
+              )}
+
+              {file.status === 'paused' && (
+                <button onClick={() => handleResume(file.id)}>
+                  Resume
+                </button>
+              )}
+
+              {file.status === 'error' && (
+                <>
+                  <span className="error">{file.error}</span>
+                  <button onClick={() => handleRetry(file.id)}>
+                    Retry
+                  </button>
+                </>
+              )}
+
+              {file.status !== 'uploading' && (
+                <button onClick={() => handleRemove(file.id)}>
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+```
 
