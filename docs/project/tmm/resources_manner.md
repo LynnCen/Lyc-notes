@@ -1422,25 +1422,45 @@ import { S3Client } from '../s3/S3Client';
 import { FileHandler } from './FileHandler';
 import { CheckpointData, UploadStatus, ChunkStatus } from './types';
 
+/**
+ * 文件上传任务类
+ * 继承自EventEmitter以支持事件机制
+ * 管理单个文件的完整上传流程
+ */
 export class UploadTask extends EventEmitter {
+  /** 当前上传状态 */
   private status: UploadStatus = UploadStatus.PENDING;
+  /** 断点续传检查点数据 */
   private checkpoint: CheckpointData;
+  /** 正在上传的分片集合 */
   private uploadingChunks: Set<number> = new Set();
 
+  /**
+   * 构造函数
+   * @param taskId 任务唯一标识符
+   * @param filePath 文件路径
+   * @param fileName 文件名称
+   * @param s3Client S3客户端实例
+   * @param config 上传配置
+   */
   constructor(
     public readonly taskId: string,
     private filePath: string,
     private fileName: string,
     private s3Client: S3Client,
     private config: {
-      partSize: number;
-      maxConcurrent: number;
-      retryTimes: number;
+      partSize: number;      // 分片大小
+      maxConcurrent: number; // 最大并发数
+      retryTimes: number;    // 重试次数
     }
   ) {
     super();
   }
 
+  /**
+   * 开始上传任务
+   * 处理完整的上传流程
+   */
   async start() {
     try {
       this.status = UploadStatus.UPLOADING;
@@ -1448,10 +1468,10 @@ export class UploadTask extends EventEmitter {
       // 初始化或恢复检查点
       await this.initializeCheckpoint();
       
-      // 开始上传
+      // 开始上传分片
       await this.uploadChunks();
       
-      // 完成上传
+      // 如果所有分片上传完成,执行完成操作
       if (this.allChunksUploaded()) {
         await this.completeUpload();
       }
@@ -1461,11 +1481,17 @@ export class UploadTask extends EventEmitter {
     }
   }
 
+  /**
+   * 暂停上传
+   */
   pause() {
     this.status = UploadStatus.PAUSED;
     this.emit('pause');
   }
 
+  /**
+   * 恢复上传
+   */
   resume() {
     if (this.status === UploadStatus.PAUSED) {
       this.status = UploadStatus.UPLOADING;
@@ -1474,11 +1500,18 @@ export class UploadTask extends EventEmitter {
     }
   }
 
+  /**
+   * 初始化或恢复检查点数据
+   * 用于支持断点续传
+   */
   private async initializeCheckpoint() {
     if (!this.checkpoint) {
+      // 计算文件唯一标识
       const fileId = await FileHandler.calculateMD5(this.filePath);
+      // 初始化S3分片上传任务
       const uploadId = await this.s3Client.initializeMultipartUpload(this.fileName);
       
+      // 创建检查点数据
       this.checkpoint = {
         fileId,
         fileName: this.fileName,
@@ -1489,89 +1522,162 @@ export class UploadTask extends EventEmitter {
     }
   }
 
-  private async uploadChunks() {
-    while (this.status === UploadStatus.UPLOADING) {
-      if (this.uploadingChunks.size >= this.config.maxConcurrent) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+
+/**
+ * 上传所有分片
+ * 使用Promise池实现并发控制
+ * 支持暂停、重试机制
+ * 
+ * @example
+ * // 配置参数
+ * maxConcurrent: 3     // 最大并发数 
+ * retryTimes: 3        // 最大重试次数
+ */
+private async uploadChunks() {
+  // 获取所有待上传的分片
+  const pendingChunks = this.checkpoint.chunks.filter(
+    chunk => chunk.status === ChunkStatus.PENDING
+  );
+
+  // 创建任务队列(复制数组避免修改原数据)
+  const queue = [...pendingChunks];
+  
+  // 正在执行的任务集合
+  // 使用Set存储正在执行的Promise
+  const executing = new Set<Promise<any>>();
+
+  try {
+    // 持续处理队列直到所有分片上传完成
+    while (queue.length > 0 || executing.size > 0) {
+      // 检查上传状态(支持暂停)
+      if (this.status !== UploadStatus.UPLOADING) {
+        break;
+      }
+
+      // 检查是否达到并发上限
+      if (executing.size >= this.config.maxConcurrent) {
+        // 等待任意一个任务完成
+        await Promise.race(executing);
         continue;
       }
 
-      const chunk = this.getNextChunk();
-      if (!chunk) break;
+      // 从队列中取出一个分片
+      const chunk = queue.shift();
+      if (!chunk) continue;
 
-      this.uploadChunk(chunk);
+      // 创建上传Promise
+      const promise = this.uploadChunk(chunk)
+        .catch(error => {
+          // 错误处理:支持重试机制
+          if (this.shouldRetry(chunk)) {
+            queue.push(chunk); // 重新加入队列
+          } else {
+            throw error;      // 超过重试次数
+          }
+        })
+        // finally确保任务完成后从执行集合中移除
+        .finally(() => executing.delete(promise));
+
+      // 将任务添加到执行集合
+      executing.add(promise);
     }
-  }
 
-  private async uploadChunk(chunk: UploadChunk) {
-    this.uploadingChunks.add(chunk.index);
+    // 等待所有正在执行的任务完成
+    if (executing.size > 0) {
+      await Promise.all(executing);
+    }
+
+  } catch (error) {
+    this.status = UploadStatus.ERROR;
+    this.emit('error', error);
+    throw error;
+  }
+}
+
+  
+  /**
+ * 上传单个分片
+ * 包含状态管理和进度更新
+ * 
+ * @param chunk 分片信息
+ * @throws 上传失败时抛出错误
+ */
+private async uploadChunk(chunk: UploadChunk): Promise<void> {
+  try {
+    // 更新分片状态
     chunk.status = ChunkStatus.UPLOADING;
+    this.uploadingChunks.add(chunk.index);
 
-    try {
-      const data = await FileHandler.readChunk(
-        this.filePath,
-        chunk.start,
-        chunk.end
-      );
+    // 读取分片数据
+    const data = await FileHandler.readChunk(
+      this.filePath,
+      chunk.start,
+      chunk.end
+    );
 
-      const result = await this.s3Client.uploadPart({
-        key: this.fileName,
-        uploadId: this.checkpoint.uploadId,
-        partNumber: chunk.index + 1,
-        body: data
-      });
+    // 上传到S3
+    const result = await this.s3Client.uploadPart({
+      key: this.fileName,
+      uploadId: this.checkpoint.uploadId,
+      partNumber: chunk.index + 1,
+      body: data
+    });
 
-      chunk.status = ChunkStatus.SUCCESS;
-      chunk.etag = result.ETag;
-      
-      this.updateProgress();
-    } catch (error) {
-      chunk.status = ChunkStatus.ERROR;
-      this.emit('error', error);
-    } finally {
-      this.uploadingChunks.delete(chunk.index);
-    }
+    // 更新分片信息
+    chunk.status = ChunkStatus.SUCCESS;
+    chunk.etag = result.ETag;
+    
+    // 更新上传进度
+    this.updateProgress();
+
+  } catch (error) {
+    chunk.status = ChunkStatus.ERROR;
+    throw error;
+  } finally {
+    this.uploadingChunks.delete(chunk.index);
   }
+}
 
+  /**
+   * 获取下一个待上传的分片
+   */
   private getNextChunk(): UploadChunk | null {
     return this.checkpoint.chunks.find(
       chunk => chunk.status === ChunkStatus.PENDING
     );
   }
 
-  private updateProgress() {
-    const uploaded = this.checkpoint.chunks.reduce(
-      (sum, chunk) => sum + (chunk.status === ChunkStatus.SUCCESS ? chunk.size : 0),
-      0
-    );
 
-    this.checkpoint.progress = uploaded / this.fileSize;
-    this.emit('progress', {
-      taskId: this.taskId,
-      loaded: uploaded,
-      total: this.fileSize,
-      progress: this.checkpoint.progress
-    });
+/**
+ * 判断分片是否应该重试
+ * 使用指数退避策略
+ * 
+ * @param chunk 上传失败的分片
+ * @returns boolean 是否应该重试
+ */
+private shouldRetry(chunk: UploadChunk): boolean {
+  const retries = chunk.retryCount || 0;
+  
+  // 超过最大重试次数
+  if (retries >= this.config.retryTimes) {
+    return false;
   }
 
-  private async completeUpload() {
-    const parts = this.checkpoint.chunks
-      .map(chunk => ({
-        PartNumber: chunk.index + 1,
-        ETag: chunk.etag
-      }))
-      .sort((a, b) => a.PartNumber - b.PartNumber);
+  // 增加重试计数
+  chunk.retryCount = retries + 1;
+  
+  // 使用指数退避策略计算延迟
+  // 延迟时间 = min(1000 * 2^重试次数, 30s)
+  const delay = Math.min(1000 * Math.pow(2, retries), 30000);
+  
+  // 延迟后重置状态
+  setTimeout(() => {
+    chunk.status = ChunkStatus.PENDING;
+  }, delay);
 
-    await this.s3Client.completeMultipartUpload({
-      key: this.fileName,
-      uploadId: this.checkpoint.uploadId,
-      parts
-    });
-
-    this.status = UploadStatus.COMPLETED;
-    this.emit('complete');
-  }
+  return true;
 }
+
 
 ```
 
