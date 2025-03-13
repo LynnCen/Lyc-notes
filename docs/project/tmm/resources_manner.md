@@ -651,55 +651,143 @@ src/
 
 **基本配置项**
 ```ts
+/**
+ * AWS S3 配置接口
+ * 定义连接 AWS S3 所需的基本配置项
+ */
 export interface S3Config {
+  /** AWS访问密钥ID */
   accessKeyId: string;
+  
+  /** AWS秘密访问密钥 */
   secretAccessKey: string;
+  
+  /** AWS区域标识符(如 us-east-1) */
   region: string;
+  
+  /** S3存储桶名称 */
   bucket: string;
 }
 
+/**
+ * 文件分片信息接口
+ * 定义单个分片的详细信息
+ */
 export interface UploadChunk {
+  /** 分片序号(从0开始) */
   index: number;
+  
+  /** 分片在文件中的起始位置(字节) */
   start: number;
+  
+  /** 分片在文件中的结束位置(字节) */
   end: number;
+  
+  /** 分片大小(字节) */
   size: number;
+  
+  /** 分片上传状态(pending|uploading|completed|failed) */
   status: ChunkStatus;
+  
+  /** 
+   * 分片上传后的ETag标识
+   * AWS S3返回的用于验证分片完整性的标识符
+   */
   etag?: string;
 }
 
+/**
+ * 断点续传检查点数据接口
+ * 用于保存上传进度,支持断点续传
+ */
 export interface CheckpointData {
+  /** 文件唯一标识符 */
   fileId: string;
+  
+  /** 文件名称 */
   fileName: string;
+  
+  /** 
+   * 分片上传ID
+   * AWS S3的multipart upload ID
+   */
   uploadId: string;
+  
+  /** 所有分片信息数组 */
   chunks: UploadChunk[];
+  
+  /** 
+   * 上传进度百分比
+   * 范围0-100
+   */
   progress: number;
 }
+
 
 ```
 
 **状态管理**
 ```ts
+/**
+ * 上传任务状态枚举
+ * 定义整体上传任务的所有可能状态
+ */
 export enum UploadStatus {
+  /** 等待上传 - 初始状态 */
   PENDING = 'pending',
+  
+  /** 正在上传 - 数据传输中 */
   UPLOADING = 'uploading',
+  
+  /** 已暂停 - 用户手动暂停或系统自动暂停 */
   PAUSED = 'paused',
+  
+  /** 已完成 - 所有分片上传成功并合并 */
   COMPLETED = 'completed',
+  
+  /** 错误 - 上传过程中发生错误 */
   ERROR = 'error'
 }
 
+/**
+ * 分片状态枚举
+ * 定义单个分片的所有可能状态
+ */
 export enum ChunkStatus {
+  /** 等待上传 - 分片初始状态 */
   PENDING = 'pending',
+  
+  /** 正在上传 - 分片数据传输中 */
   UPLOADING = 'uploading',
+  
+  /** 上传成功 - 分片完成上传并验证 */
   SUCCESS = 'success',
+  
+  /** 上传失败 - 分片上传过程出错 */
   ERROR = 'error'
 }
 
+/**
+ * 上传进度接口
+ * 用于跟踪和报告上传进度
+ */
 export interface UploadProgress {
+  /** 上传任务唯一标识符 */
   taskId: string;
+  
+  /** 已上传的字节数 */
   loaded: number;
+  
+  /** 文件总字节数 */
   total: number;
+  
+  /** 
+   * 上传进度百分比 
+   * 计算公式: (loaded / total) * 100
+   */
   progress: number;
 }
+
 ```
 
 ### 2.4 核心模块功能
