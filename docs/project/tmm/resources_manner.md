@@ -1690,25 +1690,46 @@ import { S3Client } from '../s3/S3Client';
 import { UploadTask } from './UploadTask';
 import { S3Config, CheckpointData } from './types';
 
+/**
+ * 上传管理器类
+ * 负责管理所有上传任务,提供断点续传功能
+ * 继承自EventEmitter以支持事件机制
+ */
 export class UploadManager extends EventEmitter {
+  /** 存储所有上传任务的Map */
   private tasks: Map<string, UploadTask> = new Map();
+  /** 用于持久化存储上传检查点 */
   private store: Store;
+  /** S3客户端实例 */
   private s3Client: S3Client;
 
+  /**
+   * 构造函数
+   * @param s3Config - S3配置信息
+   * @param config - 上传配置
+   */
   constructor(
     s3Config: S3Config,
     private config = {
-      partSize: 5 * 1024 * 1024,
-      maxConcurrent: 3,
-      retryTimes: 3
+      partSize: 5 * 1024 * 1024,    // 分片大小(5MB)
+      maxConcurrent: 3,             // 最大并发数
+      retryTimes: 3                 // 重试次数
     }
   ) {
     super();
     this.s3Client = new S3Client(s3Config);
+    // 初始化持久化存储
     this.store = new Store({ name: 'upload-checkpoint' });
+    // 加载已保存的检查点
     this.loadCheckpoints();
   }
 
+  /**
+   * 添加上传任务
+   * @param filePath - 文件路径
+   * @param fileName - 文件名
+   * @returns 任务ID
+   */
   addTask(filePath: string, fileName: string): string {
     const taskId = Date.now().toString();
     const task = new UploadTask(
@@ -1719,8 +1740,10 @@ export class UploadManager extends EventEmitter {
       this.config
     );
 
+    // 保存任务
     this.tasks.set(taskId, task);
     
+    // 绑定事件处理
     task.on('progress', this.handleProgress.bind(this));
     task.on('error', this.handleError.bind(this));
     task.on('complete', () => this.handleComplete(taskId));
@@ -1728,6 +1751,10 @@ export class UploadManager extends EventEmitter {
     return taskId;
   }
 
+  /**
+   * 开始上传任务
+   * @param taskId - 任务ID
+   */
   startUpload(taskId: string) {
     const task = this.tasks.get(taskId);
     if (task) {
@@ -1735,6 +1762,10 @@ export class UploadManager extends EventEmitter {
     }
   }
 
+  /**
+   * 暂停上传任务
+   * @param taskId - 任务ID
+   */
   pauseUpload(taskId: string) {
     const task = this.tasks.get(taskId);
     if (task) {
@@ -1742,6 +1773,10 @@ export class UploadManager extends EventEmitter {
     }
   }
 
+  /**
+   * 恢复上传任务
+   * @param taskId - 任务ID
+   */
   resumeUpload(taskId: string) {
     const task = this.tasks.get(taskId);
     if (task) {
@@ -1749,33 +1784,60 @@ export class UploadManager extends EventEmitter {
     }
   }
 
+  /**
+   * 处理上传进度事件
+   * @param progress - 进度信息
+   */
   private handleProgress(progress: UploadProgress) {
+    // 转发进度事件
     this.emit('progress', progress);
+    // 保存检查点
     this.saveCheckpoint(progress.taskId);
   }
 
+  /**
+   * 处理错误事件
+   * @param taskId - 任务ID
+   * @param error - 错误信息
+   */
   private handleError(taskId: string, error: Error) {
     this.emit('error', taskId, error);
   }
 
+  /**
+   * 处理上传完成事件
+   * @param taskId - 任务ID
+   */
   private handleComplete(taskId: string) {
+    // 发送完成事件
     this.emit('complete', taskId);
+    // 清理检查点
     this.clearCheckpoint(taskId);
+    // 移除任务
     this.tasks.delete(taskId);
   }
 
+  /**
+   * 保存上传检查点
+   * @param taskId - 任务ID
+   */
   private saveCheckpoint(taskId: string) {
     const task = this.tasks.get(taskId);
     if (task) {
+      // 将检查点数据持久化存储
       this.store.set(`checkpoints.${taskId}`, task.checkpoint);
     }
   }
 
+  /**
+   * 加载保存的检查点
+   * 用于恢复未完成的上传任务
+   */
   private loadCheckpoints() {
     const checkpoints = this.store.get('checkpoints') as Record<string, CheckpointData>;
     if (checkpoints) {
+      // 遍历所有检查点,恢复上传任务
       Object.entries(checkpoints).forEach(([taskId, checkpoint]) => {
-        // 恢复上传任务
         const task = new UploadTask(
           taskId,
           checkpoint.fileName,
@@ -1788,10 +1850,16 @@ export class UploadManager extends EventEmitter {
     }
   }
 
+  /**
+   * 清理上传检查点
+   * @param taskId - 任务ID
+   */
   private clearCheckpoint(taskId: string) {
     this.store.delete(`checkpoints.${taskId}`);
   }
 }
+
+
 
 ```
 
