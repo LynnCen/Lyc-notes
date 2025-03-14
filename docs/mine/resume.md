@@ -250,7 +250,7 @@
 3. ☁️ **云端资源管理**
    - 采用[流式读写策略](/project/tmm/resources_manner#_1-基本概念)，基于node的FS模块与AWS SDK分片上传接口，[实现大文件下载](/project/tmm/resources_manner#_2-实现架构)、[分片上传](/project/tmm/partFileUpload#分片上传)、[断点续传](/project/tmm/partFileUpload#断点续传)和[并行上传](/project/tmm/partFileUpload#并行上传)。
    - 通过[背压控制](/project/tmm/resources_manner#_3-背压控制)平衡内存与I/O吞吐量，有效解决文件下载卡顿问题。
-   - 采用LUR算法管理本地资源缓存，结合Service Worker实现离线资源预加载。
+   - 采用[LUR算法](/algorithm/LRU)管理本地资源和缓存高频接口数据，可拓展[Service Worker](/browser/渐进式网页应用PWA#什么是-service-worker)实现离线资源预加载。
 
 4. 🔌 **实时通信系统**
    - 基于WebSocket的心跳包与ACK确认机制保证消息可靠性，集成自动重连与离线队列补偿。
