@@ -136,6 +136,365 @@ export interface WSConfig {
 
 ```
 
+### 消息队列
+
+```ts
+// src/core/websocket/MessageQueue.ts
+
+/**
+ * 消息队列管理
+ */
+export class MessageQueue {
+  private queue: Map<string, QueueItem> = new Map();
+  private persistentStorage: Storage;
+
+  constructor() {
+    this.persistentStorage = window.localStorage;
+    this.loadPersistedQueue();
+  }
+
+  /**
+   * 添加消息到队列
+   */
+  add(message: Message): void {
+    const queueItem: QueueItem = {
+      message,
+      status: MessageStatus.PENDING,
+      timestamp: Date.now(),
+      retries: 0
+    };
+    this.queue.set(message.id, queueItem);
+    this.persistQueue();
+  }
+
+  /**
+   * 更新消息状态
+   */
+  updateStatus(messageId: string, status: MessageStatus): void {
+    const item = this.queue.get(messageId);
+    if (item) {
+      item.status = status;
+      if (status === MessageStatus.DELIVERED) {
+        this.queue.delete(messageId);
+      }
+      this.persistQueue();
+    }
+  }
+
+  /**
+   * 获取待发送的消息
+   */
+  getPendingMessages(): QueueItem[] {
+    return Array.from(this.queue.values())
+      .filter(item => item.status === MessageStatus.PENDING);
+  }
+
+  /**
+   * 持久化队列
+   */
+  private persistQueue(): void {
+    const data = Array.from(this.queue.entries());
+    this.persistentStorage.setItem('messageQueue', JSON.stringify(data));
+  }
+
+  /**
+   * 加载持久化的队列
+   */
+  private loadPersistedQueue(): void {
+    const data = this.persistentStorage.getItem('messageQueue');
+    if (data) {
+      const queue = new Map<string, QueueItem>(JSON.parse(data));
+      this.queue = queue;
+    }
+  }
+}
+
+```
+
+### ws链接
+
+```ts
+// src/core/websocket/ReliableWebSocket.ts
+
+export class ReliableWebSocket extends EventEmitter {
+  private ws: WebSocket | null = null;
+  private messageQueue: MessageQueue;
+  private heartbeatTimer: NodeJS.Timeout | null = null;
+  private reconnectTimer: NodeJS.Timeout | null = null;
+  private ackTimeouts: Map<string, NodeJS.Timeout> = new Map();
+  private connected: boolean = false;
+  private connecting: boolean = false;
+
+  constructor(private config: WSConfig) {
+    super();
+    this.messageQueue = new MessageQueue();
+    this.connect();
+  }
+
+  /**
+   * 建立WebSocket连接
+   */
+  private connect(): void {
+    if (this.connected || this.connecting) return;
+
+    this.connecting = true;
+    this.ws = new WebSocket(this.config.url);
+
+    this.ws.onopen = this.handleOpen.bind(this);
+    this.ws.onclose = this.handleClose.bind(this);
+    this.ws.onmessage = this.handleMessage.bind(this);
+    this.ws.onerror = this.handleError.bind(this);
+  }
+
+  /**
+   * 连接建立处理
+   */
+  private handleOpen(): void {
+    this.connected = true;
+    this.connecting = false;
+    
+    // 开始心跳
+    this.startHeartbeat();
+    
+    // 重发未确认的消息
+    this.resendPendingMessages();
+    
+    this.emit('connected');
+  }
+
+  /**
+   * 连接关闭处理
+   */
+  private handleClose(): void {
+    this.connected = false;
+    this.connecting = false;
+    this.stopHeartbeat();
+    this.scheduleReconnect();
+    this.emit('disconnected');
+  }
+
+  /**
+   * 消息处理
+   */
+  private handleMessage(event: MessageEvent): void {
+    try {
+      const message: Message = JSON.parse(event.data);
+      
+      switch (message.type) {
+        case MessageType.ACK:
+          this.handleAck(message);
+          break;
+        case MessageType.HEARTBEAT:
+          this.handleHeartbeat(message);
+          break;
+        case MessageType.DATA:
+          this.handleData(message);
+          break;
+      }
+    } catch (error) {
+      console.error('Failed to parse message:', error);
+    }
+  }
+
+  /**
+   * 错误处理
+   */
+  private handleError(error: Event): void {
+    console.error('WebSocket error:', error);
+    this.emit('error', error);
+  }
+
+  /**
+   * 发送消息
+   */
+  public send(data: any): string {
+    const message: Message = {
+      id: this.generateId(),
+      type: MessageType.DATA,
+      data,
+      timestamp: Date.now()
+    };
+
+    this.messageQueue.add(message);
+
+    if (this.connected) {
+      this.sendMessage(message);
+    }
+
+    return message.id;
+  }
+
+  /**
+   * 发送消息并设置ACK超时
+   */
+  private sendMessage(message: Message): void {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+    try {
+      this.ws.send(JSON.stringify(message));
+      this.messageQueue.updateStatus(message.id, MessageStatus.SENT);
+      this.setAckTimeout(message);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      this.messageQueue.updateStatus(message.id, MessageStatus.FAILED);
+    }
+  }
+
+  /**
+   * 设置ACK超时处理
+   */
+  private setAckTimeout(message: Message): void {
+    const timeout = setTimeout(() => {
+      if (this.messageQueue.getPendingMessages().find(m => m.message.id === message.id)) {
+        this.handleMessageTimeout(message);
+      }
+    }, this.config.ackTimeout);
+
+    this.ackTimeouts.set(message.id, timeout);
+  }
+
+  /**
+   * 处理消息超时
+   */
+  private handleMessageTimeout(message: Message): void {
+    const queueItem = this.messageQueue.getPendingMessages()
+      .find(m => m.message.id === message.id);
+
+    if (queueItem && queueItem.retries < this.config.maxRetries) {
+      queueItem.retries++;
+      this.sendMessage(message);
+    } else {
+      this.messageQueue.updateStatus(message.id, MessageStatus.FAILED);
+      this.emit('messageFailed', message);
+    }
+  }
+
+  /**
+   * 处理ACK消息
+   */
+  private handleAck(ackMessage: Message): void {
+    const messageId = ackMessage.data.messageId;
+    const timeout = this.ackTimeouts.get(messageId);
+    
+    if (timeout) {
+      clearTimeout(timeout);
+      this.ackTimeouts.delete(messageId);
+    }
+
+    this.messageQueue.updateStatus(messageId, MessageStatus.DELIVERED);
+    this.emit('messageDelivered', messageId);
+  }
+
+  /**
+   * 开始心跳
+   */
+  private startHeartbeat(): void {
+    this.heartbeatTimer = setInterval(() => {
+      if (this.connected) {
+        this.sendHeartbeat();
+      }
+    }, this.config.heartbeatInterval);
+  }
+
+  /**
+   * 停止心跳
+   */
+  private stopHeartbeat(): void {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+  }
+
+  /**
+   * 发送心跳消息
+   */
+  private sendHeartbeat(): void {
+    const heartbeat: Message = {
+      id: this.generateId(),
+      type: MessageType.HEARTBEAT,
+      timestamp: Date.now()
+    };
+
+    this.sendMessage(heartbeat);
+  }
+
+  /**
+   * 处理心跳响应
+   */
+  private handleHeartbeat(message: Message): void {
+    // 发送心跳ACK
+    const ack: Message = {
+      id: this.generateId(),
+      type: MessageType.ACK,
+      data: { messageId: message.id },
+      timestamp: Date.now()
+    };
+
+    this.sendMessage(ack);
+  }
+
+  /**
+   * 处理数据消息
+   */
+  private handleData(message: Message): void {
+    // 发送数据消息ACK
+    const ack: Message = {
+      id: this.generateId(),
+      type: MessageType.ACK,
+      data: { messageId: message.id },
+      timestamp: Date.now()
+    };
+
+    this.sendMessage(ack);
+    this.emit('message', message.data);
+  }
+
+  /**
+   * 安排重连
+   */
+  private scheduleReconnect(): void {
+    if (this.reconnectTimer) return;
+
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connect();
+    }, this.config.reconnectInterval);
+  }
+
+  /**
+   * 重发待处理消息
+   */
+  private resendPendingMessages(): void {
+    const pendingMessages = this.messageQueue.getPendingMessages();
+    pendingMessages.forEach(item => {
+      this.sendMessage(item.message);
+    });
+  }
+
+  /**
+   * 生成唯一消息ID
+   */
+  private generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 关闭连接
+   */
+  public close(): void {
+    this.stopHeartbeat();
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    if (this.ws) {
+      this.ws.close();
+    }
+  }
+}
+
+```
 
 ## 通信机制对比
 
