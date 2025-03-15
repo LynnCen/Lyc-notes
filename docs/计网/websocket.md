@@ -142,69 +142,80 @@ export interface WSConfig {
 // src/core/websocket/MessageQueue.ts
 
 /**
- * 消息队列管理
+ * 消息队列管理类
+ * 负责管理消息的添加、状态更新、持久化存储和获取待发送消息。
  */
 export class MessageQueue {
-  private queue: Map<string, QueueItem> = new Map();
-  private persistentStorage: Storage;
+  private queue: Map<string, QueueItem> = new Map(); // 存储消息队列的映射
+  private persistentStorage: Storage; // 持久化存储对象
 
+  /**
+   * 构造函数
+   * 初始化消息队列并加载持久化的消息队列数据。
+   */
   constructor() {
-    this.persistentStorage = window.localStorage;
-    this.loadPersistedQueue();
+    this.persistentStorage = window.localStorage; // 使用 localStorage 作为持久化存储
+    this.loadPersistedQueue(); // 加载持久化的消息队列
   }
 
   /**
-   * 添加消息到队列
+   * 向队列中添加新消息
+   * @param message - 要添加的消息对象
    */
   add(message: Message): void {
     const queueItem: QueueItem = {
       message,
-      status: MessageStatus.PENDING,
-      timestamp: Date.now(),
-      retries: 0
+      status: MessageStatus.PENDING, // 设置初始状态为 PENDING
+      timestamp: Date.now(), // 记录添加时间戳
+      retries: 0 // 初始重试次数为 0
     };
-    this.queue.set(message.id, queueItem);
-    this.persistQueue();
+    this.queue.set(message.id, queueItem); // 将消息添加到队列中
+    this.persistQueue(); // 持久化消息队列
   }
 
   /**
-   * 更新消息状态
+   * 更新特定消息的状态
+   * @param messageId - 要更新状态的消息 ID
+   * @param status - 新的消息状态
    */
   updateStatus(messageId: string, status: MessageStatus): void {
-    const item = this.queue.get(messageId);
+    const item = this.queue.get(messageId); // 获取消息项
     if (item) {
-      item.status = status;
+      item.status = status; // 更新消息状态
       if (status === MessageStatus.DELIVERED) {
-        this.queue.delete(messageId);
+        this.queue.delete(messageId); // 如果状态为 DELIVERED，则从队列中移除
       }
-      this.persistQueue();
+      this.persistQueue(); // 持久化更新后的消息队列
     }
   }
 
   /**
-   * 获取待发送的消息
+   * 获取所有待发送的消息
+   * @returns 返回待发送的消息项数组
    */
   getPendingMessages(): QueueItem[] {
     return Array.from(this.queue.values())
-      .filter(item => item.status === MessageStatus.PENDING);
+      .filter(item => item.status === MessageStatus.PENDING); // 过滤出状态为 PENDING 的消息
   }
 
   /**
-   * 持久化队列
+   * 持久化当前消息队列
+   * 将消息队列数据存储到持久化存储中
    */
   private persistQueue(): void {
-    const data = Array.from(this.queue.entries());
-    this.persistentStorage.setItem('messageQueue', JSON.stringify(data));
+    const data = Array.from(this.queue.entries()); // 将队列转换为数组形式
+    this.persistentStorage.setItem('messageQueue', JSON.stringify(data)); // 存储为 JSON 字符串
   }
 
   /**
-   * 加载持久化的队列
+   * 加载持久化的消息队列
+   * 从持久化存储中恢复消息队列数据
    */
   private loadPersistedQueue(): void {
-    const data = this.persistentStorage.getItem('messageQueue');
+    const data = this.persistentStorage.getItem('messageQueue'); // 获取存储的数据
     if (data) {
-      const queue = new Map<string, QueueItem>(JSON.parse(data));
-      this.queue = queue;
+      const queue = new Map<string, QueueItem>(JSON.parse(data)); // 解析并重建队列
+      this.queue = queue; // 更新当前队列
     }
   }
 }
