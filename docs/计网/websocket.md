@@ -76,6 +76,67 @@ sequenceDiagram
     Server->>Client: Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
 ```
 
+## 具体实现
+
+### 基础类型
+```ts
+// src/core/websocket/types.ts
+
+/**
+ * 消息类型枚举
+ */
+export enum MessageType {
+  HEARTBEAT = 'HEARTBEAT',     // 心跳消息
+  ACK = 'ACK',                 // 确认消息
+  DATA = 'DATA',               // 数据消息
+  RECONNECT = 'RECONNECT'      // 重连消息
+}
+
+/**
+ * 消息状态枚举
+ */
+export enum MessageStatus {
+  PENDING = 'PENDING',         // 待发送
+  SENT = 'SENT',              // 已发送
+  DELIVERED = 'DELIVERED',     // 已送达
+  FAILED = 'FAILED'           // 发送失败
+}
+
+/**
+ * 消息接口
+ */
+export interface Message {
+  id: string;                  // 消息ID
+  type: MessageType;           // 消息类型
+  data?: any;                  // 消息数据
+  timestamp: number;           // 时间戳
+  retry?: number;             // 重试次数
+}
+
+/**
+ * 消息队列项接口
+ */
+export interface QueueItem {
+  message: Message;
+  status: MessageStatus;
+  timestamp: number;
+  retries: number;
+}
+
+/**
+ * WebSocket配置接口
+ */
+export interface WSConfig {
+  url: string;                 // WebSocket连接地址
+  heartbeatInterval: number;   // 心跳间隔(ms)
+  reconnectInterval: number;   // 重连间隔(ms)
+  maxRetries: number;         // 最大重试次数
+  ackTimeout: number;         // ACK超时时间(ms)
+}
+
+```
+
+
 ## 通信机制对比
 
 ### 1. 轮询（Polling）
