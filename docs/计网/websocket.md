@@ -257,57 +257,190 @@ sequenceDiagram
 // src/core/websocket/types.ts
 
 /**
+ * WebSocket事件类型枚举
+ */
+export enum WSEventType {
+  CONNECTED = 'CONNECTED',         // 连接成功
+  DISCONNECTED = 'DISCONNECTED',   // 连接断开
+  RECONNECTING = 'RECONNECTING',   // 重连中
+  RECONNECTED = 'RECONNECTED',     // 重连成功
+  RECONNECT_FAILED = 'RECONNECT_FAILED', // 重连失败
+  ERROR = 'ERROR',                 // 错误
+  MESSAGE = 'MESSAGE'              // 收到消息
+}
+
+/**
  * 消息类型枚举
  */
 export enum MessageType {
-  HEARTBEAT = 'HEARTBEAT',     // 心跳消息
-  ACK = 'ACK',                 // 确认消息
-  DATA = 'DATA',               // 数据消息
-  RECONNECT = 'RECONNECT'      // 重连消息
+  PING = 'PING',           // 心跳请求
+  PONG = 'PONG',          // 心跳响应
+  ACK = 'ACK',            // 消息确认
+  DATA = 'DATA',          // 业务数据
+  SYSTEM = 'SYSTEM'       // 系统消息
 }
 
 /**
  * 消息状态枚举
  */
 export enum MessageStatus {
-  PENDING = 'PENDING',         // 待发送
-  SENT = 'SENT',              // 已发送
-  DELIVERED = 'DELIVERED',     // 已送达
-  FAILED = 'FAILED'           // 发送失败
+  PENDING = 'PENDING',     // 待发送
+  SENT = 'SENT',          // 已发送
+  DELIVERED = 'DELIVERED', // 已送达
+  FAILED = 'FAILED'       // 发送失败
 }
 
 /**
- * 消息接口
+ * 基础消息接口
  */
-export interface Message {
-  id: string;                  // 消息ID
-  type: MessageType;           // 消息类型
-  data?: any;                  // 消息数据
-  timestamp: number;           // 时间戳
-  retry?: number;             // 重试次数
+export interface BaseMessage {
+  id: string;             // 消息唯一标识
+  type: MessageType;      // 消息类型
+  timestamp: number;      // 消息时间戳
 }
+
+/**
+ * 心跳消息接口
+ */
+export interface HeartbeatMessage extends BaseMessage {
+  type: MessageType.PING | MessageType.PONG;
+}
+
+/**
+ * 确认消息接口
+ */
+export interface AckMessage extends BaseMessage {
+  type: MessageType.ACK;
+  messageId: string;      // 被确认的消息ID
+}
+
+/**
+ * 数据消息接口
+ */
+export interface DataMessage extends BaseMessage {
+  type: MessageType.DATA;
+  data: any;             // 消息数据
+  needAck?: boolean;     // 是否需要确认
+}
+
+/**
+ * 系统消息接口
+ */
+export interface SystemMessage extends BaseMessage {
+  type: MessageType.SYSTEM;
+  code: string;          // 系统消息代码
+  data?: any;           // 系统消息数据
+}
+
+/**
+ * 消息类型联合
+ */
+export type Message = HeartbeatMessage | AckMessage | DataMessage | SystemMessage;
 
 /**
  * 消息队列项接口
  */
 export interface QueueItem {
-  message: Message;
-  status: MessageStatus;
-  timestamp: number;
-  retries: number;
+  message: Message;       // 消息内容
+  status: MessageStatus;  // 消息状态
+  timestamp: number;      // 入队时间戳
+  retries: number;       // 重试次数
+  maxRetries?: number;   // 最大重试次数
+  ackTimeout?: number;   // 确认超时时间
 }
 
 /**
- * WebSocket配置接口
+ * 心跳配置接口
  */
-export interface WSConfig {
-  url: string;                 // WebSocket连接地址
-  heartbeatInterval: number;   // 心跳间隔(ms)
-  reconnectInterval: number;   // 重连间隔(ms)
-  maxRetries: number;         // 最大重试次数
-  ackTimeout: number;         // ACK超时时间(ms)
+export interface HeartbeatConfig {
+  interval: number;      // 心跳间隔(ms)
+  timeout: number;       // 心跳超时时间(ms)
 }
 
+/**
+ * 重连配置接口
+ */
+export interface ReconnectConfig {
+  baseInterval: number;  // 基础重连间隔(ms)
+  maxInterval: number;   // 最大重连间隔(ms)
+  maxRetries: number;    // 最大重试次数
+  jitter: number;       // 随机抖动因子(0-1)
+}
+
+/**
+ * 消息队列配置接口
+ */
+export interface MessageQueueConfig {
+  maxSize: number;       // 队列最大容量
+  maxRetries: number;    // 消息最大重试次数
+  ackTimeout: number;    // 消息确认超时时间(ms)
+  persistence: boolean;  // 是否持久化
+}
+
+/**
+ * WebSocket客户端配置接口
+ */
+export interface WebSocketConfig {
+  url: string;                    // WebSocket连接地址
+  heartbeat: HeartbeatConfig;    // 心跳配置
+  reconnect: ReconnectConfig;    // 重连配置
+  queue: MessageQueueConfig;     // 队列配置
+  protocols?: string | string[]; // WebSocket协议
+}
+
+/**
+ * WebSocket事件处理器接口
+ */
+export interface WSEventHandlers {
+  onConnected?: () => void;
+  onDisconnected?: () => void;
+  onReconnecting?: () => void;
+  onReconnected?: () => void;
+  onReconnectFailed?: () => void;
+  onError?: (error: Error) => void;
+  onMessage?: (message: Message) => void;
+}
+
+/**
+ * WebSocket状态枚举
+ */
+export enum WSReadyState {
+  CONNECTING = 0,    // 连接中
+  OPEN = 1,         // 已连接
+  CLOSING = 2,      // 关闭中
+  CLOSED = 3        // 已关闭
+}
+
+/**
+ * WebSocket错误类型
+ */
+export class WSError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public data?: any
+  ) {
+    super(message);
+    this.name = 'WSError';
+  }
+}
+
+/**
+ * 重试策略接口
+ */
+export interface RetryStrategy {
+  canRetry(retryCount: number): boolean;
+  nextDelay(retryCount: number): number;
+}
+
+/**
+ * 消息存储接口
+ */
+export interface MessageStorage {
+  save(messages: QueueItem[]): void;
+  load(): QueueItem[];
+  clear(): void;
+}
 ```
 
 ### 消息队列
