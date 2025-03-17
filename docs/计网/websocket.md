@@ -252,7 +252,7 @@ sequenceDiagram
 
 ## 具体实现
 
-### 基础类型
+### 基础类型types
 ```ts
 // src/core/websocket/types.ts
 
@@ -443,7 +443,7 @@ export interface MessageStorage {
 }
 ```
 
-### 消息队列
+### 消息队列MessageQueue
 
 ```ts
 // src/core/websocket/MessageQueue.ts
@@ -533,74 +533,185 @@ export class MessageQueue {
 
 ```ts
 // src/core/websocket/HeartbeatManager.ts
+
+import { HeartbeatConfig, HeartbeatMessage, MessageType } from './types';
+
+/**
+ * 心跳管理配置接口
+ */
 interface HeartbeatConfig {
-  interval: number;  // 心跳间隔
-  timeout: number;   // 超时时间
+  interval: number;  // 心跳间隔时间(ms)
+  timeout: number;   // 心跳超时时间(ms)
 }
 
 /**
- * 心跳管理类
+ * WebSocket心跳管理类
+ * 负责维护WebSocket连接的心跳机制，包括定时发送心跳包和处理心跳响应
  */
 export class HeartbeatManager {
+  /** 心跳定时器 */
   private heartbeatTimer?: NodeJS.Timeout;
+  
+  /** 心跳响应超时定时器 */
   private pongTimeout?: NodeJS.Timeout;
+  
+  /** 心跳状态标志 */
   private isAlive: boolean = false;
 
+  /**
+   * 构造函数
+   * @param config - 心跳配置
+   * @param sendMessage - 发送消息的回调函数
+   * @param onTimeout - 心跳超时的回调函数
+   */
   constructor(
-    private config: HeartbeatConfig,
-    private sendMessage: (message: any) => void,
-    private onTimeout: () => void
+    private readonly config: HeartbeatConfig,
+    private readonly sendMessage: (message: HeartbeatMessage) => void,
+    private readonly onTimeout: () => void
   ) {}
 
   /**
-   * 启动心跳
+   * 启动心跳机制
+   * 设置定时器，按照配置的间隔时间发送心跳包
    */
-  start(): void {
+  public start(): void {
+    // 设置存活标志
     this.isAlive = true;
+
+    // 清理可能存在的旧定时器
+    this.cleanup();
+
+    // 设置新的心跳定时器
     this.heartbeatTimer = setInterval(() => {
       this.sendHeartbeat();
     }, this.config.interval);
+
+    // 立即发送一次心跳
+    this.sendHeartbeat();
   }
 
   /**
-   * 停止心跳
+   * 停止心跳机制
+   * 清理所有定时器并重置状态
    */
-  stop(): void {
+  public stop(): void {
     this.isAlive = false;
-    if (this.heartbeatTimer) {
-      clearInterval(this.heartbeatTimer);
-      this.heartbeatTimer = undefined;
-    }
-    if (this.pongTimeout) {
-      clearTimeout(this.pongTimeout);
-      this.pongTimeout = undefined;
-    }
+    this.cleanup();
   }
 
   /**
    * 发送心跳包
+   * 发送PING消息并启动超时检测
+   * @private
    */
   private sendHeartbeat(): void {
+    // 检查心跳状态
     if (!this.isAlive) return;
 
-    this.sendMessage({ type: 'ping' });
+    // 发送心跳包
+    this.sendMessage({
+      id: this.generateId(),
+      type: MessageType.PING,
+      timestamp: Date.now()
+    });
     
+    // 设置超时检测
     this.pongTimeout = setTimeout(() => {
-      console.log('Heartbeat timeout');
+      console.log('Heartbeat timeout detected');
       this.onTimeout();
     }, this.config.timeout);
   }
 
   /**
    * 处理心跳响应
+   * 清除超时定时器，表示成功收到PONG响应
    */
-  handlePong(): void {
+  public handlePong(): void {
     if (this.pongTimeout) {
       clearTimeout(this.pongTimeout);
       this.pongTimeout = undefined;
     }
   }
+
+  /**
+   * 清理所有定时器
+   * @private
+   */
+  private cleanup(): void {
+    // 清理心跳定时器
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = undefined;
+    }
+
+    // 清理超时定时器
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+      this.pongTimeout = undefined;
+    }
+  }
+
+  /**
+   * 生成唯一的心跳消息ID
+   * @private
+   * @returns 心跳消息ID
+   */
+  private generateId(): string {
+    return `heartbeat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 获取当前心跳状态
+   * @returns 是否存活
+   */
+  public isActive(): boolean {
+    return this.isAlive;
+  }
+
+  /**
+   * 重置心跳机制
+   * 停止当前心跳并重新启动
+   */
+  public reset(): void {
+    this.stop();
+    this.start();
+  }
+
+  /**
+   * 更新心跳配置
+   * @param config - 新的心跳配置
+   */
+  public updateConfig(config: Partial<HeartbeatConfig>): void {
+    this.config = { ...this.config, ...config };
+    if (this.isAlive) {
+      this.reset();
+    }
+  }
 }
+
+/**
+ * 使用示例:
+ * 
+ * const heartbeat = new HeartbeatManager(
+ *   { interval: 30000, timeout: 5000 },
+ *   (message) => ws.send(JSON.stringify(message)),
+ *   () => ws.close()
+ * );
+ * 
+ * // 启动心跳
+ * heartbeat.start();
+ * 
+ * // 处理PONG响应
+ * ws.onmessage = (event) => {
+ *   const data = JSON.parse(event.data);
+ *   if (data.type === MessageType.PONG) {
+ *     heartbeat.handlePong();
+ *   }
+ * };
+ * 
+ * // 停止心跳
+ * heartbeat.stop();
+ */
 
 ```
 
