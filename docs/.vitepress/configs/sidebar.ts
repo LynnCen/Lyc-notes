@@ -492,7 +492,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
   ],
   '/计网/': [
     {
-      text: '计算机组成原理',
+      text: '计算机网络基础',
       items: [
         {
           text: '第一章 计算机网络体系结构',
@@ -507,6 +507,14 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/计网/chapter3'
         },
       ]
-    }
+    },
+    {
+      text: 'HTTPS',
+      link: '/计网/https'
+    },
+    {
+      text: 'WebSocket',
+      link: '/计网/webSocket'
+    },
   ]
 }
