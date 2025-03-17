@@ -76,6 +76,132 @@ sequenceDiagram
     Server->>Client: Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
 ```
 
+### 心跳机制
+
+**目的：保持长连接活性，检测连接状态，避免因网络波动或服务器超时导致断开。**
+
+**核心思路： 客户端定时发送心跳消息，服务端响应心跳消息，超时未收到响应则认为连接断开。**
+
+实现流程：
+
+(1) 启动心跳
+- 建立连接后启动心跳定时器
+- 定时发送 ping 消息
+- 启动 pong 等待定时器
+
+(2) 接收响应
+- 收到 pong 响应
+- 清除 pong 等待定时器
+- 重置心跳定时器
+
+(3) 超时处理
+- pong 等待超时
+- 标记连接断开
+- 触发重连机制
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Client->>Server: Ping Frame (opcode 0x9)
+    Note over Server: 收到心跳包
+    Server->>Client: Pong Frame (opcode 0xA)
+    Note over Client: 更新最后响应时间
+    Client->>Client: 检查超时状态
+    alt 超时未响应
+        Client->>Client: 触发重连流程
+    end
+```
+
+**实现方式：**
+
+1. WebSocket 内建机制
+
+```ts
+// 浏览器 WebSocket 实现
+- 浏览器会自动处理底层的 ping/pong 帧
+- 对开发者不可见
+- 无法直接控制心跳间隔
+
+// Node.js ws 库
+const WebSocket = require('ws');
+const ws = new WebSocket('ws://example.com');
+
+// 可以直接使用 ping/pong
+ws.ping();
+ws.on('pong', () => {
+  console.log('received pong');
+});
+
+```
+
+2. 自定义心跳
+
+常见情况下需要自己实现心跳的原因：
+- 检测连接状态、保持连接活跃、自定义业务逻辑
+- 自定义心跳间隔、自定义超时处理、重连策略控制
+
+```ts
+// 方式二：应用层心跳(推荐)
+class WS {
+  constructor() {
+    this.ws = new WebSocket('ws://example.com');
+    this.startHeartbeat();
+  }
+
+  startHeartbeat() {
+    this.pingInterval = setInterval(() => {
+      this.send({ type: 'ping' });
+    }, 30000);
+  }
+}
+```
+
+
+
+### 自动重连
+
+**目的：在连接断开时自动重连，避免客户端断开连接后无法接收服务端推送消息。**
+
+**核心思路：检测到连接断开时自动重连，判断是否达到最大重试次数，根据[退避算法](/algorithm/退避算法)控制重试间隔。**
+
+```mermaid
+graph TD
+    A[连接断开] --> B{是否达到最大重试次数?}
+    B -->|否| C[计算退避时间]
+    C --> D[等待随机延迟]
+    D --> E[发起新连接]
+    E --> F{连接成功?}
+    F -->|是| G[重置重试计数器]
+    F -->|否| B
+    B -->|是| H[触发错误事件]
+```
+```ts
+// 使用退避算法
+private scheduleReconnect(): void {
+  if (this.reconnectAttempts >= this.config.maxRetries) {
+    this.emit('reconnectFailed');
+    return;
+  }
+
+  const backoff = new ExponentialBackoff({
+    baseInterval: this.config.reconnectInterval,
+    maxInterval: 30000,
+    jitter: 0.3
+  });
+
+  const delay = backoff.getNextDelay();
+  this.reconnectTimer = setTimeout(() => {
+    this.reconnectAttempts++;
+    this.connect();
+  }, delay);
+}
+```
+
+### 离线队列
+
+
+
 ## 具体实现
 
 ### 基础类型
