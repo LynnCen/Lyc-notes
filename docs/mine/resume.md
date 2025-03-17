@@ -253,7 +253,7 @@
    - 采用[LUR算法](/algorithm/LRU)管理本地资源和缓存高频接口数据，可拓展[Service Worker](/browser/渐进式网页应用PWA#什么是-service-worker)实现离线资源预加载。
 
 4. 🔌 **实时通信系统**
-   - 基于[WebSocket](/计网/websocket)的心跳包与ACK确认机制保证消息可靠性，集成自动重连与离线队列补偿。
+   - 基于[WebSocket](/计网/websocket)的[心跳包](/计网/websocket#心跳机制)与ACK确认机制保证消息可靠性，集成[自动重连](/计网/websocket#自动重连)与[离线队列补偿](/计网/websocket#离线队列)。
    - 应用CAP定理权衡一致性，有效解决多端操作冲突，确保会话状态（置顶/静音）一致性。
 
 5. 🔍 **本地化搜索引擎**
