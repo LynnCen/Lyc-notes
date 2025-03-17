@@ -715,63 +715,100 @@ export class HeartbeatManager {
 
 ```
 
-### 重连管理
+### 重连管理ReconnectManager
 ```ts
+// src/core/websocket/ReconnectManager.ts
+
 import { ExponentialBackoff } from '../backoff/ExponentialBackoff';
 
+/**
+ * 重连配置接口
+ */
 interface ReconnectConfig {
-  baseInterval: number;
-  maxInterval: number;
-  maxRetries: number;
-  jitter: number;
+  baseInterval: number;  // 基础重连间隔时间(ms)
+  maxInterval: number;   // 最大重连间隔时间(ms)
+  maxRetries: number;    // 最大重试次数
+  jitter: number;       // 随机抖动因子(0-1之间)
 }
 
 /**
- * 重连管理类
+ * WebSocket重连管理类
+ * 负责在连接断开时进行自动重连，使用指数退避算法控制重连间隔
  */
 export class ReconnectManager {
+  /** 指数退避算法实例 */
   private backoff: ExponentialBackoff;
+  
+  /** 当前重试次数 */
   private retryCount: number = 0;
+  
+  /** 重连定时器 */
   private retryTimer?: NodeJS.Timeout;
+  
+  /** 是否正在重连中 */
   private isReconnecting: boolean = false;
 
+  /**
+   * 构造函数
+   * @param config - 重连配置
+   * @param onRetry - 重试回调函数，在每次重试时调用
+   * @param onFailed - 重连失败回调函数，在达到最大重试次数时调用
+   */
   constructor(
-    private config: ReconnectConfig,
-    private onRetry: () => void,
-    private onFailed: () => void
+    private readonly config: ReconnectConfig,
+    private readonly onRetry: () => void,
+    private readonly onFailed: () => void
   ) {
+    // 初始化指数退避算法实例
     this.backoff = new ExponentialBackoff(config);
   }
 
   /**
-   * 开始重连
+   * 开始重连流程
+   * 使用指数退避算法计算下一次重连延迟时间
    */
-  start(): void {
-    if (this.isReconnecting) return;
+  public start(): void {
+    // 防止重复启动重连
+    if (this.isReconnecting) {
+      console.log('Reconnection already in progress');
+      return;
+    }
 
+    // 检查是否可以继续重试
     if (!this.backoff.canRetry(this.retryCount)) {
+      console.log('Maximum retry attempts reached');
       this.handleFailed();
       return;
     }
 
+    // 设置重连状态
     this.isReconnecting = true;
+
+    // 计算下一次重连延迟
     const delay = this.backoff.nextDelay(this.retryCount);
     
-    console.log(`Reconnecting in ${delay}ms... (attempt ${this.retryCount + 1})`);
+    console.log(`Reconnecting in ${delay}ms... (attempt ${this.retryCount + 1}/${this.config.maxRetries})`);
 
+    // 设置重连定时器
     this.retryTimer = setTimeout(() => {
+      // 增加重试计数
       this.retryCount++;
+      // 执行重连回调
       this.onRetry();
     }, delay);
   }
 
   /**
    * 重置重连状态
+   * 清除定时器并重置计数器，通常在连接成功后调用
    */
-  reset(): void {
+  public reset(): void {
+    // 重置重试计数
     this.retryCount = 0;
+    // 重置重连状态
     this.isReconnecting = false;
     
+    // 清除重连定时器
     if (this.retryTimer) {
       clearTimeout(this.retryTimer);
       this.retryTimer = undefined;
@@ -780,12 +817,76 @@ export class ReconnectManager {
 
   /**
    * 处理重连失败
+   * 重置状态并触发失败回调
+   * @private
    */
   private handleFailed(): void {
     this.isReconnecting = false;
     this.onFailed();
   }
+
+  /**
+   * 获取当前重试次数
+   * @returns 当前重试次数
+   */
+  public getRetryCount(): number {
+    return this.retryCount;
+  }
+
+  /**
+   * 检查是否正在重连中
+   * @returns 是否正在重连
+   */
+  public isRetrying(): boolean {
+    return this.isReconnecting;
+  }
+
+  /**
+   * 强制停止重连
+   */
+  public stop(): void {
+    this.reset();
+  }
+
+  /**
+   * 更新重连配置
+   * @param config - 新的重连配置
+   */
+  public updateConfig(config: Partial<ReconnectConfig>): void {
+    this.config = { ...this.config, ...config };
+    this.backoff = new ExponentialBackoff(this.config);
+  }
 }
+
+/**
+ * 使用示例:
+ * 
+ * const reconnectManager = new ReconnectManager(
+ *   {
+ *     baseInterval: 1000,   // 初始重连延迟1秒
+ *     maxInterval: 30000,   // 最大重连延迟30秒
+ *     maxRetries: 5,        // 最多重试5次
+ *     jitter: 0.1          // 10%的随机抖动
+ *   },
+ *   () => {
+ *     // 重试回调
+ *     ws.connect();
+ *   },
+ *   () => {
+ *     // 失败回调
+ *     console.log('Reconnection failed after maximum attempts');
+ *   }
+ * );
+ * 
+ * // 开始重连
+ * reconnectManager.start();
+ * 
+ * // 连接成功后重置状态
+ * reconnectManager.reset();
+ * 
+ * // 停止重连
+ * reconnectManager.stop();
+ */
 
 ```
 
