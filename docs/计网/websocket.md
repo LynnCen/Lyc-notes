@@ -1188,3 +1188,7 @@ export class WebSocketClient extends EventEmitter {
 ## 通信机制对比
 
 详情看：[现代Web实时通信技术全景对比：HTTP、WebSocket、SSE、长短轮询](/posts/communicationMechanisms.md)
+
+## 参考
+
+> [RFC-WebSocket](https://datatracker.ietf.org/doc/html/rfc6455#section-5.5.2)
