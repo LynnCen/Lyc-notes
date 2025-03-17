@@ -892,18 +892,48 @@ export class ReconnectManager {
 
 ### WebSocket客户端
 ```ts
+// src/core/websocket/WebSocketClient.ts
+
+import { EventEmitter } from 'events';
+import { MessageQueue } from './MessageQueue';
+import { HeartbeatManager } from './HeartbeatManager';
+import { ReconnectManager } from './ReconnectManager';
+import { 
+  WebSocketConfig, 
+  Message, 
+  MessageStatus, 
+  WSEventType 
+} from './types';
+
+/**
+ * WebSocket 客户端类
+ * 统一管理 WebSocket 连接、心跳检测、自动重连和消息队列
+ * @extends EventEmitter
+ */
 export class WebSocketClient extends EventEmitter {
+  /** WebSocket 实例 */
   private ws: WebSocket | null = null;
+  
+  /** 连接状态标志 */
   private isAlive: boolean = false;
   
+  /** 消息队列管理器 */
   private messageQueue: MessageQueue;
+  
+  /** 心跳管理器 */
   private heartbeatManager: HeartbeatManager;
+  
+  /** 重连管理器 */
   private reconnectManager: ReconnectManager;
 
-  constructor(private config: WebSocketConfig) {
+  /**
+   * 构造函数
+   * @param config - WebSocket 配置项
+   */
+  constructor(private readonly config: WebSocketConfig) {
     super();
     
-    // 初始化消息队列
+    // 初始化消息队列管理器
     this.messageQueue = new MessageQueue();
     
     // 初始化心跳管理器
@@ -917,103 +947,126 @@ export class WebSocketClient extends EventEmitter {
     this.reconnectManager = new ReconnectManager(
       config.reconnect,
       this.connect.bind(this),
-      () => this.emit('reconnectFailed')
+      () => this.emit(WSEventType.RECONNECT_FAILED)
     );
 
+    // 建立初始连接
     this.connect();
   }
 
   /**
-   * 建立连接
+   * 建立 WebSocket 连接
+   * @private
    */
   private connect(): void {
     try {
-      this.ws = new WebSocket(this.config.url);
+      this.ws = new WebSocket(this.config.url, this.config.protocols);
       this.bindEvents();
     } catch (error) {
       console.error('WebSocket connection error:', error);
-      this.handleConnectionError();
+      this.handleConnectionError(error);
     }
   }
 
   /**
-   * 绑定事件
+   * 绑定 WebSocket 事件处理器
+   * @private
    */
   private bindEvents(): void {
     if (!this.ws) return;
 
+    // 连接成功事件
     this.ws.onopen = () => {
       this.isAlive = true;
       this.onConnected();
-      this.emit('connected');
+      this.emit(WSEventType.CONNECTED);
     };
 
-    this.ws.onclose = () => {
+    // 连接关闭事件
+    this.ws.onclose = (event) => {
       this.isAlive = false;
       this.onDisconnected();
-      this.emit('disconnected');
+      this.emit(WSEventType.DISCONNECTED, event);
     };
 
+    // 消息接收事件
     this.ws.onmessage = (event) => {
       this.handleMessage(event.data);
     };
 
+    // 错误事件
     this.ws.onerror = (error) => {
-      this.handleConnectionError();
-      this.emit('error', error);
+      this.handleConnectionError(error);
+      this.emit(WSEventType.ERROR, error);
     };
   }
 
   /**
-   * 处理连接成功
+   * 连接成功后的处理
+   * @private
    */
   private onConnected(): void {
+    // 重置重连状态
     this.reconnectManager.reset();
+    // 启动心跳检测
     this.heartbeatManager.start();
+    // 处理离线消息队列
     this.processPendingMessages();
   }
 
   /**
-   * 处理连接断开
+   * 连接断开后的处理
+   * @private
    */
   private onDisconnected(): void {
+    // 停止心跳检测
     this.heartbeatManager.stop();
+    // 开始重连
     this.reconnectManager.start();
   }
 
   /**
    * 处理心跳超时
+   * @private
    */
   private handleHeartbeatTimeout(): void {
+    console.log('Heartbeat timeout, closing connection');
     this.ws?.close();
   }
 
   /**
    * 处理连接错误
+   * @param error - 错误信息
+   * @private
    */
-  private handleConnectionError(): void {
+  private handleConnectionError(error: any): void {
     this.isAlive = false;
     this.reconnectManager.start();
   }
 
   /**
-   * 处理消息
+   * 处理接收到的消息
+   * @param data - 接收到的原始消息数据
+   * @private
    */
   private handleMessage(data: string): void {
     try {
       const message = JSON.parse(data);
       
+      // 处理心跳响应
       if (message.type === 'pong') {
         this.heartbeatManager.handlePong();
         return;
       }
 
+      // 处理消息确认
       if (message.type === 'ack') {
         this.messageQueue.updateStatus(message.messageId, MessageStatus.DELIVERED);
         return;
       }
 
-      this.emit('message', message);
+      // 触发消息事件
+      this.emit(WSEventType.MESSAGE, message);
     } catch (error) {
       console.error('Failed to parse message:', error);
     }
@@ -1021,6 +1074,8 @@ export class WebSocketClient extends EventEmitter {
 
   /**
    * 处理离线消息队列
+   * 重新发送所有待发送的消息
+   * @private
    */
   private processPendingMessages(): void {
     const pendingMessages = this.messageQueue.getPendingMessages();
@@ -1029,8 +1084,12 @@ export class WebSocketClient extends EventEmitter {
 
   /**
    * 发送消息
+   * 如果连接断开，消息会被加入离线队列
+   * @param message - 要发送的消息
+   * @public
    */
   public send(message: Message): void {
+    // 检查连接状态
     if (!this.isAlive) {
       this.messageQueue.add(message);
       return;
@@ -1045,7 +1104,8 @@ export class WebSocketClient extends EventEmitter {
   }
 
   /**
-   * 手动重连
+   * 手动触发重连
+   * @public
    */
   public reconnectNow(): void {
     this.reconnectManager.reset();
@@ -1053,18 +1113,75 @@ export class WebSocketClient extends EventEmitter {
   }
 
   /**
-   * 关闭连接
+   * 关闭 WebSocket 连接
+   * 清理所有相关资源
+   * @public
    */
   public close(): void {
+    // 停止心跳检测
     this.heartbeatManager.stop();
+    // 停止重连
     this.reconnectManager.reset();
     
+    // 关闭连接
     if (this.ws) {
       this.ws.close();
       this.ws = null;
     }
   }
+
+  /**
+   * 获取连接状态
+   * @returns 当前连接是否存活
+   * @public
+   */
+  public isConnected(): boolean {
+    return this.isAlive;
+  }
+
+  /**
+   * 获取消息队列状态
+   * @returns 待发送的消息数量
+   * @public
+   */
+  public getPendingCount(): number {
+    return this.messageQueue.getPendingMessages().length;
+  }
 }
+
+/**
+ * 使用示例:
+ * 
+ * const wsClient = new WebSocketClient({
+ *   url: 'ws://example.com',
+ *   protocols: ['v1'],
+ *   heartbeat: {
+ *     interval: 30000,
+ *     timeout: 5000
+ *   },
+ *   reconnect: {
+ *     baseInterval: 1000,
+ *     maxInterval: 30000,
+ *     maxRetries: 5,
+ *     jitter: 0.1
+ *   }
+ * });
+ * 
+ * wsClient.on(WSEventType.CONNECTED, () => {
+ *   console.log('Connected to server');
+ * });
+ * 
+ * wsClient.on(WSEventType.MESSAGE, (message) => {
+ *   console.log('Received:', message);
+ * });
+ * 
+ * wsClient.send({
+ *   id: 'msg1',
+ *   type: 'chat',
+ *   data: 'Hello'
+ * });
+ */
+
 ```
 
 
