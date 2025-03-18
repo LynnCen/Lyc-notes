@@ -22,10 +22,12 @@ hero:
       theme: alt
 features:
   - icon: 📖
-    title: WebFrontEnd Interview
-    details: Prepare for the interviews and sum up the most popular interview problems for front-end Web development, full-stack. <small> ( ͡° ͜ʖ ͡°)  </small><br />
-    link: /interview/browser
-    linkText: Common knowledge
+    title: Algorithm
+    details: Explore core algorithms powering modern systems, including 
+      <strong>Exponential Backoff</strong> for resilient network retries and 
+      <strong>LRU Cache</strong> for high-performance memory management.  <small> ( ͡° ͜ʖ ͡°)  </small><br />
+    link: /algorithm/LRU
+    linkText: next
   - icon:
       src: /icons/react.svg
     title: Custom Hooks
@@ -39,11 +41,11 @@ features:
     link: /browser/Chrome架构
     linkText: React Utils
   - icon:
-      src: /icons/048CPU.svg
-    title: 计算机组成原理
+      src: /icons/blogIcon.svg
+    title: Blogs
     details: To do a good job, an artisan needs the best tools<br />Record software, plug-ins, extensions, etc. used in development and daily use
-    link: /组成原理/chapter1
-    linkText: Tools
+    link: /posts/index
+    linkText: next
   - icon:
       src: /icons/数据结构1.svg
     title: 数据结构
