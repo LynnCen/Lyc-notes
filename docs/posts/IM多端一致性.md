@@ -45,6 +45,8 @@ graph TD
 4. 数据覆盖风险：后到达的操作可能错误地覆盖先到达的更重要操作
 
 ### 2.2 状态一致性的技术挑战
+
+
 ```mermaid
 sequenceDiagram
     participant 移动端
@@ -62,3 +64,57 @@ sequenceDiagram
     服务器-->>桌面端: 同步最终状态
 ```
 
+## 三、解决方案设计
+
+### 3.2 分层架构
+
+1. 本地状态层
+ - 状态管理：管理内存中的会话状态
+ - 状态持久化：将状态保存到 IndexedDB
+ - 版本控制：维护状态版本，用于冲突检测
+
+2. 同步层
+ - 实时同步：通过 WebSocket 进行状态同步
+ - 离线队列：管理离线状态更新
+ - 冲突解决：处理多端状态冲突
+
+3. 存储层
+ - 内存缓存：使用 LRU 缓存热点会话
+ - 持久化存储：使用 IndexedDB 存储状态
+ - 队列管理：管理待同步的状态更新
+
+### 3.2 核心流程
+
+```mermaid
+sequenceDiagram
+    participant UI
+    participant LocalState
+    participant SyncQueue
+    participant Server
+    
+    UI->>LocalState: 更新状态(乐观更新)
+    LocalState->>LocalState: 更新内存状态
+    LocalState->>IndexedDB: 持久化状态
+    LocalState->>SyncQueue: 加入同步队列
+    SyncQueue->>Server: 同步到服务器
+    Server-->>SyncQueue: 同步成功/失败
+    SyncQueue-->>LocalState: 更新同步状态
+    LocalState-->>UI: 更新UI状态
+
+```
+### 3.3 解决冲突
+
+```mermaid
+sequenceDiagram
+    participant LocalState
+    participant ConflictResolver
+    participant RemoteState
+    
+    LocalState->>ConflictResolver: 本地状态
+    RemoteState->>ConflictResolver: 远程状态
+    ConflictResolver->>ConflictResolver: 版本比较
+    ConflictResolver->>ConflictResolver: 时间戳比较
+    ConflictResolver->>ConflictResolver: 特殊规则处理
+    ConflictResolver-->>LocalState: 解决后的状态
+
+```
