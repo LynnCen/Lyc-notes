@@ -516,5 +516,55 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: 'WebSocket',
       link: '/计网/webSocket'
     },
-  ]
+  ],
+  '/project/': [
+    {
+      text: '项目总结',
+      link: '/project/index'
+    },
+  ],
+  '/algorithm/': [
+    {
+      text: '退避算法',
+      link: '/algorithm/退避算法'
+    },
+    {
+      text: 'LRU算法',
+      link: '/algorithm/LRU'
+    },
+  ],
+  '/posts/': [
+    {
+      text: '数据预加载',
+      link: '/posts/dataPreFetch'
+    },
+    {
+      text: 'rpx 适配',
+      link: '/posts/rpxTovw'
+    },
+    {
+      text: 'SSG骨架屏',
+      link: '/posts/skelon'
+    },
+    {
+      text: 'unocss插件',
+      link: '/posts/uno-css-jp'
+    },
+    {
+      text: 'Web实时通信技术对比',
+      link: '/posts/communicationMechanisms'
+    },
+    {
+      text: '埋点',
+      link: '/posts/埋点'
+    },
+    {
+      text: '前端性能优化',
+      link: '/posts/性能优化'
+    },
+    {
+      text: '前端渲染模式',
+      link: '/posts/renderMode'
+    }
+  ],
 }
