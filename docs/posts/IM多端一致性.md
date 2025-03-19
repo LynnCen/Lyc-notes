@@ -904,6 +904,147 @@ export class SyncManager {
 
 ### 4.3 冲突解决器
 
+冲突解决器是IM多端一致性方案中的关键组件，负责在多端并发操作产生冲突时，通过一系列算法和规则确定最终一致的状态。它作为同步层的核心部分，直接影响系统的数据一致性和用户体验。
+
+1. **向量时钟冲突检测**
+
+冲突解决器使用向量时钟算法作为主要的冲突检测机制：
+```ts
+private isVectorClockGreater(vc1: {[deviceId: string]: number}, vc2: {[deviceId: string]: number}): boolean {
+  let isGreater = false;
+  
+  // 检查vc1是否大于vc2
+  for (const deviceId in vc1) {
+    if (!(deviceId in vc2) || vc1[deviceId] > vc2[deviceId]) {
+      isGreater = true;
+    } else if (vc1[deviceId] < vc2[deviceId]) {
+      // 如果任一维度小于vc2，则不可能大于
+      return false;
+    }
+  }
+  
+  // 检查vc2是否有vc1没有的设备ID
+  for (const deviceId in vc2) {
+    if (!(deviceId in vc1)) {
+      return false;
+    }
+  }
+  
+  return isGreater;
+}
+```
+向量时钟比较算法具有以下特点：
+
+- 严格偏序关系判断：能准确判断两个操作之间的因果关系
+- 并发操作识别：当两个向量时钟互不大于对方时，表示操作是并发的
+- 分布式时序保证：无需全局时钟，各设备独立维护局部时钟
+
+2. **三层冲突解决策略**
+
+冲突解决器采用三层递进式的冲突解决策略：
+```ts
+resolveConflict(localState: Conversation, remoteState: Conversation): Conversation {
+  // 1. 基于向量时钟比较版本
+  if (this.isVectorClockGreater(remoteState.vectorClock, localState.vectorClock)) {
+    return remoteState;
+  } else if (this.isVectorClockGreater(localState.vectorClock, remoteState.vectorClock)) {
+    return localState;
+  } else {
+    // 2. 无法通过向量时钟确定先后，需要自定义合并策略
+    return this.mergeStates(localState, remoteState);
+  }
+}
+```
+三层策略包括：
+
+- 第一层：向量时钟比较：通过向量时钟直接判断状态的先后关系
+- 第二层：业务规则合并：当向量时钟无法判断时，应用特定业务规则
+- 第三层：最后修改时间：当业务规则无法决定时，使用时间戳作为最后裁决
+
+3. **业务规则合并策略**
+
+针对IM常见操作，冲突解决器实现了针对性的业务规则：
+```ts
+private mergeStates(state1: Conversation, state2: Conversation): Conversation {
+  // 合并向量时钟
+  const mergedVectorClock = this.mergeVectorClocks(state1.vectorClock, state2.vectorClock);
+  
+  // 根据业务规则合并状态
+  return {
+    ...state1,
+    isPinned: state1.isPinned || state2.isPinned,       // 任一端置顶则置顶
+    isMuted: state1.isMuted || state2.isMuted,          // 任一端静音则静音
+    unreadCount: Math.max(state1.unreadCount, state2.unreadCount),
+    lastModified: Math.max(state1.lastModified, state2.lastModified),
+    vectorClock: mergedVectorClock
+  };
+}
+```
+特定业务规则包括：
+
+- 置顶合并规则：任何一端置顶，则最终状态为置顶（或优先原则）
+- 静音合并规则：任何一端静音，则最终状态为静音（或优先原则）
+- 未读数合并规则：取最大值，避免信息丢失
+- 消息合并规则：按时间戳和ID排序，去重合并
+
+4. **向量时钟合并算法**
+
+当需要合并两个并发状态时，冲突解决器会合并向量时钟：
+```ts
+private mergeVectorClocks(vc1: {[deviceId: string]: number}, vc2: {[deviceId: string]: number}): {[deviceId: string]: number} {
+  const result: {[deviceId: string]: number} = {};
+  
+  // 合并所有deviceId
+  const allDeviceIds = new Set([...Object.keys(vc1), ...Object.keys(vc2)]);
+  
+  // 取每个设备ID的最大计数值
+  allDeviceIds.forEach(deviceId => {
+    result[deviceId] = Math.max(vc1[deviceId] || 0, vc2[deviceId] || 0);
+  });
+  
+  return result;
+}
+```
+向量时钟合并保证了：
+
+- 单调递增：合并后的向量时钟必定大于或等于原始的两个向量时钟
+- 收敛性：确保多端多次合并后最终达到一致状态
+- 完整性：包含所有设备的最新版本信息
+
+5. **冲突类型处理**
+冲突解决器针对不同类型的冲突采用不同处理策略：
+
+置顶冲突处理：
+```ts
+// 处理置顶状态冲突
+if (state1.isPinned !== state2.isPinned) {
+  // 采用"置顶优先"策略
+  merged.isPinned = state1.isPinned || state2.isPinned;
+  
+  // 记录冲突解决日志
+  this.logConflictResolution('isPinned', state1.id, 
+                           state1.isPinned, state2.isPinned, merged.isPinned);
+}
+```
+已读状态冲突处理:
+```ts
+// 处理已读状态冲突（取最小值，保证所有消息被读取）
+if (state1.readPosition !== state2.readPosition) {
+  merged.readPosition = Math.max(state1.readPosition, state2.readPosition);
+  
+  // 同时更新未读计数
+  merged.unreadCount = calculateUnreadCount(merged.readPosition, merged.messages);
+}
+```
+
+技术亮点:
+- 数学理论支撑：基于分布式系统理论的向量时钟算法，确保操作的偏序关系判断准确性
+- 多层次冲突解决：从向量时钟到业务规则再到时间戳的层级解决策略，保证冲突必定能够解决
+- 自适应合并策略：根据不同数据字段的业务语义选择不同的合并策略
+- 完备的日志机制：详细记录冲突检测和解决过程，便于问题追踪和调试
+- 统计与优化：收集冲突率和解决情况统计数据，用于不断优化冲突解决策略
+
+**完整代码**
 ```ts
 
 /**
