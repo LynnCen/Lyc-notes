@@ -1,6 +1,6 @@
 # uno-css-jp
 
-> 什么是原子化CSS，UnoCSS又是什么，[重新构想原子化 CSS](/posts/reimagine-atomic-css.md)
+> 什么是原子化CSS，UnoCSS又是什么
 > 
 >参考 antfu.me https://antfu.me/posts/reimagine-atomic-css-zh
 ## uno-css插件

@@ -1,6 +1,6 @@
 # SSR改造实践
 
-> [渲染模式](/posts/csr&ssr&ssg.md)
+> [渲染模式](/posts/renderMode.md)
 
 ## 基于Wormhole的流式SSR改造
 
