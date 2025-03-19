@@ -123,6 +123,106 @@ sequenceDiagram
 
 ### 4.1 本地状态层实现
 
+1. **响应式状态管理**
+
+本地状态层采用MobX实现响应式状态管理，通过`makeAutoObservable`将会话集合标记为可观察对象。这使得UI组件能够自动响应状态变化，无需手动触发渲染更新。
+
+当会话状态发生变化时，所有依赖该状态的UI组件会自动重新渲染，大大简化了状态同步与UI更新的复杂度。
+
+2. **向量时钟冲突检测**
+
+实现采用向量时钟(Vector Clock)算法跟踪多端操作的因果关系。每个设备维护一个计数器映射表，记录所有设备的操作版本号：
+```ts
+  // 更新向量时钟
+    if (!updatedConversation.vectorClock) {
+      updatedConversation.vectorClock = {};
+    }
+    
+    const deviceId = localStorage.getItem('device_id') || 'unknown';
+    updatedConversation.vectorClock[deviceId] = 
+      (updatedConversation.vectorClock[deviceId] || 0) + 1;
+```
+向量时钟机制具有以下优势：
+- 确定操作的偏序关系：通过比较两个向量时钟，可以判断操作之间的因果关系
+- 精确检测并发冲突：当两个向量时钟互不包含时，表示存在并发操作
+- 支持多设备协作：每个设备独立维护自己的计数器，无需中央协调器
+
+3. **事件驱动架构**
+
+状态层采用事件驱动架构，通过事件总线(EventBus)实现各模块之间的松耦合通信：
+```ts
+private subscribeToEvents(): void {
+  // 订阅会话更新事件
+  this.eventBus.on(EventTypes.CONVERSATION_UPDATED, event => {
+    const conversation = event.data as Conversation;
+    this.updateConversation(conversation);
+  });
+  
+  // 订阅同步完成事件
+  this.eventBus.on(EventTypes.SYNC_COMPLETED, () => {
+    this.initialize();
+  });
+}
+```
+这种设计带来以下技术优势：
+
+- 解耦模块依赖：状态层与同步层通过事件通信，无需直接依赖对方的实现
+- 简化异步操作链：事件机制天然支持异步操作流程
+- 增强可观察性：所有状态变更都通过事件广播，便于监控和调试
+- 提高可扩展性：新功能可以通过订阅现有事件快速集成
+
+4. **乐观更新策略**
+
+状态层实现了乐观更新(Optimistic Updates)模式，提升用户操作的响应速度：
+```ts
+async pinConversation(conversationId: string, isPinned: boolean): Promise<void> {
+  // ...
+  // 更新本地状态（立即执行，不等待网络响应）
+  this.updateConversation(updatedConversation);
+  
+  // 持久化到IndexedDB
+  await db.conversations.put(updatedConversation);
+  
+  // 发布事件，通知同步层
+  this.eventBus.emit(EventTypes.CONVERSATION_CHANGED, {
+    type: 'pin',
+    data: updatedConversation
+  });
+}
+```
+乐观更新模式具有以下技术特点：
+
+- 即时反馈：用户操作立即反映在UI上，不等待服务器确认
+- 本地优先：先更新本地状态和持久化存储，再异步同步到服务器
+- 异步同步：通过事件通知同步层进行后台同步，不阻塞用户操作
+- 增强体验：即使在弱网环境下，用户也能感受到流畅的交互体验
+
+5. **本地持久化存储**
+
+状态层利用IndexedDB实现本地持久化存储，确保数据在页面刷新或应用重启后仍然可用：
+```ts
+async initialize(): Promise<void> {
+  this.loading = true;
+  try {
+    const conversations = await db.conversations.toArray();
+    conversations.forEach(conversation => {
+      this.conversations.set(conversation.id, conversation);
+    });
+  } catch (error) {
+    console.error('Failed to load conversations:', error);
+  } finally {
+    this.loading = false;
+  }
+}
+```
+IndexedDB相比其他存储方案的优势：
+
+- 大容量存储：支持存储大量结构化数据，远超LocalStorage的限制
+- 异步API设计：所有操作均为非阻塞，不影响主线程性能
+- 支持复杂查询：提供索引和范围查询能力
+- 事务支持：提供原子性操作，确保数据一致性
+
+**完整代码：**
 ```ts
 // src/core/state/ConversationState.ts
 
