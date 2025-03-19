@@ -1138,7 +1138,226 @@ export class ConflictResolver {
 
 ### 4.4 存储层
 
+存储层是IM多端一致性方案的基础设施组件，提供高效、可靠的数据存储和访问能力。它通过多级缓存设计和智能的数据访问策略，在保证数据持久性的同时提供高性能的数据操作体验。
 
+1. **LRU缓存机制**
+
+> [LRU算法](/algorithms/LRU)
+存储层实现了内存级LRU（最近最少使用）缓存，加速热点会话和消息的访问：
+```ts
+private conversationCache: LRUCache<Conversation>;
+private messageCache: LRUCache<Message[]>;
+
+constructor(
+  private db: IMDatabase,
+  private eventBus: EventBus,
+  private options = {
+    conversationCacheSize: 50, // 默认缓存50个会话
+    messageCacheSize: 20,      // 默认缓存20个会话的消息
+  }
+) {
+  // 初始化LRU缓存
+  this.conversationCache = new LRUCache<Conversation>(options.conversationCacheSize);
+  this.messageCache = new LRUCache<Message[]>(options.messageCacheSize);
+  // ...
+}
+```
+LRU缓存的优势包括：
+
+- 访问性能优化：热点数据常驻内存，减少数据库操作
+- 内存占用控制：自动淘汰不常用数据，防止内存泄漏
+- 缓存命中率统计：收集访问指标，用于性能监控和优化
+- 自适应缓存：可根据设备性能调整缓存大小
+
+2. **多层缓存读写策略**
+
+存储层实现了读写数据时的多层缓存策略：
+```ts
+async getConversation(conversationId: string): Promise<Conversation | undefined> {
+  this.metrics.readOperations++;
+  
+  // 1. 优先从缓存获取
+  const cachedConversation = this.conversationCache.get(conversationId);
+  if (cachedConversation) {
+    this.metrics.cacheHits++;
+    return cachedConversation;
+  }
+  
+  this.metrics.cacheMisses++;
+  
+  // 2. 缓存未命中，从数据库读取
+  try {
+    const conversation = await this.db.conversations.get(conversationId);
+    
+    // 3. 将数据加入缓存
+    if (conversation) {
+      this.conversationCache.put(conversationId, conversation);
+    }
+    
+    return conversation;
+  } catch (error) {
+    console.error(`Failed to get conversation ${conversationId}:`, error);
+    throw new Error(`存储层读取会话失败: ${error.message}`);
+  }
+}
+```
+多层缓存读写策略的特点：
+
+- 缓存优先：先检查内存缓存，减少数据库操作
+- 透明的缓存更新：写操作同时更新缓存和数据库
+- 缓存一致性：通过事件监听保持缓存与数据库的一致性
+- 性能指标收集：记录缓存命中率等指标，用于性能优化
+
+3. **事件驱动的缓存更新**
+
+存储层通过订阅系统事件，实现缓存与数据库的自动同步：
+```ts
+private subscribeToEvents(): void {
+  // 监听会话更新事件，更新缓存
+  this.eventBus.on(EventTypes.CONVERSATION_UPDATED, event => {
+    const conversation = event.data as Conversation;
+    this.conversationCache.put(conversation.id, conversation);
+  });
+  
+  // 监听消息更新事件，更新缓存
+  this.eventBus.on(EventTypes.MESSAGE_UPDATED, event => {
+    const message = event.data as Message;
+    // 更新消息缓存
+    const cachedMessages = this.messageCache.get(message.conversationId);
+    if (cachedMessages) {
+      // 找到并更新对应消息
+      const index = cachedMessages.findIndex(m => m.id === message.id);
+      if (index !== -1) {
+        cachedMessages[index] = message;
+      } else {
+        cachedMessages.push(message);
+      }
+      this.messageCache.put(message.conversationId, cachedMessages);
+    }
+  });
+}
+```
+这种事件驱动的缓存更新机制确保：
+
+- 缓存实时性：缓存数据随系统状态变化实时更新
+- 降低耦合度：通过事件机制解耦缓存更新和业务逻辑
+- 避免重复代码：集中处理缓存更新逻辑，降低维护成本
+- 提高系统响应性：避免频繁的数据库查询操作
+
+4. **故障恢复与重试机制**
+
+存储层实现了错误处理和自动重试机制，提高系统容错性：
+```ts
+private async retryOperation<T>(operation: () => Promise<T>): Promise<T> {
+  this.backoff.reset();
+  
+  while (true) {
+    try {
+      return await operation();
+    } catch (error) {
+      try {
+        // 计算下一次重试延迟
+        const delay = this.backoff.getNextDelay();
+        console.log(`操作失败，将在 ${delay}ms 后重试...`);
+        
+        // 等待指定时间后重试
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } catch (backoffError) {
+        // 达到最大重试次数，抛出原始错误
+        console.error('达到最大重试次数，操作失败:', error);
+        throw error;
+      }
+    }
+  }
+}
+```
+故障恢复与重试机制的特点：
+
+- 自动错误恢复：临时性错误可自动重试，提高系统稳定性
+- [指数退避](/algorithms/退避算法)策略：采用指数级增长的重试间隔，避免系统过载
+- 有限重试次数：设置最大重试次数，防止无限重试消耗资源
+- 透明重试：对上层业务逻辑透明，简化错误处理
+
+5. **批量操作优化**
+
+存储层支持批量消息处理，优化大量数据同步场景：
+
+```ts
+async saveMessages(messages: Message[]): Promise<void> {
+  if (!messages.length) return;
+  
+  try {
+    // 按会话ID分组消息
+    const messagesByConversation = new Map<string, Message[]>();
+    
+    for (const message of messages) {
+      const conversationId = message.conversationId;
+      if (!messagesByConversation.has(conversationId)) {
+        messagesByConversation.set(conversationId, []);
+      }
+      messagesByConversation.get(conversationId)!.push(message);
+    }
+    
+    // 批量保存到数据库
+    await db.messages.bulkPut(messages);
+    
+    // 更新缓存
+    for (const [conversationId, conversationMessages] of messagesByConversation) {
+      const cachedMessages = this.messageCache.get(conversationId);
+      if (cachedMessages) {
+        // 合并消息并重新排序
+        const mergedMessages = [...cachedMessages];
+        
+        for (const message of conversationMessages) {
+          const index = mergedMessages.findIndex(m => m.id === message.id);
+          if (index !== -1) {
+            mergedMessages[index] = message;
+          } else {
+            mergedMessages.push(message);
+          }
+        }
+        
+        // 按时间戳排序
+        mergedMessages.sort((a, b) => b.timestamp - a.timestamp);
+        this.messageCache.put(conversationId, mergedMessages);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to save messages in bulk:', error);
+    throw new Error(`批量保存消息失败: ${error.message}`);
+  }
+}
+```
+
+批量操作的优势：
+
+- 减少数据库事务：将多次操作合并为一次，降低事务开销
+- 提高数据吞吐量：批量处理显著提高数据同步效率
+- 优化缓存更新：批量更新缓存减少缓存失效次数
+- 降低资源消耗：减少数据库连接和上下文切换
+
+6. **重试队列管理**
+
+存储层实现了失败操作的重试队列`processRetryQueue`，确保数据最终一致性.
+
+重试队列管理的特点：
+
+- 持久化重试队列：确保应用重启后仍能继续处理失败操作
+- 渐进式重试策略：随着重试次数增加逐渐延长重试间隔
+- 有限重试保护：设置最大重试次数，避免无限循环
+- 事件通知机制：重试失败后通过事件通知业务层处理
+
+**技术亮点**
+
+- 多级缓存架构：内存LRU缓存与IndexedDB结合，平衡性能与存储容量
+- 智能缓存策略：根据访问模式自动调整缓存内容，提高命中率
+- 容错与自愈能力：通过重试队列和指数退避策略实现系统的自愈能力
+- 异步批处理：支持批量操作，显著提升大批量数据处理性能
+- 完善的指标收集：内置性能监控指标，便于系统调优和问题排查
+- 透明的错误处理：错误重试对上层业务透明，简化应用逻辑复杂度
+
+
+**完整实现**
 ```ts
 // src/core/storage/StorageManager.ts
 
