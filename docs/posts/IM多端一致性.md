@@ -1809,3 +1809,10 @@ export class StorageManager {
   }
 }
 ```
+
+
+## 参考
+
+> [如何保证IM实时消息的“时序性”与“一致性”？](http://www.52im.net/thread-714-1-1.html)
+>
+> [什么是IM系统的消息时序一致性？](https://cloud.tencent.com/developer/article/1740860)
