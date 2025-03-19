@@ -402,6 +402,171 @@ export class ConversationStore {
 
 ### 4.2 同步层实现
 
+同步层是IM多端一致性解决方案的核心组件，负责协调本地状态与服务器状态的同步，确保多端数据最终一致性。其设计遵循"离线优先"理念，在网络波动环境下依然能够提供稳定的数据同步服务。
+
+1. **队列化同步机制**
+
+同步层采用队列化设计，将所有待同步的状态变更放入同步队列，有序处理：
+
+```ts
+async queueForSync(conversation: Conversation): Promise<void> {
+  // 防止重复添加相同ID的会话
+  const existingIndex = this.syncQueue.findIndex(item => item.id === conversation.id);
+  if (existingIndex !== -1) {
+    // 如果存在相同ID的会话，则替换为最新版本
+    this.syncQueue[existingIndex] = conversation;
+  } else {
+    // 添加到队列
+    this.syncQueue.push(conversation);
+  }
+  
+  // 持久化同步队列
+  await this.saveSyncQueue();
+  
+  // 如果在线且未同步中，立即开始同步
+  if (navigator.onLine && !this.isSyncing) {
+    this.syncWithServer();
+  }
+}
+```
+这种设计确保了：
+
+- 有序同步：按照操作顺序同步，防止乱序更新
+- 去重合并：合并对同一会话的多次更新，减少网络请求
+- 持久化队列：将队列保存到IndexedDB，防止页面刷新导致同步丢失
+
+2. **指数退避重试策略**
+
+> [退避算法](/algorithms/退避算法)
+> 
+同步层实现了智能的指数退避重试机制，在网络不稳定时能够自适应调整重试间隔：
+```ts
+try {
+  // 使用指数退避重试
+  const delay = this.backoff.getNextDelay();
+  console.log(`Retrying sync in ${delay}ms...`);
+  
+  this.retryTimeout = setTimeout(() => {
+    this.isSyncing = false;
+    this.syncWithServer();
+  }, delay);
+} catch (backoffError) {
+  // 达到最大重试次数
+  console.error('Max retries exceeded, giving up sync attempt');
+  this.eventBus.emit(EventTypes.SYNC_FAILED, { 
+    error: error,
+    retryExhausted: true
+  });
+}
+```
+该策略提供了以下优势：
+
+- 自适应重试：初始快速重试，失败次数增加后逐渐延长间隔
+- 随机抖动：添加随机延迟，防止多客户端同步风暴
+- 有限重试：设置最大重试次数，避免无限重试消耗资源
+- 退避上限：设置最大延迟间隔，确保合理的用户等待时间
+
+3. **冲突检测与解决**
+
+同步层集成了基于向量时钟的冲突检测与解决机制：
+```ts
+private async mergeServerData(serverConversations: Conversation[]): Promise<void> {
+  // 获取本地所有会话
+  const localConversations = await db.conversations.toArray();
+  const localById = new Map(localConversations.map(c => [c.id, c]));
+  
+  const updates: Conversation[] = [];
+  
+  // 处理每个服务器会话
+  for (const serverConv of serverConversations) {
+    const localConv = localById.get(serverConv.id);
+    
+    if (!localConv) {
+      // 本地没有，直接添加服务器版本
+      updates.push(serverConv);
+    } else {
+      // 本地存在，需要解决冲突
+      const mergedConv = this.conflictResolver.resolveConflict(localConv, serverConv);
+      
+      // 如果合并后的结果与本地不同，则更新本地
+      if (JSON.stringify(mergedConv) !== JSON.stringify(localConv)) {
+        updates.push(mergedConv);
+      }
+    }
+  }
+  
+  // 批量更新本地数据库
+  if (updates.length > 0) {
+    await db.conversations.bulkPut(updates);
+    // 发布批量更新事件
+    this.eventBus.emit(EventTypes.CONVERSATIONS_UPDATED, {
+      type: 'bulkUpdate',
+      data: updates
+    });
+  }
+}
+```
+冲突解决器通过以下策略处理数据冲突：
+
+- 向量时钟比较：判断操作的因果关系和并发性
+- 特定业务规则：对于并发操作，应用预定义的合并规则（如"置顶优先"）
+- 最后写入优先：对于无法通过业务规则解决的冲突，使用时间戳作为最后判断依据
+
+4. **网络状态感知**
+
+同步层能够自动感知网络状态变化，动态调整同步策略：
+```ts
+// 监听在线状态变化
+window.addEventListener('online', this.handleOnline);
+window.addEventListener('offline', this.handleOffline);
+
+private handleOnline = (): void => {
+  console.log('Network connected, starting sync');
+  this.backoff.reset(); // 重置退避状态
+  this.syncWithServer();
+}
+
+private handleOffline = (): void => {
+  console.log('Network disconnected, sync paused');
+  // 清除重试定时器
+  if (this.retryTimeout) {
+    clearTimeout(this.retryTimeout);
+    this.retryTimeout = null;
+  }
+}
+```
+这样设计的好处包括：
+
+- 即时响应网络变化：网络恢复时立即同步，网络断开时暂停重试
+- 优化电池使用：在离线状态下暂停同步尝试，节省设备电量
+- 提高同步成功率：网络恢复后主动发起同步，减少数据延迟
+
+5. **事件通知机制**
+同步层通过事件总线向应用其他部分通知同步状态与结果：
+```ts
+// 发布同步完成事件
+this.eventBus.emit(EventTypes.SYNC_COMPLETED, { success: true });
+
+// 发布部分同步完成事件
+this.eventBus.emit(EventTypes.SYNC_PARTIALLY_COMPLETED, {
+  success: this.syncQueue.length - failedItems.length,
+  failed: failedItems.length
+});
+
+// 发布同步失败事件
+this.eventBus.emit(EventTypes.SYNC_FAILED, { 
+  error: error,
+  retryExhausted: true
+});
+```
+这种事件通知机制使得：
+
+- UI层响应同步状态：界面可以根据同步事件显示适当的加载、成功或错误提示
+- 状态层更新本地数据：同步完成后状态层可以重新加载数据
+- 统计与监控：应用可以收集同步成功率和失败原因，用于质量监控
+- 调试与故障排除：开发人员可以通过监听事件追踪同步流程
+
+**完整实例：**
 ```ts
 // src/core/sync/SyncManager.ts
 
