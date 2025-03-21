@@ -420,7 +420,216 @@ function conversationSorter(a: Conversation, b: Conversation): number {
 位运算是CPU的基本指令，执行速度极快
 
 
-## 四、 技术架构概览
+## 四、Web Worker在本地搜索引擎中的应用
+
+### 4.1 Web Worker的基本概念
+
+Web Worker是HTML5提供的一种在网页脚本中创建后台线程的技术，它允许JavaScript代码在主线程之外的独立线程中运行，实现真正的多线程处理能力。
+
+Web Worker的核心特性：
+
+- 独立线程执行：在浏览器主线程之外单独运行
+- 无法直接操作DOM：不能直接访问或修改页面内容
+- 消息通信机制：通过postMessage和onmessage事件与主线程通信
+- 隔离的上下文：拥有独立的全局上下文，不共享主线程的变量
+- 支持复杂计算：适合执行耗时的数学计算、数据处理等操作
+
+
+### 4.2 为什么Web Worker能避免主线程卡顿
+
+JavaScript最初设计为单线程执行模型，所有任务都在同一线程上排队执行，包括：用户交互、页面渲染、JS执行、DOM操作和网络请求回调
+
+在单线程模型下，如果执行耗时计算（如本地搜索大量数据），会出现明显问题：
+
+- 界面冻结：渲染进程被阻塞，用户点击等操作无法响应
+- 动画卡顿：无法维持流畅的60FPS刷新率
+- 响应延迟：事件处理被推迟，造成明显的交互延迟
+
+### 4.3 Web Worker的并发优势
+
+Web Worker通过创建独立线程，实现真正的并行计算，解决单线程瓶颈：
+
+```mermaid
+graph TB
+    M[主线程] --- A[用户交互]
+    M --- B[页面渲染]
+    M --- D[DOM操作]
+    M <--> W[Web Worker线程]
+    W --- C[复杂计算]
+    W --- F[数据处理]
+    W --- G[索引搜索]
+```
+主要优势包括：
+
+- 计算并行化：搜索操作在后台线程执行，主线程可继续处理用户交互
+- 渲染流畅性：主线程不被阻塞，界面保持响应，动画流畅运行
+- 资源隔离：崩溃隔离，Worker线程出错不影响主应用
+- 性能提升：在多核设备上实现真正的并行计算，提高搜索性能
+
+
+### 4.4 Web Worker在IM中应用
+
+传统方案：
+```ts
+// 传统多步骤查询方法
+async function searchInPinnedConversationsWithMention(keyword, currentUserId) {
+  // 1. 查询所有会话
+  const allConversations = await db.conversations.toArray();
+  
+  // 2. 筛选置顶会话
+  const pinnedConvIds = allConversations
+    .filter(conv => conv.isPinned === true)
+    .map(conv => conv.id);
+  
+  // 3. 获取所有消息
+  const allMessages = await db.messages.toArray();
+  
+  // 4. 内存中筛选符合条件的消息
+  return allMessages.filter(msg => 
+    pinnedConvIds.includes(msg.conversationId) && // 属于置顶会话
+    msg.content.includes(keyword) &&              // 包含关键词
+    msg.mentions && msg.mentions.includes(currentUserId) // @了当前用户
+  );
+}
+```
+这种方法存在严重问题：
+
+- 全表扫描两次（会话表和消息表）
+- 内存占用剧增（加载全部数据）
+- 主线程阻塞（大量计算导致UI卡顿）
+- 随数据量增长性能急剧下降
+
+优化方案：位运算+联合索引+Worker异步计算
+
+```ts
+// 1. 首先定义位标志
+const ConversationFlags = {
+  NONE: 0,               // 00000
+  PINNED: 1 << 0,        // 00001 - 置顶
+  MUTED: 1 << 1,         // 00010 - 静音
+  ARCHIVED: 1 << 2,      // 00100 - 归档
+  HAS_UNREAD: 1 << 3,    // 01000 - 有未读消息
+  HAS_MENTION: 1 << 4    // 10000 - 有@消息
+};
+
+// 2. 创建搜索Worker
+const searchWorker = new Worker('/js/search-worker.js');
+
+// 3. 主线程发起搜索请求
+function searchPinnedWithMention(keyword) {
+  // 显示搜索进度UI
+  showSearchingIndicator();
+  
+  // 发送搜索请求到Worker
+  searchWorker.postMessage({
+    action: 'SEARCH_PINNED_WITH_MENTION',
+    payload: {
+      keyword,
+      currentUserId: getCurrentUserId()
+    }
+  });
+}
+
+// 4. 接收Worker返回的结果
+searchWorker.onmessage = function(event) {
+  const { type, data } = event.data;
+  
+  if (type === 'SEARCH_RESULTS') {
+    // 更新UI显示结果
+    hideSearchingIndicator();
+    renderSearchResults(data.messages);
+    updateResultStats(data.totalCount);
+  } else if (type === 'PROGRESS') {
+    // 更新进度条
+    updateProgressBar(data.progress);
+  }
+};
+
+// 5. Worker中的搜索实现 (search-worker.js)
+self.onmessage = async function(event) {
+  const { action, payload } = event.data;
+  
+  if (action === 'SEARCH_PINNED_WITH_MENTION') {
+    try {
+      const results = await searchPinnedWithMention(
+        payload.keyword, 
+        payload.currentUserId
+      );
+      
+      self.postMessage({
+        type: 'SEARCH_RESULTS',
+        data: results
+      });
+    } catch (error) {
+      self.postMessage({
+        type: 'ERROR',
+        error: error.message
+      });
+    }
+  }
+};
+
+// 6. Worker中的优化搜索实现
+async function searchPinnedWithMention(keyword, currentUserId) {
+  // 步骤一：使用位运算高效过滤置顶会话
+  self.postMessage({ type: 'PROGRESS', data: { progress: 0.1, status: '查找置顶会话...' } });
+  
+  const pinnedConvs = await db.conversations
+    .where('flags')
+    .aboveOrEqual(ConversationFlags.PINNED)  // 使用索引定位
+    .filter(conv => (conv.flags & ConversationFlags.PINNED) !== 0)  // 位运算过滤
+    .toArray();
+  
+  const pinnedIds = pinnedConvs.map(c => c.id);
+  
+  // 步骤二：使用全文搜索索引查找包含关键词的消息
+  self.postMessage({ type: 'PROGRESS', data: { progress: 0.3, status: '搜索关键词...' } });
+  
+  // 将关键词分词处理，提高匹配精度
+  const terms = keyword.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+  let indexResults = [];
+  
+  // 利用term+refType联合索引进行高效查询
+  for (const term of terms) {
+    const results = await db.searchIndex
+      .where('[term+refType]')
+      .between([term, 'message'], [term + '\uffff', 'message'])
+      .toArray();
+    
+    indexResults.push(...results);
+  }
+  
+  // 提取匹配消息ID并去重
+  const matchedMsgIds = [...new Set(indexResults.map(item => item.refId))];
+  
+  // 步骤三：使用消息ID批量获取完整消息记录
+  self.postMessage({ type: 'PROGRESS', data: { progress: 0.6, status: '检查@提及...' } });
+  
+  // 批量获取消息记录，减少数据库交互次数
+  const messages = await db.messages.bulkGet(matchedMsgIds);
+  
+  // 步骤四：过滤只保留置顶会话中且@了当前用户的消息
+  const finalResults = messages.filter(msg => 
+    msg && 
+    pinnedIds.includes(msg.conversationId) && 
+    msg.mentions && 
+    msg.mentions.includes(currentUserId)
+  );
+  
+  // 步骤五：按时间排序结果
+  self.postMessage({ type: 'PROGRESS', data: { progress: 0.9, status: '排序结果...' } });
+  
+  finalResults.sort((a, b) => b.timestamp - a.timestamp);
+  
+  // 返回结果
+  return {
+    messages: finalResults,
+    totalCount: finalResults.length
+  };
+}
+```
+
+## 五、 技术架构概览
 
 本地搜索引擎的核心架构包括三大模块：
 ```mermaid
