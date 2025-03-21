@@ -257,9 +257,9 @@
    - 应用[CAP定理](/posts/IM多端一致性)权衡一致性，有效解决多端操作冲突，确保会话状态（置顶/静音）一致性。
 
 5. 🔍 **[本地化搜索引擎](/project/tmm/local_search)**
-   - 基于IndexDB的多对象存储特性，设计联合索引实现跨表查询优化。
-   - 通过位运算快速过滤优先级会话，减少全表扫描开销。
-   - 使用Web Worker分离计算搜索与主线程渲染，避免卡顿。
+   - 基于IndexDB的多对象存储特性，设计[联合索引](/project/tmm/local_search#二、联合索引的深度解析)实现跨表查询优化。
+   - 通过[位运算](/project/tmm/local_search#三、位运算)快速过滤优先级会话，减少全表扫描开销。
+   - 使用[Web Worker](/project/tmm/local_search#四、web-worker在本地搜索引擎中的应用)分离计算搜索与主线程渲染，避免卡顿。
 
 6. ✍️ **编辑器拓展**
    - 基于Quill的Delta模型开发插件，通过MutationObserver监听光标事件。
