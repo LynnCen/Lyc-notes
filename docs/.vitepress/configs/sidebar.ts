@@ -522,6 +522,40 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: '项目总结',
       link: '/project/index'
     },
+    {
+      text: 'TMM',
+      link: '/project/tmm',
+      items: [
+        {
+          text: 'TMM模块重构与架构设计',
+          link: '/project/tmm/architecture'
+        },
+        {
+          text: '本地化搜索引擎实现',
+          link: '/project/tmm/local_search'
+        },
+        {
+          text: '@功能的高效实现',
+          link: '/project/tmm/mention'
+        },
+        {
+          text: 'ELectron大文件分片上传、断点续传、并行上传',
+          link: '/project/tmm/partFileUpload'
+        },
+        {
+          text: 'TMM性能优化',
+          link: '/project/tmm/performance_optimization'
+        },
+        {
+          text: '基于RBAC模型的群组权限体系设计与实现',
+          link: '/project/tmm/RBAC'
+        },
+        {
+          text: '基于AWS和Node流式大文件下载',
+          link: '/project/tmm/resources_manner'
+        }
+      ]
+    }
   ],
   '/algorithm/': [
     {
