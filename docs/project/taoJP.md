@@ -10,45 +10,41 @@
 
 项目职责：
 
-负责设计和优化逆向物流入口，确保用户在不同订单状态下能够正确选择“仅退款”或“退货退款”选项。
-
-针对未发货、已发货、物流异常等不同场景，制定相应的退款策略和流程。
-
-与物流平台对接，确保在物流异常情况下能够及时下发拒收指令，并引导用户发起仅退款。
-
-处理多子单退款场景，支持部分子单退款和整包仅退款，确保退款流程的灵活性和准确性。
+- 负责设计和优化逆向物流入口，确保用户在不同订单状态下能够正确选择"仅退款"或"退货退款"选项。
+- 针对未发货、已发货、物流异常等不同场景，制定相应的退款策略和流程。
+- 与物流平台对接，确保在物流异常情况下能够及时下发拒收指令，并引导用户发起仅退款。
+- 处理多子单退款场景，支持部分子单退款和整包仅退款，确保退款流程的灵活性和准确性。
 
 项目成果：
 
-实现了全流程包裹维度的逆向入口优化，提升了用户退款申请的便捷性和准确性。
-
-在物流异常场景下，通过引导用户发起仅退款，减少了用户等待时间和纠纷率。
-
-支持多子单部分退款功能，提高了退款处理的灵活性和用户满意度。
+- 实现了全流程包裹维度的逆向入口优化，提升了用户退款申请的便捷性和准确性。
+- 在物流异常场景下，通过引导用户发起仅退款，减少了用户等待时间和纠纷率。
+- 支持多子单部分退款功能，提高了退款处理的灵活性和用户满意度。
 
 技术亮点：
 
-与物流平台深度对接，实现拒收指令的自动下发。
-
-针对不同订单状态和物流场景，设计了差异化的退款策略。
-
-优化了多子单退款流程，支持部分子单退款和整包仅退款，提升了运营效率。
+- 与物流平台深度对接，实现拒收指令的自动下发。
+- 针对不同订单状态和物流场景，设计了差异化的退款策略。
+- 优化了多子单退款流程，支持部分子单退款和整包仅退款，提升了运营效率。
 
 项目影响：
 
-用户退款申请的处理时间缩短了30%，用户满意度提升了20%。
+- 用户退款申请的处理时间缩短了30%，用户满意度提升了20%。
+- 物流异常场景下的纠纷率降低了15%，运营成本得到了有效控制。
 
-物流异常场景下的纠纷率降低了15%，运营成本得到了有效控制。
+---
 
 ## 整体全貌
 
-- 工作流：直接选择用 Def（参考 SuperBuy）。背后逻辑：尽管 Dida 背后也是 Def , 但考虑到 Dida 和 Def 研发体验还是有一定差距，且平台有改造成本 & 大家开发有学习和切换成本，且生产关系上 Dida 不对我们负责，基于短期 & 长期研效最佳的方案的考虑。
-- 基础物料：涉及到的全部 Fork 一轮
-- 监控平台：经过 AE 内部几个团队的调研，综合对比易用性下来，计划使用 aem-sg（参考 SuperBuy）
-- 性能：基于 CSR 架构的性能优化方案，后续长期再看 SSR 、流式 SSR 等。
-- 图片：背后 Filebroker，业务层使用 开发的上传平台
-  ○ 由于目前日本站的域名还在申请中，因此先到纵横平台上传图片资源，后续域名开通后，再将图片资源上传到诺亚提供的上传平台，再对项目中的链接做替换。
-- 搭建：本期不涉及
+- **工作流**：直接选择用 Def（参考 SuperBuy）。背后逻辑：尽管 Dida 背后也是 Def , 但考虑到 Dida 和 Def 研发体验还是有一定差距，且平台有改造成本 & 大家开发有学习和切换成本，且生产关系上 Dida 不对我们负责，基于短期 & 长期研效最佳的方案的考虑。
+- **基础物料**：涉及到的全部 Fork 一轮
+- **监控平台**：经过 AE 内部几个团队的调研，综合对比易用性下来，计划使用 aem-sg（参考 SuperBuy）
+- **性能**：基于 CSR 架构的性能优化方案，后续长期再看 SSR 、流式 SSR 等。
+- **图片**：背后 Filebroker，业务层使用 开发的上传平台
+  - 由于目前日本站的域名还在申请中，因此先到纵横平台上传图片资源，后续域名开通后，再将图片资源上传到诺亚提供的上传平台，再对项目中的链接做替换。
+- **搭建**：本期不涉及
+
+---
 
 ## 研发流程
 
@@ -59,7 +55,6 @@ document.tsx配置
 主要是 aplus 接入以及域名配置，可以直接复制
 
 ```js
-
 /**
  * The page's HTML template structure, using JSX.
  */
@@ -124,6 +119,7 @@ createAEM({
 });
 export const aes = getAESInstance();
 ```
+
 ```ts
 // api
 import { sendRequest,initMtop} from "@ali/odin-jp-api";
@@ -143,7 +139,6 @@ export const getStartRendData = (params:any) => {
 ```
 
 ```ts
-
 // tracker
 import { tracker } from "@ali/odin-jp-api";
 export const click = (type: string, values?: any) => {
@@ -177,6 +172,7 @@ export const click = (type: string, values?: any) => {
 
 新建应用，选择【关联仓库】 & 【pages.tao.co】 域名
 
+---
 
 ## 基础物料
 
@@ -256,10 +252,10 @@ ConfigProvider.config({
       "color-brand-disable": "#ccc"
     }
   });
-  ```
+```
 
-  ```less
-  :root {
+```less
+:root {
   --color-brand-primary: #333;
   --color-brand-primary2: #ff4513;
   --color-brand-disable: #ffcec1;
@@ -274,8 +270,8 @@ ConfigProvider.config({
   --color-grey-5: #f9f9f6;
   --color-grey-6: #757575;
   --color-grey-10: #191919;
-  }
-  ```
+}
+```
 
 **根据ui稿定制样式，修改样式变量**
 
@@ -285,80 +281,6 @@ ConfigProvider.config({
 @btn-slim-active-bg-color: #dbdbdb;
 @btn-primary-active-bg-color: #e23246;
 @btn-default-active-bg-color: #e4cdce;
-@btn-default-active-color: #e23246;
-@btn-brand-bg-color: var(--color-brand-bg, '#fff');
-@btn-brand-disable-bg-color: var(--color-brand-disable, '#FFB5BB');
-@color-white: var(--color-white, '#fff');
-@color-transparent: var(--color-Transparent, 'rgba(0,0,0,0)');
-@font-size-md: 30rpx;
-@font-size-smller: 20rpx;
-@padding-inline-lg: 18rpx;
-
-.default-active() {
-  background: @btn-default-active-bg-color;
-  border-color: @btn-default-active-bg-color;
-  color: @btn-default-active-color;
-}
-```
-
-
-#### uno-css 预设主题
-
-为了快速开发，参考[tailwindcss](https://tailwind.nodejs.cn/docs/text-color)的类名(欢迎补充)导出了一份JP站点移动端预设配置，参考如下:
-
-```tsx
-// >>第一步<< 配置ice.config.mts
-import Unocss from '@ice/plugin-unocss';
-// JP移动站点预设配置
-import presetJP from '@ali/odin-jp-api/lib/presets/preset-jp.js'
-
-export default defineConfig(() => ({
-  // ...
-  plugins: [
-    // ...
-    Unocss({
-      presets: [presetJP.default]
-    })
-  ],
-  // ...
-}))
-
-// >>第二步<< 组件怎么写
-const Component: FC = () => {
-
-  return (
-    // 自定义的css module
-    <div className={styles.container}>
-      // 预设样式里的数值类均已转换成rpx;色值类将优先跟随@ali/odin-ui的主题色
-      // 以下等同于 padding-left: 7rpx;margin-top: 8rpx;color: var(--color-function-3-2, #ff8214) 
-      <div className='pl-7 mt-8 text-12 text-orange'>文本</div>
-    </div>
-  );
-};
-
-```
-
-#### html骨架图
-
-**为什么要设置骨架屏？**
-
-> 为了提升用户体验，在真实DOM渲染之前，我们需要先生成一张骨架图，并将其绘制到页面上。
-
-https://tmg-odin.pages.alibaba-inc.com/usage/skelon
-
-[核心原理](../posts/skelon.md)
-
-
-### @ali/odin-jp-icon
-
-**[icon-generate实现原理](./generate_icon.md)**
-
-合并了@ali/comet-icon和@ali/comet-icons两个icon库，icon详情
-
-icon统一用最新的iconfont，均以Tbj为前缀，icon详情
-```tsx
-import { TbjIcAdd } from '@ali/odin-jp-icon';
-<TbjIcAdd style={{ fontSize: '16px', color: '#08c' }} />;
 ```
 
 #### icon更新方案
@@ -367,7 +289,10 @@ import { TbjIcAdd } from '@ali/odin-jp-icon';
 
 注意：名字需要和Japan_TAO中的icon名字一致（不区分大小写），因为默认从该项目中拉取icon
 
-
+```tsx
+import { TbjIcAdd } from '@ali/odin-jp-icon';
+<TbjIcAdd style={{ fontSize: '16px', color: '#08c' }} />;
+```
 
 ### @ali/odin-jp-hook
 
@@ -460,6 +385,8 @@ const Uid = cookie.getMemberId();
 
 https://tmg-odin.pages.alibaba-inc.com/windvane
 
+---
+
 ## 性能
 
 ### 性能监控
@@ -515,6 +442,8 @@ import AESPluginAutolog from '@ali/aes-tracker-plugin-autolog';
 
 
 **Dataprefetch**
+
+---
 
 ## 稳定性
 
@@ -604,6 +533,8 @@ aplus点击埋点
 
 ● A+采集工作台：https://log2.alibaba-inc.com/track?tenantId=10&spm=aplus_put_channel.29903622.0.0 
 ● A+流量分析：https://aplus2.alibaba-inc.com/platform/dashboard?spm=aplus_put_channel.29903622.0.0 
+
+---
 
 ## APP 容器能力
 
