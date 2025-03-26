@@ -4,13 +4,11 @@
 
 各位老师好，我叫蔡忠岭，今年26岁，毕业于丽水学院数字媒体技术专业。本科期间我系统学习了计算机相关等核心课程，并积极参与项目实践，培养了扎实的编程能力和工程化思维。
 
-在过去三年，我一直在互联网行业从事前端开发工作，主导或参与了多个复杂项目。
+在过去三年，我一直在互联网行业从事前端开发工作，主导或参与了多个复杂项目。主要负责跨境电商逆向退款、AI智能客服、PC端实时聊天等项目。
 
-主要负责跨境电商逆向退款、AI智能客服、PC端实时聊天等项目。
+我热爱技术钻研，吹毛求疵，习惯通过编写博客总结工作中的问题与解决方案，同时坚持每天学习英语，能够熟练阅读技术文档。业余时间我喜欢健身、弹吉他和做饭，这些爱好让我保持了良好的抗压能力和创造力。
 
-我热爱技术钻研，习惯通过编写博客总结工作中的问题与解决方案，同时坚持每天学习英语，能够熟练阅读技术文档。业余时间我喜欢健身、弹吉他，这些爱好让我保持了良好的抗压能力和创造力。
-
-目前，我希望在人工智能、大模型等领域深入探索，将工业界的实践经验与学术理论结合。复旦大学在计算机领域的研究实力令我向往，如果能有机会在这里学习，我将全力以赴，为未来的技术突破贡献自己的力量。
+复旦大学在计算机领域的研究实力令我向往，未来，我希望在人工智能、大模型等领域深入探索，将工作中的实践经验与学术理论结合，为未来的技术突破贡献自己的力量。如果能有机会在这里学习，我将全力以赴。
 
 谢谢各位老师！
 
@@ -19,11 +17,11 @@
 
 Good morning, Dear professors！Its a great honor for me to have a this chance for interview.
 
-I'm Zhongling Caijing. I'm 26 years old. I come form Neijiang Sichuan province. I graduated from Lishui  university, majoring in Digital Media Technology.
+I'm Zhongling Caijing. I'm 26 years old. I come form Neijiang Sichuan province. I graduated from Lishui university, majoring in Digital Media Technology.
 
 In the past three years, I have been working in the internet industry as a web-front-end developer, leading or participating in multiple complex projects. I mainly contributed to the e-commerce reverse refund, AI intelligent customer service, and PC real-time chat projects. I love technology research, I like to read technical documents and participate in writing blogs to summarize the problems and solutions in the work. 
 
-In my spare time, I like to exercise, play guitar and  cooking that keep me healthy and creative. 
+In my spare time, I like to exercise, playing the guitar and cooking that keep me healthy and creative. 
 
 If i am lucky enough to be a postgraduate student at Fudan University, i will study harder and be strict with myself. I will make my best effort to combine the industrial experience with the theoretical approach and contribute my strength to the future technical breakthrough.
 
