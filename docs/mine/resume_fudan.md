@@ -15,6 +15,19 @@
 谢谢各位老师！
 
 
+## 英文自我介绍
+
+Good morning, Dear professors！Its a great honor for me to have a this chance for interview.
+
+I'm Zhongling Caijing. I'm 26 years old. I come form Neijiang Sichuan province. I graduated from Lishui  university, majoring in Digital Media Technology.
+
+In the past three years, I have been working in the internet industry as a web-front-end developer, leading or participating in multiple complex projects. I mainly contributed to the e-commerce reverse refund, AI intelligent customer service, and PC real-time chat projects. I love technology research, I like to read technical documents and participate in writing blogs to summarize the problems and solutions in the work. 
+
+In my spare time, I like to exercise, play guitar and  cooking that keep me healthy and creative. 
+
+If i am lucky enough to be a postgraduate student at Fudan University, i will study harder and be strict with myself. I will make my best effort to combine the industrial experience with the theoretical approach and contribute my strength to the future technical breakthrough.
+
+The above is my self-introduction. Thank you for your attention!
 
 ## 📮 基本信息
 | **字段** | **内容**           |
