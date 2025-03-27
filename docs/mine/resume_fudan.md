@@ -19,7 +19,7 @@ Good morning, Dear professors！Its a great honor for me to have a this chance f
 
 I'm Zhongling Caijing. I'm 26 years old. I come form Neijiang Sichuan province. I graduated from Lishui university, majoring in Digital Media Technology.
 
-In the past three years, I have been working in the internet industry as a web-front-end developer, leading or participating in multiple complex projects. I mainly contributed to the e-commerce reverse refund, AI intelligent customer service, and PC real-time chat projects. I love technology research, I like to read technical documents and participate in writing blogs to summarize the problems and solutions in the work. 
+In the past three years, I have been working in the internet industry as a web-front-end developer, leading and participating in multiple complex projects. I mainly contributed to the e-commerce reverse refund, AI intelligent customer service, and PC real-time chat projects. I love technology research, I like to read technical documents and participate in writing blogs to summarize the problems and solutions in the work. 
 
 In my spare time, I like to exercise, playing the guitar and cooking that keep me healthy and creative. 
 
