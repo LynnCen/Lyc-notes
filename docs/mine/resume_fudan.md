@@ -37,8 +37,6 @@ The above is my self-introduction. Thank you for your attention!
 | 电话     | 17369797751        |
 | 邮箱     | 279818304@qq.com   |
 
-
-
 ## 🎓 教育经历
 **丽水学院 · 数字媒体技术**  
 `2017.09 - 2021.06`  
