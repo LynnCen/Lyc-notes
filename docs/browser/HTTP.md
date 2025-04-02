@@ -1,18 +1,222 @@
-# HTTP 请求流程
+# HTTP 请求流程详解
 
-## 浏览器端发起 HTTP 请求流程
+HTTP（超文本传输协议）是Web应用程序的基础，理解其工作原理对于开发高效的Web应用至关重要。本文将详细解析HTTP请求的完整生命周期，从浏览器发起请求到服务器响应的全过程。
 
-#### 构建请求
+```mermaid
+sequenceDiagram
+    autonumber
+    participant 用户
+    participant 浏览器
+    participant DNS系统
+    participant 缓存层
+    participant 服务器
+    
+    用户->>浏览器: 输入URL或点击链接
+    浏览器->>浏览器: 解析URL(协议、域名、路径、参数等)
+    
+    浏览器->>缓存层: 查找浏览器缓存
+    alt 找到有效缓存
+        缓存层-->>浏览器: 返回缓存资源
+        浏览器-->>用户: 渲染页面
+    else 无缓存或缓存失效
+        浏览器->>DNS系统: 发起DNS查询
+        DNS系统-->>浏览器: 返回目标IP地址
+        
+        浏览器->>浏览器: TCP队列排队检查(同域名最多6个连接)
+        
+        浏览器->>服务器: TCP三次握手
+        服务器-->>浏览器: 建立TCP连接
+        
+        浏览器->>服务器: 发送HTTP请求(请求行、请求头、请求体)
+        
+        服务器->>服务器: 处理请求
+        服务器-->>浏览器: 返回HTTP响应(状态行、响应头、响应体)
+        
+        alt 状态码为重定向(301/302/307/308等)
+            浏览器->>浏览器: 获取Location头部新地址
+            浏览器->>浏览器: 重新发起请求
+        else 状态码为成功(200)
+            浏览器->>浏览器: 解析响应内容
+            浏览器->>缓存层: 根据响应头决定是否缓存
+            浏览器-->>用户: 渲染页面
+        else 状态码为错误(4xx/5xx)
+            浏览器-->>用户: 显示错误信息
+        end
+        
+        alt Connection: Keep-Alive
+            浏览器->>服务器: 保持连接以复用
+        else Connection: Close
+            浏览器->>服务器: TCP四次挥手
+            服务器-->>浏览器: 关闭连接
+        end
+    end
+```
+## 一、浏览器端发起 HTTP 请求流程
 
-首先，浏览器构建请求行信息（如下所示），构建好后，浏览器准备发起网络请求。
+### 1.1 URL解析
+在用户输入URL或点击链接后，浏览器首先需要解析URL的各个组成部分：
 
+```text
+https://www.example.com:443/path/resource.html?query=example#section
+|      |        |       |   |                   |           |
+协议    子域名    主域名   端口  路径              查询参数     片段标识符
+```
+- 协议：指定使用的通信协议，如HTTP或HTTPS
+- 域名：标识资源所在的服务器
+- 端口：指定服务器上的通信端口，HTTP默认80，HTTPS默认443
+- 路径：指向服务器上的具体资源位置
+- 查询参数：提供额外的请求信息
+- 片段标识符：指向页面内的特定部分
+
+### 1.2 请求构建
+
+浏览器根据解析后的URL信息构建HTTP请求，这包括三个核心部分： 请求行、请求头、请求体.
+
+**请求行：**
 ```js
 GET /index.html HTTP1.1
 ```
+- HTTP方法（如GET、POST、PUT、DELETE等）
+- 请求URL路径
+- HTTP协议版本
 
-#### 查找缓存
+**请求头**
+```json
+Host: www.example.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+Accept: text/html,application/xhtml+xml,application/xml
+Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+Cookie: session=abc123; user_id=456
+Cache-Control: max-age=0
+```
+每个请求头字段都有特定的用途：
+
+- Host: 指定请求的目标主机和端口
+- User-Agent: 标识发起请求的客户端软件
+- Accept: 表明客户端能够处理的内容类型
+- Cookie: 携带之前服务器设置的状态信息
+- Cache-Control: 指定缓存机制
+
+**请求体：**
+
+对于POST、PUT等方法，请求体包含发送到服务器的数据内容：
+```text
+// 表单提交示例 (application/x-www-form-urlencoded)
+username=johndoe&password=secret
+
+// JSON数据示例 (application/json)
+{
+  "username": "johndoe",
+  "password": "secret"
+}
+```
+### 1.3 查找缓存
+
 
 在真正发起网络请求之前，浏览器会先在浏览器缓存中查询是否有要请求的文件。其中，**浏览器缓存是一种在本地保存资源副本，以供下次请求时直接使用的技术**。
+
+缓存的层级结构包括：
+
+1. 内存缓存（Memory Cache）
+
+- 存储位置：RAM内存中
+- 特点：读取速度最快，但容量有限，且页面关闭后失效
+- 适用场景：频繁访问的小型资源，如页面内多次引用的图片、脚本等
+- 优先级：最高
+
+2. 磁盘缓存（Disk Cache）
+
+- 存储位置：硬盘上
+- 特点：容量大，持久化存储，但读取速度比内存慢
+- 适用场景：大型资源和不太频繁访问的资源
+- 优先级：次之
+
+3. Service Worker 缓存
+
+- 存储位置：由JavaScript控制的可编程缓存
+- 特点：支持离线访问，可以精确控制缓存策略
+- 适用场景：PWA应用，需要离线功能的网站
+- 优先级：取决于Service Worker的具体实现
+
+4. HTTP缓存（强缓存和协商缓存）
+
+- 存储位置：通常在磁盘上
+- 特点：由HTTP协议头部控制的标准缓存机制
+- 适用场景：几乎所有Web资源
+
+浏览器判断缓存是否可用的流程：
+
+```mermaid
+flowchart TD
+    A[开始请求资源] --> B{检查Service Worker}
+    B -->|有匹配规则| C[返回Service Worker控制的缓存]
+    B -->|无匹配规则| D{检查内存缓存}
+    D -->|找到并有效| E[使用内存缓存]
+    D -->|未找到或失效| F{检查磁盘缓存}
+    F -->|找到并有效| G[使用磁盘缓存]
+    F -->|未找到或失效| H{检查强缓存是否有效}
+    H -->|有效| I[使用缓存资源]
+    H -->|无效| J{检查是否有协商缓存信息}
+    J -->|有| K[发送条件请求]
+    J -->|无| L[发送普通请求]
+    K --> M{服务器返回304?}
+    M -->|是| N[更新缓存时间戳\n使用缓存资源]
+    M -->|否| O[使用新响应\n更新缓存]
+    L --> O
+```
+
+**强缓存(Strong Cache)：**强缓存是指在缓存有效期内，浏览器直接使用缓存而不与服务器进行任何交互。
+特点：
+
+- 完全不向服务器发送请求，直接从本地加载资源
+- 响应状态码显示为200（但通常带有"from disk cache"或"from memory cache"标记）
+- 网络面板中可能显示为"(disk cache)"或"(memory cache)"
+
+控制方式：
+
+1. Cache-Control（HTTP/1.1）
+```text
+Cache-Control: max-age=3600  // 缓存3600秒（1小时）
+Cache-Control: public        // 可被任何缓存区缓存
+Cache-Control: private       // 只能被浏览器缓存
+Cache-Control: no-cache      // 每次使用前需要校验
+Cache-Control: no-store      // 不缓存任何内容
+```
+2. Expires（HTTP/1.0）
+```text
+Expires: Wed, 21 Oct 2023 07:28:00 GMT  // 具体过期时间
+```
+优先级： Cache-Control 优先级高于 Expires
+
+
+**协商缓存 (Negotiation Cache)：**协商缓存是指浏览器需要向服务器发送请求来确认缓存是否仍然有效。
+
+特点：
+
+- 需要发送请求到服务器进行校验
+- 如果资源未变化，返回304状态码，浏览器继续使用缓存
+- 如果资源已变化，返回200状态码和最新资源内容
+
+控制方式：
+
+1. ETag/If-None-Match（优先级更高）
+
+```text
+ETag: 资源的唯一标识符，类似指纹
+If-None-Match: 客户端发送的ETag值
+服务器响应头：ETag: "33a64df551425fcc55e4d42a148795d9f25f89d4"（资源的唯一标识符，类似指纹）
+浏览器请求头：If-None-Match: "33a64df551425fcc55e4d42a148795d9f25f89d4"
+```
+
+2. Last-Modified/If-Modified-Since
+```text
+Last-Modified: 资源的最后修改时间
+If-Modified-Since: 客户端发送的最后修改时间
+服务器响应头：Last-Modified: Wed, 21 Oct 2023 07:28:00 GMT（资源最后修改时间）
+浏览器请求头：If-Modified-Since: Wed, 21 Oct 2023 07:28:00 GMT
+```
 
 当浏览器发现请求的资源已经在浏览器缓存中存有副本，它会拦截请求，返回该资源的副本，并直接结束请求，而不会再去源服务器重新下载。这样做的好处有：
 
