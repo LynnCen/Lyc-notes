@@ -224,7 +224,7 @@ If-Modified-Since: 客户端发送的最后修改时间
 - 对于网站来说，缓存是实现快速资源加载的重要组成部分
   当然，如果缓存查找失败，就会进入网络请求过程了。
 
-#### 准备 IP 地址和端口
+### 1.4  DNS解析
 
 浏览器使用**HTTP 协议作为应用层协议**，用来封装请求的文本信息；并使用**TCP/IP 作传输层协议**将它发到网络上，所以在 HTTP 工作开始之前，浏览器需要通过 TCP 与服务器建立连接。也就是说**HTTP 的内容是通过 TCP 的传输数据阶段来实现的**，你可以结合下图更好地理解这二者的关系。
 
@@ -238,19 +238,85 @@ If-Modified-Since: 客户端发送的最后修改时间
 
 拿到 IP 之后，接下来就需要获取端口号了。通常情况下，如果 URL 没有特别指明端口号，那么 HTTP 协议默认是 80 端口。
 
-#### 等待 TCP 队列
+DNS查询遵循一个分层的解析过程：
+```mermaid
+flowchart TD
+    A[开始DNS解析] --> B{浏览器DNS缓存?}
+    B -->|有| Z[返回缓存的IP]
+    B -->|无| C{本地hosts文件?}
+    C -->|有| Z
+    C -->|无| D{系统DNS缓存?}
+    D -->|有| Z
+    D -->|无| E{本地DNS服务器?}
+    E -->|有| Z
+    E -->|无| F{根域名服务器?}
+    F --> G{顶级域名服务器?}
+    G --> H{权威域名服务器?}
+    H --> I[获取IP地址]
+    I --> J[缓存结果]
+    J --> Z
+```
+DNS解析过程是递归和迭代相结合的：
+
+1. 递归查询：本地DNS服务器代表客户端进行完整的域名解析
+2. 迭代查询：DNS服务器返回下一级名称服务器的地址，客户端逐级查询
+
+**DNS优化技术**
+
+- DNS预解析：通过`<link rel="dns-prefetch" href="https://example.com">`提前解析域名
+- DNS缓存：将解析结果缓存，减少重复查询
+- 并行DNS查询：同时发起多个DNS请求
+- 智能DNS决策：基于网络情况选择最佳DNS服务器
+
+
+### 1.5 TCP连接建立
 
 现在已经把端口和 IP 地址都准备好了，那么下一步是不是可以建立 TCP 连接了呢？
 
 答案依然是“不行”。Chrome 有个机制，同一个域名同时最多只能建立 6 个 TCP 连接，如果在同一个域名下同时有 10 个请求发生，那么其中 4 个请求会进入排队等待状态，直至进行中的请求完成。
 
+
+**TCP队列管理**
+
+现代浏览器限制对同一域名的并发连接数（通常为6个），这是为了：
+- 防止对服务器造成过大压力
+- 避免网络拥塞
+- 公平分配网络资源
+
+当存在超过限制的请求时，浏览器将剩余请求放入队列中等待：
+
+```mermaid
+flowchart LR
+    A[新HTTP请求] --> B{当前连接数<6?}
+    B -->|是| C[立即建立TCP连接]
+    B -->|否| D[放入等待队列]
+    D --> E[监听连接释放]
+    E --> F{有空闲连接?}
+    F -->|是| C
+```
+
+
 当然，如果当前请求数量少于 6，会直接进入下一步，建立 TCP 连接。
 
-#### 建立 TCP 连接
+TCP建立连接的过程包括以下关键步骤([详情见TCP](./TCP协议.md))：
 
-排队等待结束之后，终于可以快乐地和服务器握手了，在 HTTP 工作开始之前，浏览器通过 TCP 与服务器建立连接。
+```mermaid
+sequenceDiagram
+    participant Client as 浏览器
+    participant Server as 服务器
+    
+    Note over Client,Server: TCP三次握手
+    Client->>Server: SYN=1, Seq=x
+    Note right of Client: 第1次握手: 客户端发送SYN报文，进入SYN_SENT状态
+    Server->>Client: SYN=1, ACK=1, Seq=y, Ack=x+1
+    Note left of Server: 第2次握手: 服务器回应SYN+ACK报文，进入SYN_RCVD状态
+    Client->>Server: ACK=1, Seq=x+1, Ack=y+1
+    Note right of Client: 第3次握手: 客户端发送ACK报文，双方进入ESTABLISHED状态
+    
+    Note over Client,Server: 连接建立完成，开始数据传输
+```
 
-#### 发送 HTTP 请求
+### 1.6 发送 HTTP 请求
 
 一旦建立了 TCP 连接，浏览器就可以和服务器进行通信了。而 HTTP 中的数据正是在这个通信过程中传输的。
 
@@ -260,11 +326,69 @@ If-Modified-Since: 客户端发送的最后修改时间
 
 另外一个常用的请求方法是 POST，它用于发送一些数据给服务器，比如登录一个网站，就需要通过 POST 方法把用户信息发送给服务器。如果使用 POST 方法，那么浏览器还要准备数据给服务器，这里准备的数据是通过请求体来发送。
 
+
 在浏览器发送请求行命令之后，还要以请求头形式发送其他一些信息，把浏览器的一些基础信息告诉服务器。比如包含了浏览器所使用的操作系统、浏览器内核等信息，以及当前请求的域名信息、浏览器端的 Cookie 信息，等等。
 
-## 服务器端处理 HTTP 请求流程
+常见HTTP方法及其用途：
 
-#### 返回请求
+- GET：获取资源，参数在URL中，幂等
+- POST：创建资源，数据在请求体中
+- PUT：更新资源，数据在请求体中，幂等
+- DELETE：删除资源，幂等
+- PATCH：部分更新资源
+- HEAD：仅获取响应头，不返回响应体
+- OPTIONS：询问服务器支持的方法和选项
+
+除了基本请求头外，现代Web应用还会使用许多特殊用途的请求头：
+
+安全相关：
+
+- Authorization: 身份验证凭证
+- Content-Security-Policy: 内容安全策略
+- X-CSRF-Token: 跨站请求伪造保护令牌
+
+内容协商：
+
+- Accept-Language: 首选语言
+- Accept-Encoding: 支持的压缩算法
+
+跨域资源共享：
+
+- Origin: 请求源
+- Access-Control-Request-Method: 预检请求中声明的HTTP方法
+- Access-Control-Request-Headers: 预检请求中声明的HTTP头
+
+性能优化：
+
+- Connection: keep-alive: 保持连接以复用
+- Upgrade-Insecure-Requests: 告知服务器客户端支持HTTPS
+
+## 二、服务器端处理 HTTP 请求流程
+
+### 2.1 接收与解析请求
+
+当服务器接收到来自客户端的HTTP请求后，首先需要进行请求的解析工作：
+
+1. 解析请求行：提取HTTP方法、URL路径和协议版本
+```text
+GET /index.html HTTP/1.1
+```
+2. 解析请求头：将头部信息转换成键值对形式
+```text
+Host: example.com
+User-Agent: Mozilla/5.0 ...
+Cookie: sessionid=abc123
+```
+
+3. 解析请求体（如果存在）：根据Content-Type头部确定如何解析
+  
+- application/x-www-form-urlencoded: 表单数据
+- application/json: JSON数据
+- multipart/form-data: 文件上传
+- 其他格式数据
+
+
+### 2.2 返回请求
 
 ![alt text](./img/服务器响应的数据格式.png)
 
@@ -279,7 +403,7 @@ If-Modified-Since: 客户端发送的最后修改时间
 
 发送完响应头后，服务器就可以继续发送响应体的数据，通常，响应体就包含了 HTML 的实际内容。
 
-#### 断开连接
+### 2.3 断开连接
 
 通常情况下，一旦服务器向客户端返回了请求数据，它就要关闭 TCP 连接。不过如果浏览器或者服务器在其头信息中加入了：
 
@@ -289,7 +413,7 @@ Connection: Keep - Alive
 
 那么 TCP 连接在发送后将仍然保持打开状态，这样浏览器就可以继续通过同一个 TCP 连接发送请求。**保持 TCP 连接可以省去下次请求时需要建立连接的时间，提升资源加载速度**。比如，一个 Web 页面中内嵌的图片就都来自同一个 Web 站点，如果初始化了一个持久连接，你就可以复用该连接，以请求其他资源，而不需要重新再建立新的 TCP 连接。
 
-#### 重定向
+### 2.4 重定向
 
 ![alt text](./img/重定向.png)
 
