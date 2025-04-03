@@ -13,8 +13,8 @@
         <p><strong class="text-gray-700">姓　　名</strong>：<span class="text-gray-900">蔡忠岭</span></p>
         <p><strong class="text-gray-700">年　　龄</strong>：<span class="text-gray-900">26 岁</span></p>
         <p><strong class="text-gray-700">性　　别</strong>：<span class="text-gray-900">男</span></p>
-        <p><strong class="text-gray-700">学　　校</strong>：<span class="text-gray-900">丽水学院</span></p>
-        <p><strong class="text-gray-700">专　　业</strong>：<span class="text-gray-900">数字媒体技术/计算机系</span></p>
+        <p><strong class="text-gray-700">学　　校</strong>：<span class="text-gray-900">复旦大学</span></p>
+        <p><strong class="text-gray-700">专　　业</strong>：<span class="text-gray-900">电子信息/软件学院</span></p>
       </div>
     </td>
     <td class="p-4 border border-gray-200">
@@ -31,37 +31,38 @@
 
 ## 🛠 专业技能
 
-<div class="skills-container space-y-6 p-4 bg-white rounded-lg shadow-lg">
-  <div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow">
-    <h3 class="text-xl font-bold text-blue-600 mb-3 flex items-center">
+
+
+<div class="skills-container space-y-6 p-4 bg-white rounded-lg shadow-lg"><div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow">
+    <h3 class="text-xl font-bold text-blue-600 mb-3flex items-center">
       <span class="mr-2">💻</span> 前端基础
     </h3>
-    <ul class="space-y-2 text-gray-700">
+    <ul class="space-y-2 text-gray-700"><li class="flex items-start">
+        <span class="mr-2">•</span>熟练掌握HTML5/ES6+、CSS预处理器（Less/Sass）和原子化（Tailwind），熟悉响应式布局与模块开发
+      </li>
       <li class="flex items-start">
-        <span class="mr-2">•</span>
-        熟练掌握 CSS、HTML、JavaScript 和 ES6+ 新特性，对页面布局和模块化有丰富经验
+        <span class="mr-2">•</span>熟练掌握TypeScript，保障代码健壮性和可维护性
       </li>
       <li class="flex items-start">
         <span class="mr-2">•</span>
-        TypeScript 重度使用者，具备良好的类型编程能力
+        熟悉浏览器渲染原理、JS运行机制、浏览器调试工具、性能分析工具以及性能优化
       </li>
     </ul>
   </div>
 
-  <div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow">
-    <h3 class="text-xl font-bold text-green-600 mb-3 flex items-center">
+  <div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow"><h3 class="text-xl font-bold text-green-600 mb-3 flex items-center">
       <span class="mr-2">⚛️</span> 框架生态
     </h3>
     <ul class="space-y-2 text-gray-700">
       <li class="flex items-start">
         <span class="mr-2">•</span>
-        熟悉 React 框架并深入研究其实现原理，熟练使用 Mobx、Redux 等状态管理方案
+        深度掌握React生态（Hooks、Fiber架构），熟练掌握Mobx/Context等状态管理
       </li>
       <li class="flex items-start">
-        <span class="mr-2">•</span>
-        熟练使用 Antd、Echarts、AntV、ElementUI、TDesign 等主流 UI 框架
-      </li>
-    </ul>
+        <span class="mr-2">•</span>熟练使用Antd、Fusion等主流UI框架，参与和维护Monorepo组件库设计和开发
+      </li><li class="flex items-start">
+        <span class="mr-2">•</span>擅长全链路SSR/SSG架构设计，实现过自动化图标管理、多语言国际化、低代码配置平台
+      </li></ul>
   </div>
 
   <div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow">
@@ -71,27 +72,22 @@
     <ul class="space-y-2 text-gray-700">
       <li class="flex items-start">
         <span class="mr-2">•</span>
-        掌握 Vite、Webpack 等构建工具，具备从 0 到 1 的项目搭建和优化经验
+        熟悉Vite/Webpack构建配置与优化，掌握AEM埋点和异常监控体系
       </li>
       <li class="flex items-start">
         <span class="mr-2">•</span>
-        具备 Electron 桌面端、React Native 移动端和 H5 混合开发等跨端开发经验
-      </li>
+        具备Electron桌面端、React Native移动端及Hybrid H5开发经验，支持多端一致性交互</li>
       <li class="flex items-start">
         <span class="mr-2">•</span>
-        了解 Node.js 并善于使用其编写提效工具脚本
+        掌握Node开发脚本工具及中间层服务，提升开发效率
       </li>
     </ul>
-  </div>
-
-  <div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow">
-    <h3 class="text-xl font-bold text-yellow-600 mb-3 flex items-center">
+  </div><div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow"><h3 class="text-xl font-bold text-yellow-600 mb-3 flex items-center">
       <span class="mr-2">🗺</span> 地图开发
     </h3>
     <ul class="space-y-2 text-gray-700">
-      <li class="flex items-start">
-        <span class="mr-2">•</span>
-        具备高德地图、天地图和 Cesium 三维地图开发经验
+      <li class="flex items-start"><span class="mr-2">•</span>
+        熟悉高德地图、天地图API集成，具备Cesium三维可视化开发经验
       </li>
     </ul>
   </div>
@@ -101,18 +97,38 @@
       <span class="mr-2">💡</span> 底层原理
     </h3>
     <ul class="space-y-2 text-gray-700">
-      <li class="flex items-start">
-        <span class="mr-2">•</span>
-        深入理解浏览器运行原理、JavaScript 运行机制
+      <li class="flex items-start"><span class="mr-2">•</span>
+        计算机基础知识扎实，熟悉网络协议（HTTP/TCP/Websocket）、数据结构与算法
       </li>
       <li class="flex items-start">
         <span class="mr-2">•</span>
-        熟练使用浏览器调试工具和性能分析工具进行问题排查与优化
+        了解操作系统原理和组成原理，能将理论应用于复杂业务场景（如高并发通信、状态机设计和内存管理）
+      </li>
+    </ul>
+  </div>
+  
+  <div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow">
+    <h3 class="text-xl font-bold text-indigo-600 mb-3flex items-center"><span class="mr-2">🤖</span> AI工具应用</h3>
+    <ul class="space-y-2 text-gray-700">
+      <li class="flex items-start">
+        <span class="mr-2">•</span>
+        熟练应用现代AI工具辅助开发流程，包括Cursor、GitHub Copilot、DS和ChatGPT等，提升20%-30%开发效率</li>
+    </ul>
+  </div>
+  <div class="skill-section bg-gray-50 p-4 rounded-md hover:shadow-md transition-shadow">
+    <h3 class="text-xl font-bold text-teal-600mb-3 flex items-center">
+      <span class="mr-2">📚</span> 学习与沉淀</h3>
+    <ul class="space-y-2text-gray-700"><li class="flex items-start">
+        <span class="mr-2">•</span>
+        坚持技术博客输出（累计50+篇），善于反思总结技术难点
+      </li>
+      <li class="flex items-start">
+        <span class="mr-2">•</span>
+        具备良好的英语能力、丰富的词汇量（坚持背单词1200+天），能熟练独立阅读英文技术文档，国外社交论坛常驻
       </li>
     </ul>
   </div>
 </div>
-
 ---
 
 ## 🌟 个人优势
