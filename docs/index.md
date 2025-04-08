@@ -3,12 +3,12 @@ layout: home
 layoutClass: 'm-home-layout'
 
 hero:
-  name: 林岑LynnCen
+  name: Lynn Cen
   text: Web Developer Blog
-  tagline: LynnCen daily record
+  tagline: Exploring the digital frontier, one line of code at a time
   image:
     src: /LynnCenLogo.png
-    alt: 林岑LynnCen
+    alt: Lynn Cen
   actions:
     - text: About Me
       link: /mine/about
@@ -23,45 +23,45 @@ hero:
 features:
   - icon:
       src: /icons/blogIcon.svg
-    title: Blogs
-    details: To do a good job, an artisan needs the best tools<br />Record software, plug-ins, extensions, etc. used in development and daily use
+    title: Developer Tools
+    details: The right tools make all the difference. Discover software, plugins, and extensions that enhance productivity and streamline development workflows.
     link: /posts/index
-    linkText: next
+    linkText: Explore
   - icon: 📖
-    title: Algorithm
-    details: Explore core algorithms powering modern systems, including 
-      <strong>Exponential Backoff</strong> for resilient network retries and 
-      <strong>LRU Cache</strong> for high-performance memory management.  <small> ( ͡° ͜ʖ ͡°)  </small><br />
+    title: Algorithms & Data Structures
+    details: Dive into the core algorithms powering modern systems, including 
+      <strong>Exponential Backoff</strong> for resilient networking and 
+      <strong>LRU Cache</strong> for optimized memory management. <small> ( ͡° ͜ʖ ͡°) </small><br />
     link: /algorithm/LRU
-    linkText: next
+    linkText: Learn More
   - icon:
       src: /icons/react.svg
-    title: Custom Hooks
-    details: Learn ReactHooks (づ｡◕‿‿◕｡)づ  <br /> make something customizing hooks 🚀
+    title: React Ecosystem
+    details: Master the art of React Hooks (づ｡◕‿‿◕｡)づ <br /> Discover powerful custom hooks to supercharge your applications 🚀
     link: /react/customHook/hooks
-    linkText: hooks
+    linkText: Discover
   - icon:
       src: /icons/浏览器.svg
-    title: Browser
-    details: Cheatsheets for experienced React developers getting started with TypeScript</small><br /> Incredible magic o_o ....
+    title: Browser Insights
+    details: Uncover the inner workings of modern browsers and performance optimization techniques <br /> Witness the incredible magic behind web rendering o_o ....
     link: /browser/Chrome架构
-    linkText: React Utils
+    linkText: Explore
   - icon:
       src: /icons/数据结构1.svg
-    title: ComputerBasics
-    details: The pitfalls we stepped on over the years<br />There are always some questions that surprise you
+    title: Computer Science Fundamentals
+    details: Essential knowledge that forms the foundation of software engineering <br /> Tackling surprising challenges and common pitfalls
     link: /computerBasics/index
-    linkText: ಥ_ಥ
+    linkText: Dive In
   - icon:
       src: /icons/Postgraduate。.svg
-    title: Postgraduate。
-    details: <small class="bottom-small">Gods determine what you're going to be</small>
+    title: Academic Journey
+    details: <small class="bottom-small">Charting the path through higher education and research</small>
     link: /Postgraduate/school
     linkText: ▶►
 ---
 
 <style>
-/*爱的魔力转圈圈*/
+/*Magical rotation effect*/
 .m-home-layout .image-src:hover {
   transform: translate(-50%, -50%) rotate(666turn);
   transition: transform 59s 1s cubic-bezier(0.3, 0, 0.8, 1);
