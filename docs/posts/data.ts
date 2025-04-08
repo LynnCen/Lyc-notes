@@ -22,12 +22,6 @@ export const data: NavData[] = [
         link: '/posts/dataPreFetch',
       },
       {
-        icon: '🔄',
-        title: 'IM多端一致性',
-        desc: '在即时通讯（IM）系统中，用户通常会在多个终端（手机、平板、电脑）同时登录，这就带来了会话状态（如置顶、静音、未读计数等）如何在多端保持一致的问题。本文将从分布式系统的CAP理论出发，探讨IM场景下的多端一致性解决方案，并提供基于TypeScript和IndexedDB的实现代码。',
-        link: '/posts/IM多端一致性',
-      },
-      {
         icon: '🎨',
         title: '现代前端渲染模式',
         desc: '本文将详细介绍现代前端框架中的三种主要渲染模式:CSR(客户端渲染)、SSR(服务端渲染)和SSG(静态站点生成),分析它们各自的优缺点和适用场景。',
@@ -73,6 +67,12 @@ export const data: NavData[] = [
         title: 'IM性能优化',
         desc: '通过虚拟列表、消息分页加载、图片懒加载等技术优化IM系统性能,重点解决大量消息渲染和滚动卡顿问题',
         link: '/project/tmm/performance_optimization',
+      },
+      {
+        icon: '🔄',
+        title: 'IM多端一致性',
+        desc: '在即时通讯（IM）系统中，用户通常会在多个终端（手机、平板、电脑）同时登录，这就带来了会话状态（如置顶、静音、未读计数等）如何在多端保持一致的问题。本文将从分布式系统的CAP理论出发，探讨IM场景下的多端一致性解决方案，并提供基于TypeScript和IndexedDB的实现代码。',
+        link: '/posts/IM多端一致性',
       },
       {
         icon: '',

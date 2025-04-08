@@ -21,6 +21,12 @@ hero:
       link: /test
       theme: alt
 features:
+  - icon:
+      src: /icons/blogIcon.svg
+    title: Blogs
+    details: To do a good job, an artisan needs the best tools<br />Record software, plug-ins, extensions, etc. used in development and daily use
+    link: /posts/index
+    linkText: next
   - icon: 📖
     title: Algorithm
     details: Explore core algorithms powering modern systems, including 
@@ -41,16 +47,10 @@ features:
     link: /browser/Chrome架构
     linkText: React Utils
   - icon:
-      src: /icons/blogIcon.svg
-    title: Blogs
-    details: To do a good job, an artisan needs the best tools<br />Record software, plug-ins, extensions, etc. used in development and daily use
-    link: /posts/index
-    linkText: next
-  - icon:
       src: /icons/数据结构1.svg
-    title: 数据结构
+    title: ComputerBasics
     details: The pitfalls we stepped on over the years<br />There are always some questions that surprise you
-    link: /dataStructure/chapter1
+    link: /computerBasics/index
     linkText: ಥ_ಥ
   - icon:
       src: /icons/Postgraduate。.svg
