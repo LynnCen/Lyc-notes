@@ -565,7 +565,6 @@ export class AgoraRtc {
 
 ## AI智能客服
 ### 架构设计图
-![alt text](./img/AI智能客服架构.png)
 ```mermaid
 graph TD
     subgraph "低代码配置平台"
