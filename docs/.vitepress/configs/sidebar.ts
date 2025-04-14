@@ -284,25 +284,31 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
   ],
   '/webpack/': [
     {
-      text: 'WebPack基础篇',
-      link: '/webpack/basic'
+      text: 'WebPack',
+      items: [
+        {
+          text: '基础篇',
+          link: '/webpack/basic'
+        },
+        {
+          text: '实战篇',
+          link: '/webpack/practice'
+        },
+        {
+          text: '优化篇',
+          link: '/webpack/optimization'
+        },
+        {
+          text: '原理篇',
+          link: '/webpack/principle'
+        },
+        {
+          text: '性能优化',
+          link: '/webpack/performance'
+        },
+      ]
     },
-    {
-      text: 'WebPack实战篇',
-      link: '/webpack/practice'
-    },
-    {
-      text: 'WebPack优化篇',
-      link: '/webpack/optimization'
-    },
-    {
-      text: 'WebPack原理篇',
-      link: '/webpack/principle'
-    },
-    {
-      text: 'WebPack性能优化',
-      link: '/webpack/performance'
-    },
+
   ],
   '/browser/': [
     {
