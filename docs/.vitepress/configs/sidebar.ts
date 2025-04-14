@@ -292,6 +292,14 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       link: '/webpack/practice'
     },
     {
+      text: 'WebPack优化篇',
+      link: '/webpack/optimization'
+    },
+    {
+      text: 'WebPack原理篇',
+      link: '/webpack/principle'
+    },
+    {
       text: 'WebPack性能优化',
       link: '/webpack/performance'
     },

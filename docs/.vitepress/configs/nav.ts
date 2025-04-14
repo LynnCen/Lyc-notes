@@ -105,10 +105,19 @@ export const nav: DefaultTheme.Config['nav'] = [
         link: 'webpack/performance'
       },
       {
+        text: 'Node',
+        activeMatch: '/node/',
+        link: 'node/packages'
+      },
+      {
         text: 'Vite',
-        items: [
-
-        ]
+        activeMatch: '/vite/',
+        link: 'vite/basic'
+      },
+      {
+        text: 'Git',
+        activeMatch: '/git/',
+        link: 'git/basic'
       }
     ],
   },
