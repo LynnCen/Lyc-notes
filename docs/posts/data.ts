@@ -10,6 +10,12 @@ export const data: NavData[] = [
     title: '前端杂记',
     items: [
       {
+        icon: '🎯',
+        title: 'Vite为什么比Webpack快',
+        desc: '本文介绍了Vite相对于Webpack的优势,包括更快的启动时间、更高效的模块解析和更优的构建速度,并提供了Vite的配置示例。',
+        link: '/posts/compareViteAndWebpack',
+      },
+      {
         icon: '📡',
         title: 'HTTP、WebSocket、SSE、长短轮询',
         desc: '现代Web实时通信技术全景对比：HTTP、WebSocket、SSE、长短轮询',
@@ -45,12 +51,7 @@ export const data: NavData[] = [
         desc: '本文介绍了原子化CSS的概念以及UnoCSS的使用方法,并提供了一个自定义UnoCSS插件的实现示例,用于支持rpx单位和常用样式类。',
         link: '/posts/uno-css-jp',
       },
-      {
-        icon: '🎯',
-        title: 'Vite为什么比Webpack快',
-        desc: '本文介绍了Vite相对于Webpack的优势,包括更快的启动时间、更高效的模块解析和更优的构建速度,并提供了Vite的配置示例。',
-        link: '/posts/compareViteAndWebpack',
-      },
+
     ],
   },
   {
