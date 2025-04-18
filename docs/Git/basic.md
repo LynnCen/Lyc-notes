@@ -16,7 +16,7 @@ git init
 
 `git reset --soft HEAD^`
 
-### User
+### 身份信息
 
 github 贡献值不显示问题：
 
