@@ -17,6 +17,30 @@
 5.  **发布规范**：对于要发布到 npm 公共或私有仓库的包，`package.json` 是必需的，它规定了包的入口、包含的文件等。
 6.  **环境配置**：可以指定项目运行所需的 Node.js 版本、操作系统等。
 
+### package.json 在 Node.js 生态系统中的位置
+
+```mermaid
+graph TD
+    A[Developer] -->|创建/编辑| B[package.json]
+    B -->|定义| C[项目元数据]
+    B -->|声明| D[依赖管理]
+    B -->|配置| E[脚本命令]
+    B -->|指定| F[发布设置]
+    
+    D -->|读取| G[npm/yarn/pnpm]
+    G -->|安装| H[node_modules]
+    H -->|提供| I[第三方库]
+    
+    E -->|执行| J[构建/测试/开发]
+    
+    B -->|发布时使用| K[npm Registry]
+    K -->|供其他项目使用| D
+    
+    style B fill:#ff9,stroke:#333,stroke-width:2px
+    style G fill:#9cf,stroke:#333,stroke-width:1px
+    style K fill:#f9c,stroke:#333,stroke-width:1px
+```
+
 无论你是刚入门的初学者，还是有一定经验的开发者，深入理解 `package.json` 的各个字段都将极大地提升你对 Node.js 生态和项目管理的掌控力。
 
 ---
@@ -144,12 +168,54 @@
 
 这是 `package.json` 最核心的功能之一，用于声明项目所需的外部库。
 
+#### 依赖类型可视化
+
+```mermaid
+graph TD
+    A[package.json] --> B[dependencies]
+    A --> C[devDependencies]
+    A --> D[peerDependencies]
+    A --> E[optionalDependencies]
+    A --> F[bundledDependencies]
+    
+    B -->|"生产环境<br>（随包发布或部署）"| G[最终用户应用]
+    C -->|"仅开发环境<br>（构建、测试、工具）"| H[开发者工作流]
+    D -->|"宿主项目提供<br>（避免多实例）"| I[插件/扩展机制]
+    E -->|"可能缺失<br>（需要处理）"| J[增强功能]
+    F -->|"打包在发布包内<br>（确保可用）"| K[固定依赖]
+    
+    style A fill:#f96,stroke:#333,stroke-width:2px
+    style B fill:#6f6,stroke:#333
+    style C fill:#66f,stroke:#333
+    style D fill:#f66,stroke:#333
+    style E fill:#ff6,stroke:#333
+    style F fill:#6ff,stroke:#333
+```
+
+#### 不同包管理器的依赖处理差异
+
+| 特性 | npm | yarn | pnpm |
+|-----|-----|------|------|
+| **依赖安装机制** | 嵌套 + 扁平化 | 扁平化 | 内容寻址存储 |
+| **node_modules 结构** | 扁平化目录 | 扁平化目录 | 符号链接结构 |
+| **避免重复安装** | 部分支持 | 支持 | 完全支持 |
+| **幽灵依赖问题** | 存在 | 存在 | 基本避免 |
+| **安装速度** | 较慢 | 中等 | 最快 |
+| **磁盘空间使用** | 高 | 高 | 低 |
+| **锁文件** | package-lock.json | yarn.lock | pnpm-lock.yaml |
+
+**幽灵依赖 (Phantom Dependencies)**: 指项目中使用但未在 package.json 中声明的依赖。由于 npm/yarn 的扁平化 node_modules 结构，项目可能访问到其他依赖包的依赖，这是一种隐患。
+
 *   **`dependencies`**
     *   **说明**：项目**生产环境**运行时必需的依赖包。这些包会被一起打包或部署到最终运行环境中。
     *   **应用场景**：
         *   例如 Web 框架 (`express`, `koa`)、数据库 ORM (`sequelize`, `mongoose`)、前端框架 (`react`, `vue`)、工具库 (`lodash`, `axios`) 等。
         *   当别人安装你的包时（如果你的项目是一个库），这些依赖也会被自动安装（除非它们是 `peerDependencies`）。
         *   运行 `npm install <package-name>` 或 `yarn add <package-name>` 时，默认会将包添加到此列表。
+    *   **技术细节**：
+        * 在 `npm install --production` 或 `NODE_ENV=production` 环境下，只会安装这类依赖
+        * 包含在这里的依赖会影响你的应用在生产环境的大小和加载性能
+        * 对于前端应用，构建工具通常只会将这些依赖（或其一部分）打包到最终代码中
     *   **示例**：
         ```json
         "dependencies": {
@@ -164,6 +230,50 @@
         *   `18.x`: 允许安装 `18.*.*` 系列的最新版本。
         *   `*` 或 `latest`: 安装最新版本（不推荐，可能引入破坏性更新）。
         *   固定版本 `1.2.3`: 只安装 `1.2.3` 版本。
+
+### 语义化版本控制 (SemVer) 详解
+
+语义化版本控制 (Semantic Versioning) 是软件版本号的事实标准，采用 `主版本号.次版本号.修订号` 格式（如 `1.2.3`）。深入理解 SemVer 对于管理依赖至关重要。
+
+- **主版本号 (MAJOR)**：当你做了不兼容的 API 修改（可能会破坏依赖此包的应用）
+- **次版本号 (MINOR)**：当你添加了向下兼容的新功能
+- **修订号 (PATCH)**：当你做了向下兼容的问题修正（bug fixes）
+
+#### 依赖版本范围可视化
+
+```mermaid
+graph LR
+    subgraph "版本范围表示法"
+        A["精确版本: 1.2.3"] -->|"只匹配精确版本"| A1["= 1.2.3"]
+        B["波浪号范围: ~1.2.3"] -->|"允许补丁级更新"| B1["≥ 1.2.3 < 1.3.0"]
+        C["插入号范围: ^1.2.3"] -->|"允许兼容性更新"| C1["≥ 1.2.3 < 2.0.0"]
+        D["通配符: 1.x 或 1.*"] -->|"主版本固定"| D1["≥ 1.0.0 < 2.0.0"]
+        E["比较范围: >1.2.3"] -->|"大于特定版本"| E1["> 1.2.3"]
+        F["比较范围: >=1.2.3 <2.0.0"] -->|"版本区间"| F1["≥ 1.2.3 < 2.0.0"]
+    end
+    
+    style A fill:#f9f,stroke:#333
+    style B fill:#bbf,stroke:#333
+    style C fill:#bfb,stroke:#333
+    style D fill:#fbb,stroke:#333
+```
+
+#### SemVer 版本选择策略
+
+对于不同类型的项目，应选择不同的版本控制策略：
+
+| 类型 | 推荐版本范围 | 原因 |
+|-----|------------|-----|
+| 应用程序 | 确切版本 (`1.2.3`) | 最大程度确保稳定性和一致性 |
+| 库/框架 | 插入号 (`^1.2.3`) | 允许兼容更新，提供bug修复和新功能 |
+| 开发工具 | 波浪号 (`~1.2.3`) | 获取补丁更新，避免工具变化过大 |
+| 实验性项目 | 通配符 (`*`) | 始终使用最新版本，快速迭代 |
+
+**最佳实践**：
+
+- 在开发初期可以使用较宽松的版本范围（`^`）以获取更新
+- 发布生产环境前，使用 `npm shrinkwrap` 或利用 lock 文件确保版本一致性
+- 定期更新依赖，但更新后要进行充分测试
 
 *   **`devDependencies`**
     *   **说明**：项目**开发环境**所需的依赖包。这些包只在开发、测试、构建过程中使用，**不会**被打包到生产环境或随库一起发布。
@@ -211,7 +321,7 @@
     *   **说明**：可选依赖。即使这些依赖安装失败，npm/yarn 也不会中断整个安装过程。你的代码需要有相应的逻辑来处理这些依赖不存在的情况。
     *   **应用场景**：
         *   某些功能依赖于可能在特定平台或环境下才可用或编译成功的包（如性能分析工具、平台特定的通知库）。
-        *   提供“锦上添花”的功能，如果依赖安装成功则启用。
+        *   提供"锦上添花"的功能，如果依赖安装成功则启用。
     *   **示例**：
         ```json
         "optionalDependencies": {
@@ -287,6 +397,67 @@
         }
         ```
 
+#### 脚本执行流程
+
+脚本执行时会遵循特定的顺序，特别是生命周期脚本：
+
+```mermaid
+flowchart TD
+    A[npm run script] --> B{存在 pre-script?}
+    B -->|Yes| C[执行 pre-script]
+    B -->|No| D[跳过]
+    C --> E[执行主脚本]
+    D --> E
+    E --> F{存在 post-script?}
+    F -->|Yes| G[执行 post-script]
+    F -->|No| H[结束]
+    G --> H
+    
+    style A fill:#f96,stroke:#333
+    style E fill:#6f6,stroke:#333,stroke-width:2px
+```
+
+例如运行 `npm run build` 时，实际执行顺序是：
+1. 检查是否存在 `prebuild` 脚本并执行
+2. 执行 `build` 脚本
+3. 检查是否存在 `postbuild` 脚本并执行
+
+#### 脚本执行技术详情
+
+**环境变量**:
+- 在脚本执行过程中，npm 会设置多种环境变量：
+  - `npm_package_*`: package.json 中的所有字段（例如 `process.env.npm_package_name` 可访问包名）
+  - `npm_config_*`: npm 配置变量
+  - `npm_lifecycle_event`: 当前正在执行的脚本名称
+
+**npm 脚本的 PATH**:
+- 执行 npm 脚本时，`node_modules/.bin` 会被临时添加到 PATH 环境变量中
+- 这使得你可以直接使用依赖中的可执行文件，而不需要全局安装或使用全路径
+
+**脚本参数传递**:
+- 可以通过 `--` 向脚本传递参数：`npm run test -- --watch`
+- 在脚本中可以通过 `process.argv` 访问这些参数
+
+**脚本组合**:
+- 可以组合多个脚本：`"build:all": "npm run build:css && npm run build:js"`
+- `&&`: 前一个命令成功才执行下一个
+- `&`: 并行执行命令
+- `||`: 前一个命令失败才执行下一个
+
+**脚本钩子与自动化工作流**:
+```json
+"scripts": {
+  "clean": "rimraf dist",
+  "prebuild": "npm run clean",
+  "build": "webpack",
+  "postbuild": "node scripts/notify-deploy.js",
+  "precommit": "lint-staged",
+  "prepare": "husky install"
+}
+```
+
+使用这样的配置，当运行 `npm run build` 时，会自动先清理 dist 目录，然后执行构建，最后运行部署通知脚本。
+
 ### 4. 配置与环境 (Configuration & Environment)
 
 *   **`main`**
@@ -307,7 +478,7 @@
     *   **说明**：更现代、更强大的方式来定义包的入口点，可以精确控制哪些文件可以被外部访问，并为不同的环境（如 `require`, `import`, `node`, `browser`）提供不同的入口。它会覆盖 `main` 和 `module` 字段。
     *   **应用场景**：
         *   创建同时支持 CommonJS 和 ES Module 的包（双模块包）。
-        *   限制包内部文件的直接访问，提供清晰的公共 API。
+        *   限制包内部文件的直接访问，形成清晰的公共 API。
         *   为不同条件（如 Node.js 版本、环境）提供不同的实现。
     *   **示例**：
         ```json
@@ -320,6 +491,96 @@
           "./package.json": "./package.json" // Allow access to package.json
         },
         ```
+
+#### 模块解析策略与 `exports` 字段详解
+
+`exports` 字段允许精确控制包的公共 API 和模块解析策略，是现代 Node.js 包的推荐配置方式。
+
+```mermaid
+flowchart TD
+    A[导入或引用包] --> B{是否有 exports 字段?}
+    B -->|Yes| C{检查请求路径}
+    B -->|No| D{回退到传统字段}
+    
+    C -->|精确匹配| E[使用指定路径]
+    C -->|通配符匹配| F[替换通配符]
+    C -->|无匹配| G[抛出 ERR_PACKAGE_PATH_NOT_EXPORTED]
+    
+    D -->|ESM import| H[检查 module 字段]
+    D -->|CommonJS require| I[检查 main 字段]
+    
+    H -->|存在| J[使用 module 路径]
+    H -->|不存在| K[使用 main 或 index.js]
+    
+    I -->|存在| L[使用 main 路径]
+    I -->|不存在| M[默认使用 index.js]
+    
+    style B fill:#f96,stroke:#333,stroke-width:2px
+    style C fill:#6f6,stroke:#333
+    style D fill:#66f,stroke:#333
+```
+
+**条件导出详解**：
+
+`exports` 字段支持以下条件关键字：
+
+| 条件 | 描述 |
+|-----|------|
+| `import` | 当使用 `import` 或 `import()` 导入时 |
+| `require` | 当使用 `require()` 导入时 |
+| `node` | Node.js 环境（可指定版本如 `node-14`） |
+| `browser` | 浏览器环境 |
+| `default` | 当没有条件匹配时的默认值 |
+| `types` 或 `typings` | TypeScript 类型定义文件位置 |
+| `development` | 开发环境 |
+| `production` | 生产环境 |
+
+**复杂示例**：
+
+```json
+"exports": {
+  ".": {
+    "types": "./types/index.d.ts",
+    "node": {
+      "import": {
+        "production": "./dist/node/production/esm/index.js",
+        "development": "./dist/node/development/esm/index.js",
+        "default": "./dist/node/esm/index.js"
+      },
+      "require": {
+        "production": "./dist/node/production/cjs/index.js",
+        "development": "./dist/node/development/cjs/index.js",
+        "default": "./dist/node/cjs/index.js"
+      }
+    },
+    "browser": {
+      "production": "./dist/browser/production/index.js",
+      "development": "./dist/browser/development/index.js",
+      "default": "./dist/browser/index.js"
+    }
+  },
+  "./utils": {
+    "import": "./dist/esm/utils.js",
+    "require": "./dist/cjs/utils.js"
+  }
+}
+```
+
+**注意事项**：
+1. 条件解析顺序是从左到右
+2. 一旦引入 `exports`，不在其中声明的文件就无法被外部导入
+3. 为了向后兼容，可以同时保留 `main` 和 `module` 字段
+4. 如果要公开目录下的所有文件，可以使用 `"./directory/*": "./dist/directory/*"`
+
+**`exports` vs 传统字段对比**：
+
+| 特性 | 传统方式 | exports 方式 |
+|------|----------|-------------|
+| 公开的 API | 所有文件默认可访问 | 只有显式声明的路径可访问 |
+| 模块系统区分 | 依赖 `main`/`module` | 内置条件导出支持 |
+| 子路径模式 | 不支持 | 支持通配符和子路径映射 |
+| 环境感知 | 不支持 | 支持不同环境的不同实现 |
+| TypeScript 整合 | 分离的 `types` 字段 | 可在 `exports` 中集成 |
 
 *   **`type`**
     *   **说明**：指定项目中的 `.js` 文件默认应被视为哪种模块类型。
@@ -374,9 +635,183 @@
         ]
         ```
 
+#### Monorepo 结构与工作区管理
+
+Monorepo（单体仓库）是一种将多个相关项目代码存储在同一个仓库中的开发策略。`workspaces` 字段使包管理器能够智能处理这种结构。
+
+```mermaid
+graph TD
+    subgraph "Monorepo 项目结构"
+        A[Root package.json] -->|workspaces| B[packages/*]
+        A -->|workspaces| C[apps/*]
+        
+        B --> D[packages/ui-components]
+        B --> E[packages/utils]
+        B --> F[packages/themes]
+        
+        C --> G[apps/web]
+        C --> H[apps/mobile]
+        C --> I[apps/docs]
+        
+        D --> J[自己的 package.json]
+        E --> K[自己的 package.json]
+        G --> L[自己的 package.json]
+    end
+    
+    style A fill:#f96,stroke:#333,stroke-width:2px
+    style D fill:#6f6,stroke:#333
+    style E fill:#6f6,stroke:#333
+    style F fill:#6f6,stroke:#333
+    style G fill:#66f,stroke:#333
+    style H fill:#66f,stroke:#333
+    style I fill:#66f,stroke:#333
+```
+
+**工作区技术优势**：
+
+1. **依赖共享与优化**：
+   - 所有项目共享一个 `node_modules` 目录（npm/yarn），减少磁盘空间和安装时间
+   - 依赖提升（hoisting）：重复依赖会被移至根目录，减少冗余
+   - pnpm 通过硬链接和符号链接实现更高效的存储结构
+
+2. **本地依赖解析**：
+   - 工作区内的包可以相互引用，无需发布即可测试
+   - 包管理器会自动创建符号链接，使得本地开发体验与使用发布包相同
+   - 修改共享库立即反映在使用它的应用中
+
+3. **统一的版本控制与发布**：
+   - 可以使用工具如 Lerna、Nx、Turborepo 协调版本控制
+   - 支持独立版本（每个包单独版本）或固定版本（所有包版本同步）
+
+**工作区命令示例**：
+
+| 命令 | npm | yarn | pnpm |
+|-----|-----|------|------|
+| 安装所有依赖 | `npm install` | `yarn` | `pnpm install` |
+| 向特定工作区添加依赖 | `npm install lodash -w package-name` | `yarn workspace package-name add lodash` | `pnpm --filter package-name add lodash` |
+| 在所有工作区运行命令 | `npm run test -ws` | `yarn workspaces run test` | `pnpm -r run test` |
+| 在特定工作区运行命令 | `npm run build -w package-name` | `yarn workspace package-name build` | `pnpm --filter package-name build` |
+
+**工作区配置示例**：
+
+```json
+// 根目录 package.json
+{
+  "name": "my-monorepo",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "build": "npm run build -ws",
+    "test": "npm run test -ws",
+    "dev": "npm run dev -w web-app"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0"
+  }
+}
+
+// packages/ui-lib/package.json
+{
+  "name": "@my-org/ui-lib",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0" // 会使用根目录的版本
+  }
+}
+
+// apps/web-app/package.json
+{
+  "name": "web-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@my-org/ui-lib": "*" // 指向本地工作区的包
+  }
+}
+```
+
+**性能优化策略**：
+- 使用构建缓存工具（如 Turborepo）加速增量构建
+- 为大型 monorepo 实施任务编排，只构建受影响的包
+- 针对 CI/CD 优化构建策略，仅测试和构建变更影响的包
+
 ### 5. 发布与分发 (Publishing & Distribution)
 
 这些字段主要影响当你把包发布到 npm 时，哪些文件会被包含，以及如何被使用。
+
+#### npm 包发布工作流
+
+以下流程图展示了 npm 包从开发到发布的完整流程：
+
+```mermaid
+flowchart TD
+    A[开发与测试] -->|准备发布| B[更新版本号]
+    B -->|语义化版本原则| C[npm version patch/minor/major]
+    C --> D[构建生产版本]
+    D --> E{验证package.json}
+    
+    E -->|检查必需字段| F[name, version, main, files...]
+    F --> G[执行prepublishOnly脚本]
+    G --> H[npm publish]
+    
+    H -->|验证身份| I{是否有发布权限?}
+    I -->|Yes| J[发布到npm仓库]
+    I -->|No| K[权限错误]
+    
+    J --> L[包可被安装使用]
+    
+    style A fill:#bbf,stroke:#333
+    style C fill:#bfb,stroke:#333
+    style H fill:#f96,stroke:#333,stroke-width:2px
+    style J fill:#f9f,stroke:#333
+```
+
+**npm 发布前核对清单**：
+
+1. 确保 `package.json` 包含正确的元数据：
+   - 唯一的包名称 (`name`)
+   - 符合 SemVer 的版本号 (`version`)
+   - 准确的入口点 (`main`, `module`, `exports`)
+   - 完善的描述和关键字
+
+2. 配置正确的访问级别：
+   - 公开包：`"private": false` 或不设置 `private` 字段
+   - 限制访问：对于 scoped 包 (如 `@your-org/package`)，可设置 `"access": "restricted"`
+
+3. 指定要包含的文件：
+   - 使用 `files` 字段（推荐）
+   - 或使用 `.npmignore` 文件（不推荐）
+
+4. 确保库正确构建并测试通过：
+   - 验证构建产物是否正确
+   - 运行测试确保功能正常
+
+**npm 发布命令**：
+
+```bash
+# 登录到 npm (如果尚未登录)
+npm login
+
+# 更新版本号
+npm version patch  # 1.0.0 -> 1.0.1
+npm version minor  # 1.0.0 -> 1.1.0
+npm version major  # 1.0.0 -> 2.0.0
+
+# 发布包
+npm publish  # 公开包
+npm publish --access=public  # 确保 scoped 包公开访问
+```
+
+**特殊场景**：
+
+- **测试版本**：使用 `npm publish --tag beta` 发布预发布版本，不会影响默认的 `latest` 标签
+- **私有仓库**：使用 `npm publish --registry=https://your-private-registry` 发布到私有仓库
+- **仅限特定网络**：添加 `"publishConfig": { "registry": "https://your-registry" }` 到 package.json
 
 *   **`files`**
     *   **说明**：一个文件或目录名的数组，指定**只有**这些文件/目录才会被包含在你发布到 npm 的包里。这是一个**白名单**机制。
@@ -395,6 +830,66 @@
           "LICENSE"
         ]
         ```
+
+#### 文件包含机制详解
+
+文件包含逻辑可以这样理解：
+
+```mermaid
+flowchart TD
+    A[npm publish] --> B{存在 files 字段?}
+    B -->|Yes| C[包含 files 列出的文件/目录]
+    B -->|No| D{存在 .npmignore?}
+    
+    C --> E[始终包含的文件]
+    D -->|Yes| F[包含未被 .npmignore 排除的文件]
+    D -->|No| G{存在 .gitignore?}
+    
+    G -->|Yes| H[包含未被 .gitignore 排除的文件]
+    G -->|No| I[包含项目中的所有文件]
+    
+    E --> J[合并生成最终 npm 包]
+    F --> J
+    H --> J
+    I --> J
+    
+    style B fill:#f96,stroke:#333,stroke-width:2px
+    style C fill:#6f6,stroke:#333
+    style E fill:#bbf,stroke:#333
+```
+
+**始终包含的文件**（无论 `files` 字段如何设置）：
+- `package.json`
+- `README.*` (任何扩展名的README文件)
+- `LICENSE.*` (任何扩展名的LICENSE文件)
+- `CHANGELOG.*` (任何扩展名的CHANGELOG文件)
+- `main` 字段指定的文件
+
+**始终排除的文件**（无论设置如何）：
+- `.git` 目录
+- `node_modules` 目录
+- `CVS` 目录
+- `.*.swp`, `.DS_Store` 等系统和编辑器临时文件
+- 以 `.` 开头的文件/目录（除了 `.npmignore` 和显式指定的）
+
+**文件包含策略最佳实践**：
+
+1. **始终使用 `files` 字段**：白名单比黑名单更安全、更清晰
+2. **为包源码与发布内容分离**：
+   - `src/` - 源代码（不包含在发布包中）
+   - `dist/` 或 `lib/` - 构建产物（包含在发布包中）
+3. **明确指定类型定义**：如果提供TypeScript类型，确保包含相关`.d.ts`文件
+4. **验证发布内容**：在正式发布前使用 `npm pack` 创建 tarball 并检查内容
+5. **考虑包体积**：减小包体积可以加快安装速度并减少用户的磁盘占用
+
+**npm 包内容验证命令**：
+```bash
+# 创建模拟发布包但不实际发布
+npm pack
+
+# 查看将被发布的文件列表
+npm publish --dry-run
+```
 
 *   **`bin`**
     *   **说明**：用于创建**命令行可执行文件**。指定一个或多个命令名称到本地文件路径的映射。当你的包被全局安装 (`npm install -g`) 或作为依赖安装后，npm 会在系统的 PATH 或 `node_modules/.bin/` 目录下创建相应的符号链接，使得这些命令可以直接在终端运行。
@@ -474,15 +969,120 @@
 
 ## ✅ 最佳实践与建议
 
+### 完整 package.json 最佳实践总结
+
+```mermaid
+mindmap
+  root((package.json<br>最佳实践))
+    依赖管理
+      ::icon(fa fa-cube)
+      正确区分依赖类型
+        dependencies: 生产环境
+        devDependencies: 开发环境
+        peerDependencies: 宿主环境
+      使用语义化版本
+        固定版本: 1.2.3
+        补丁级更新: ~1.2.3
+        兼容性更新: ^1.2.3
+      定期更新和审核
+        npm-check-updates
+        npm outdated
+        npm audit
+      使用锁文件
+        package-lock.json
+        yarn.lock
+        pnpm-lock.yaml
+    元数据完善
+      ::icon(fa fa-info-circle)
+      必填字段
+        name
+        version
+      描述性字段
+        description
+        keywords
+        author
+        license
+      资源链接
+        homepage
+        repository
+        bugs
+    脚本自动化
+      ::icon(fa fa-play-circle)
+      标准化命令
+        test, build, start
+      使用生命周期钩子
+        pre/post scripts
+      跨平台兼容
+        使用 cross-env
+        避免平台特定命令
+    发布优化
+      ::icon(fa fa-upload)
+      控制发布内容
+        使用 files 字段
+        排除开发文件
+      确保私有性
+        添加 private: true
+      入口点明确
+        main, module, exports
+        支持 ESM 和 CJS
+    项目结构
+      ::icon(fa fa-folder)
+      分离源码和构建产物
+        src/ 和 dist/
+      考虑 monorepo
+        workspaces
+```
+
 1.  **保持 `package.json` 清洁和最新**：定期移除不再使用的依赖 (`npm prune` 可以帮助清理 `node_modules`，但需要手动更新 `package.json`)。
+
 2.  **理解依赖类型**：正确区分 `dependencies` 和 `devDependencies`，避免将开发工具放入生产依赖。谨慎使用 `optionalDependencies` 和 `bundledDependencies`。
+
 3.  **使用语义化版本控制 (SemVer)**：不仅为自己的包遵循 SemVer，也要理解依赖版本号 (`^`, `~`) 的含义，以避免意外的破坏性更新。
+    - 为应用程序考虑使用更严格的版本锁定
+    - 为库考虑使用更灵活的版本范围
+
 4.  **锁定依赖版本**：使用 `package-lock.json` (npm) 或 `yarn.lock` (yarn) 或 `pnpm-lock.yaml` (pnpm) 文件来确保团队成员和部署环境安装完全相同的依赖版本，保证环境一致性。**务必将 lock 文件提交到版本控制 (Git)。**
+
 5.  **使用 `private: true`**：对于不打算发布的应用程序或私有包，明确设置此项，防止意外发布。
+
 6.  **优化发布内容**：使用 `files` 字段精确控制发布内容，减小包体积。
+    - 只发布**构建后**的代码，不发布源代码（除非有特殊需求）
+    - 确保包含必要的类型声明（`.d.ts`）和许可证文件
+
 7.  **利用 `scripts` 自动化流程**：将常用命令标准化，提高开发效率和一致性。
+    - 使用 `pre` 和 `post` 钩子创建工作流
+    - 使用 `npm-run-all` 或 `concurrently` 组合和并行执行命令
+    - 考虑使用 `cross-env` 实现跨平台兼容性
+
 8.  **善用 `engines`**：指定支持的 Node.js 版本，减少环境兼容性问题。
+    ```json
+    "engines": {
+      "node": ">=16.0.0"
+    }
+    ```
+
 9.  **了解 `exports` 字段**：对于开发库，尤其是需要支持 CJS 和 ESM 的现代库，`exports` 是管理入口点的推荐方式。
+    - 使用条件导出支持不同环境
+    - 限制公开的文件和路径，形成清晰的 API 边界
+
+10. **考虑多环境支持**：
+    - 使用条件导出为浏览器和 Node.js 提供不同实现
+    - 考虑支持服务器端渲染和静态生成等特殊场景
+
+11. **安全实践**：
+    - 定期运行 `npm audit` 检查安全漏洞
+    - 避免过度使用或强制使用 `--force` 安装依赖
+    - 考虑依赖的生态系统健康状况（维护频率、开源社区活跃度）
+
+12. **CI/CD 集成**：
+    - 在 CI 环境中使用 `CI=true npm ci` 代替 `npm install`，确保使用锁文件
+    - 配置自动化测试、构建和发布流程
+    - 使用 `prepublishOnly` 确保发布前运行测试和构建
+
+13. **文档化**：
+    - 保持 README 和 package.json 的描述字段同步
+    - 为异常情况提供清晰的错误信息和排障指南
+    - 记录和遵循 Git 提交规范，以便自动生成 CHANGELOG
 
 ---
 
