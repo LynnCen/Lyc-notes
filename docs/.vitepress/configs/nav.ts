@@ -88,7 +88,7 @@ export const nav: DefaultTheme.Config['nav'] = [
       {
         text: 'React',
         activeMatch: '/react/',
-        link: 'react/core/basic'
+        link: 'react/core/intro'
       },
       {
         text: 'Vue',

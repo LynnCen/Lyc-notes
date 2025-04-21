@@ -22,22 +22,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
   ],
   '/react/': [
     {
-      text: 'React源码',
+      text: 'React源码详解',
       items: [
         {
-          text: '核心概念',
-          link: '/react/core/basic'
-        }, {
-          text: '设计理念',
-          link: '/react/core/设计理念'
+          text: '第一篇 React运行全流程',
+          link: '/react/core/intro'
         },
         {
-          text: '内核关系',
-          link: '/react/core/innerCore'
-        },
-        {
-          text: '基本数据结构',
-          link: '/react/core/baseStruct'
+          text: '第二篇 JSX 是如何转换为 React.createElement',
+          link: '/react/core/createElement'
         }
       ]
     },
