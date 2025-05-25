@@ -130,3 +130,96 @@ const message = ref('Hello')
 - .number：将输入框的值转换为数字。
 - .trim：将输入框的值转换为字符串，并去除两端的空格。
 
+## v-text和v-html
+
+定义：v-text 指令用于设置元素的文本内容，v-html 指令用于设置元素的HTML内容。
+
+v-text的用法：
+
+```js  
+<script setup>
+import { ref } from 'vue'
+const htmlContent = ref('<p>Hello</p>')
+const webInfo = reactive({
+  name: 'Vue',
+  url: "<a style='color: red;' href='https://vuejs.org'>Vue</a>"
+})
+</script>
+
+<template>
+  <div v-html="webInfo.url"></div>
+  <p v-text="webInfo.name"></p>
+</template>
+```
+
+## 计算属性computed
+
+定义：computed 用于计算属性，可以缓存计算结果。
+
+computed的用法：
+
+```js
+
+<script setup>
+import { ref, computed } from 'vue'
+const data = reactive({
+    x:10,
+    y:20
+})
+const sum = computed(() => data.x + data.y)
+const add = () => {
+  data.x++
+}
+</script>
+
+<template>
+  <p>Count: {{ data.x }}</p>
+  <p>Sum: {{ sum }}</p>
+  <button @click="add">Add</button>
+</template>
+```
+
+## 侦听器watch
+
+定义：watch 用于监听数据的变化。
+
+watch的用法：
+
+```js
+
+<script setup>
+import { ref, watch } from 'vue'
+const count = ref(0)
+watch(count, (newVal, oldVal) => {
+    if( newVal > 10){
+  console.log(`Count changed from ${oldVal} to ${newVal}`)
+})
+</script> 
+<template>
+  <p>Count: {{ count }}</p>
+  <button @click="count++">Add</button>
+</template>
+```
+
+## 自定义监听器
+
+定义：watchEffect自定义监听器用于监听数据的变化。
+
+自定义监听器的用法：
+
+```js
+
+<script setup>
+import { ref, watchEffect } from 'vue'
+const count = ref(0)
+watchEffect(() => {
+  if(count.value > 10){
+    console.log(`Count: ${count.value}`)
+  }
+})
+</script>
+
+<template>
+  <p>Count: {{ count }}</p>
+  <button @click="count++">Add</button>
+</template>
