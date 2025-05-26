@@ -201,11 +201,11 @@ watch(count, (newVal, oldVal) => {
 </template>
 ```
 
-## 自定义监听器
+## 自动监听器
 
-定义：watchEffect自定义监听器用于监听数据的变化。
+定义：watchEffect能自动监听数据的变化。
 
-自定义监听器的用法：
+自动监听器的用法：
 
 ```js
 
@@ -223,3 +223,202 @@ watchEffect(() => {
   <p>Count: {{ count }}</p>
   <button @click="count++">Add</button>
 </template>
+```
+
+## 基于Vite创建Vue3项目
+
+定义：Vite 是一个快速的构建工具，用于创建Vue3项目。
+
+基于Vite创建Vue3项目的用法：
+
+```bash
+npm create vite@latest my-vue-app --template vue
+```
+
+```bash
+cd my-vue-app
+npm install
+npm run dev
+```
+
+## Vue3的Vscode插件
+
+Vue-Official:Vue3的官方插件，提供Vue3的语法提示和代码补全能力。
+
+Vue VSCode Snippets:Vue3的代码片段，提供Vue3的代码片段，提高开发效率。
+
+## 导入组件
+
+```vue
+<script setup>
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+</script>
+
+<template>
+  <Header />
+  <Footer />
+</template>
+
+<style scoped>
+
+</style>
+```
+
+## 父组件向子组件传递数据
+
+父组件：
+
+```vue
+<script setup>
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+</script>
+
+<template>
+  <Header name="Header" url="https://vuejs.org"/>
+  // :='data' 是父组件向子组件传递数据
+  <Footer :="data"/>
+</template>
+
+<style scoped>
+
+</style>
+```
+
+Header组件：
+
+```vue
+<script setup>
+const props = defineProps(['name', 'url'])
+</script>
+
+<template>
+  <h1>{{ name }}</h1>
+  <a :href="url">{{ url }}</a>
+</template>
+```
+
+## 子组件向父组件传递数据
+
+// 写一个子组件向父组件传递数据的例子
+
+子组件Input.vue
+
+```vue
+<script setup>
+// emit 是子组件向父组件传递数据的方法 参数：第一个参数updateData 是父组件监听的方法名 第二个参数是子组件传递的数据
+const emit = defineEmits(['updateData'])
+</script>
+
+<template>
+  // 子组件向父组件传递数据
+  <input v-model="name" @input="emit('updateData', $event.target.value)" />
+</template> 
+```
+
+父组件App.vue
+
+```vue
+<script setup>
+import Input from './components/Input.vue'
+// 父组件监听子组件传递的数据
+const updateData = (data) => {
+  console.log(data)
+}
+</script>
+<template>
+  <Input @updateData="updateData" />
+</template>
+```
+
+## 跨组件通信-依赖注入
+
+定义：provide 和 inject 用于跨组件通信。
+
+provide 和 inject 的用法：
+
+父组件挂在provider：
+
+```vue
+<script setup>
+import { provide } from 'vue'
+provide('name', 'Vue')
+</script>
+
+<template>
+  <h1>父组件</h1>
+  <Child />
+</template>
+```
+
+子组件注入inject：
+
+```vue
+<script setup>
+import { inject } from 'vue'
+const name = inject('name')
+</script>
+
+<template>
+  <h1>子组件</h1>
+  <p>{{ name }}</p>
+</template>
+```
+
+## 匿名插槽和具名插槽
+
+插槽（slot）：是指可以在父组件中定义一个插槽，然后在子组件中使用这个插槽。
+
+父组件Layout：
+
+```vue
+<script setup>
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+</script>
+
+<template>
+ <!-- 匿名插槽 -->
+  <Header>
+    <slot />
+  </Header>
+  <!-- 具名插槽 -->
+   <Footer>
+    <!-- v-slot:header 是具名插槽 简写为 #header -->
+    <template #header>
+      <h1>Header</h1>
+    </template>
+    <template #footer>
+      <h1>Footer</h1>
+    </template>
+   </Footer>
+
+ 
+</template>
+```
+
+Header组件：
+
+```vue
+<script setup>
+</script>
+
+<template>
+ <!-- 匿名插槽 -->
+  <slot />
+</template>
+```
+
+Footer组件：
+
+```vue
+<script setup>
+</script>
+
+<template>
+  <!-- 具名插槽 -->
+  <slot name="header" />
+  <slot name="footer" />
+</template>
+```
