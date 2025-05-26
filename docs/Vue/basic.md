@@ -8,6 +8,7 @@
 
 定义：
 - ref：用于创建响应式对象，返回一个响应式对象，可以通过.value访问和修改值。
+
 - reactive：用于创建响应式对象，返回一个响应式对象，可以通过.value访问和修改值。
 
 
@@ -70,7 +71,7 @@ const show = ref(true)
 
 ## 动态属性绑定v-bind
 
-定义：`v-bind `指令用于绑定动态属性。
+定义：`v-bind ` 指令用于绑定动态属性。
 
 v-bind的用法：
 
@@ -422,3 +423,176 @@ Footer组件：
   <slot name="footer" />
 </template>
 ```
+
+## 作用域插槽
+
+定义：子组件向父组件传递数据，父组件通过插槽的参数访问子组件的数据。
+
+作用域插槽的用法：
+
+```vue
+<script setup>
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+</script>
+
+<template>
+ <!-- 匿名插槽 -->
+  <Header>
+    <slot />
+  </Header>
+  <!-- 具名插槽 -->
+   <Footer>
+    <!-- v-slot:header 是具名插槽 简写为 #header -->
+    <template #header="{data}">
+      <h1>{{ data }}</h1>
+    </template>
+    <template #footer="{data}">
+      <h1>Footer</h1>
+    </template>
+   </Footer>
+
+ 
+</template>
+```
+
+Footer组件：
+
+```vue
+<script setup>
+const data = ref('Footer')
+</script>
+
+<template>
+  <slot name="header" :data="data" />
+  <slot name="footer" :data="data" />
+</template>
+```
+
+## 生命周期
+
+定义： 生命周期函数是组件实例从创建到销毁的各个阶段执行的函数。
+
+1. 挂载阶段onMounted：组件挂载到DOM后执行
+
+2.更新阶段onUpdated：组件更新后执行
+
+3.卸载阶段onUnmounted：组件卸载后执行
+
+4. 错误处理阶段onErrorCaptured：组件错误处理后执行
+
+```vue
+<script setup>
+import { onMounted } from 'vue'
+onMounted(() => {
+  console.log('onMounted')
+})
+
+onUpdated(() => {
+  console.log('onUpdated')
+})
+
+onUnmounted(() => {
+  console.log('onUnmounted')
+})
+
+onErrorCaptured(() => {
+  console.log('onErrorCaptured')
+})
+</script>
+
+<template>
+  <p>onMounted</p>
+</template>
+```
+
+## toRef和toRefs
+
+toRef：将一个响应式对象的某个属性转为ref对象
+
+toRefs：将一个响应式对象的所有属性转为ref对象
+
+## Pinia
+
+定义：Pinia 是一个Vue3的官方状态管理库，用于管理应用的状态。
+
+地址：`https://pinia.vuejs.org/zh/`
+
+安装：
+
+```bash
+npm install pinia
+```
+
+使用：
+
+`main.ts`:
+
+```ts
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import { createApp } from 'vue'
+const pinia = createPinia()
+const app = createApp(App)
+app.use(pinia)
+app.mount('#app')
+export default pinia
+```
+
+`store/index.ts`:
+
+```ts
+import { defineStore } from 'pinia'
+
+export const useMainStore = defineStore('main', ()=>{
+    const count = ref(0)
+    const data = reactive({
+        name: 'Vue',
+        url: 'https://vuejs.org'
+    })
+    const add = ()=>{
+        count.value++
+    }
+    const updateData = (data)=>{
+        data.name = data.name
+        data.url = data.url
+    }
+    return {
+        count,
+        data,
+        add,
+        updateData
+    }
+})
+```
+
+组件使用：
+
+```vue
+<script setup>
+import { useMainStore } from './store'
+const mainStore = useMainStore()
+const { count, data, add, updateData } = mainStore
+</script>
+
+<template>
+  <p>Count: {{ count }}</p>
+  <p>Data: {{ data.name }}</p>
+  <p>Data: {{ data.url }}</p>
+  <button @click="add">Add</button>   
+  <button @click="updateData(data)">Update</button>
+</template>
+```
+
+### 持久化存储pinia-plugin-persistedstate
+
+定义：pinia-plugin-persistedstate 是一个Pinia的插件，用于将Pinia的状态持久化存储到本地。
+
+地址：`https://github.com/prazdevs/pinia-plugin-persistedstate`
+
+安装：
+
+```bash
+npm install pinia-plugin-persistedstate
+```
+
