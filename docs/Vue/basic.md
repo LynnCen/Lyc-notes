@@ -4,13 +4,35 @@
 
 定义：script标签的setup属性，用于在组件中定义响应式数据和方法。
 
+## v-bind
+
+定义：`v-bind` 指令用于绑定动态属性(**简写为:**)。
+
+`v-bind`的用法：
+
+```vue
+<script setup>
+import { ref } from 'vue'
+const dynamicId = ref('dynamic-id')
+const id = ref('id')
+</script> 
+
+<template>
+<!-- 基础用法 -->
+  <div v-bind:id="dynamicId"></div>
+  <!-- 简写 -->
+   <div :id="dynamicId"></div>
+   <!-- 同名简写 -->
+   <div :id></div>
+</template>
+```
+
 ## 数据绑定ref和reactive
 
 定义：
+
 - ref：用于创建响应式对象，返回一个响应式对象，可以通过.value访问和修改值。
-
 - reactive：用于创建响应式对象，返回一个响应式对象，可以通过.value访问和修改值。
-
 
 ```vue
 <script setup>
@@ -28,9 +50,9 @@ const obj = reactive({ count: 0 })
 
 ## 事件绑定v-on和按键修饰符
 
-定义：v-on 指令用于绑定事件，按键修饰符用于绑定按键事件。
+定义：`v-on` 指令用于绑定事件，按键修饰符用于绑定按键事件(**简写为:@**)。
 
-给个v-on的例子：
+v-on的用法：
 
 ```js
 <script setup>
@@ -46,12 +68,12 @@ const handleClick = () => {
   <p>Count: {{ count }}</p>
 </template>
 ```
+
 ## 显示和隐藏v-show和v-if
 
 定义：v-show 指令用于根据条件显示元素，v-if 指令用于根据条件删除元素。
 
 给个v-show和v-if的例子：
-
 
 ```js
 
@@ -69,29 +91,11 @@ const show = ref(true)
 </template>
 ```
 
-## 动态属性绑定v-bind
-
-定义：`v-bind ` 指令用于绑定动态属性。
-
-v-bind的用法：
-
-```js
-<script setup>
-import { ref } from 'vue'
-const dynamicId = ref('dynamic-id')
-</script>
-
-<template>
-  <div v-bind:id="dynamicId"></div>
-</template>
-```
-
 ## 列表渲染v-for
 
 定义：v-for 指令用于循环渲染列表。
 
 v-for的用法：
-
 
 ```js
 
