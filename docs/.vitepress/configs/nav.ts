@@ -5,25 +5,76 @@ export const nav: DefaultTheme.Config['nav'] = [
     text: 'WebFront',
     items: [
       {
-        text: 'Javascript基础',
-        activeMatch: 'Javascript/basic/',
-        link: 'Javascript/basic/你不知道的js'
+        text: '前端基础',
+        items: [
+          {
+            text: 'Javascript基础',
+            activeMatch: 'Javascript/basic/',
+            link: 'Javascript/basic/你不知道的js'
+          },
+          {
+            text: 'Javascript进阶',
+            activeMatch: 'Javascript/Advance/',
+            link: 'Javascript/Advance/executionContext'
+          },
+          {
+            text: 'Typescript',
+            activeMatch: '/typescript/',
+            link: '/typescript/记录'
+          },
+        ]
       },
       {
-        text: 'Javascript进阶',
-        activeMatch: 'Javascript/Advance/',
-        link: 'Javascript/Advance/executionContext'
+        text:'Framework',
+        items: [
+          {
+            text: 'React',
+            activeMatch: '/react/',
+            link: 'react/core/intro'
+          },
+          {
+            text: 'Vue',
+            activeMatch: '/Vue/',
+            link: 'Vue/basic'
+          }
+        ]
       },
       {
-        text: 'Typescript',
-        activeMatch: '/typescript/',
-        link: '/typescript/记录'
+        text: 'Engineering',
+        items: [
+          {
+            text: 'WebPack',
+            activeMatch: '/webpack/',
+            link: 'webpack/performance'
+          },
+          {
+            text: 'Node',
+            activeMatch: '/node/',
+            link: 'node/packages'
+          },
+          {
+            text: 'Vite',
+            activeMatch: '/vite/',
+            link: 'vite/basic'
+          },
+          {
+            text: 'Git',
+            activeMatch: '/git/',
+            link: 'git/basic'
+          }
+        ],
       },
       {
-        text: '浏览器原理',
-        activeMatch: '/browser/',
-        link: '/browser/Chrome架构'
-      }
+        text:'浏览器',
+        items: [
+          {
+            text: '浏览器原理',
+            activeMatch: '/browser/',
+            link: '/browser/Chrome架构'
+          }
+        ]
+      },
+  
     ],
   },
   {
@@ -83,45 +134,14 @@ export const nav: DefaultTheme.Config['nav'] = [
     ],
   },
   {
-    text: 'Frameworks',
+    text: 'SoftExame',
     items: [
       {
-        text: 'React',
-        activeMatch: '/react/',
-        link: 'react/core/intro'
-      },
-      {
-        text: 'Vue',
-        link: 'Vue/basic'
+        text: '软考-软件设计师',
+        link: '/softExame/index'
       }
-    ],
+    ]
   },
-  {
-    text: 'Engineering',
-    items: [
-      {
-        text: 'WebPack',
-        activeMatch: '/webpack/',
-        link: 'webpack/performance'
-      },
-      {
-        text: 'Node',
-        activeMatch: '/node/',
-        link: 'node/packages'
-      },
-      {
-        text: 'Vite',
-        activeMatch: '/vite/',
-        link: 'vite/basic'
-      },
-      {
-        text: 'Git',
-        activeMatch: '/git/',
-        link: 'git/basic'
-      }
-    ],
-  },
-
   {
     text: 'Interview',
     activeMatch: '/interview/',

@@ -20,6 +20,20 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       ]
     }
   ],
+  '/typescript/': [
+    {
+      text: 'TypeScript',
+      link: '/typescript/记录'
+    },
+    {
+      text: 'TypeScript进阶',
+      link: '/typescript/advance'
+    },
+    {
+      text: 'Class',
+      link: '/typescript/class'
+    },
+  ],
   '/react/': [
     {
       text: 'React源码详解',
@@ -577,6 +591,31 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       text: 'LRU算法',
       link: '/algorithm/LRU'
     },
+  ],
+  '/softExame/': [
+    {
+      text: '软考-软件设计师',
+      link: '/softExame/index'
+    },
+    {
+      text: '时间规划',
+      link: '/softExame/schedule'
+    },
+    {
+      text: '软件工程',
+      link: '/softExame/软件工程'
+    },
+    {
+      text: '面向对象',
+      link: '/softExame/面向对象'
+    },
+    {
+      text: '数据库',
+      link: '/softExame/database'
+    },
+    {
+
+    }
   ],
   // '/posts/': [
   //   {
