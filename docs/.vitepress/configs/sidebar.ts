@@ -20,6 +20,101 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
       ]
     }
   ],
+  '/Vue/': [
+    {
+      text: 'Vue学习规划',
+      link: '/Vue/schudle'
+    },
+    {
+      text: 'Vue基础',
+      items: [
+        {
+          text: '响应式系统',
+          link: '/Vue/basic/reactivity'
+        },
+        {
+          text: '模板语法与指令',
+          link: '/Vue/basic/template'
+        },
+        {
+          text: '组件通信',
+          link: '/Vue/basic/component-communication'
+        },
+        {
+          text: 'Composition API',
+          link: '/Vue/basic/composition-api'
+        }
+      ]
+    },
+    {
+      text: 'Vue进阶',
+      items: [
+        {
+          text:'hooks',
+          link: '/Vue/advanced/hooks'
+        },
+        {
+          text:'自定义指令',
+          link: '/Vue/advanced/directive'
+        },
+        {
+          text: '动画',
+          link: '/Vue/advanced/animation'
+        },
+        {
+          text:'性能优化',
+          link: '/Vue/advanced/performance'
+        },
+        {
+          text: '项目架构设计',
+          link: '/Vue/advanced/architecture'
+        }
+      ]
+    },
+    {
+      text: 'Vue 生态篇',
+      items: [
+        {
+          text: 'Vue Router',
+          link: '/Vue/ecosystem/router'
+        },
+        {
+          text: 'Pinia状态管理',
+          link: '/Vue/ecosystem/pinia'
+        },
+        {
+          text: '构建工具',
+          link: '/Vue/ecosystem/build'
+        },
+        {
+          text: 'Vue Devtools',
+          link: '/Vue/ecosystem/devtools'
+        },
+        {
+          text: 'UI库',
+          link: '/Vue/ecosystem/ui'
+        },
+        {
+          text: '测试',
+          link: '/Vue/ecosystem/test'
+        },
+        
+      ]
+    },
+    {
+      text: 'Vue原理',
+      items: [
+        {
+          text: '深入响应式系统',
+          link: '/Vue/principle/reactivity'
+        },
+        {
+          text: '编译器原理',
+          link: '/Vue/principle/compiler'
+        },
+      ]
+    }
+  ],
   '/typescript/': [
     {
       text: 'TypeScript',
