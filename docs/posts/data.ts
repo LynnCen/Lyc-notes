@@ -51,7 +51,11 @@ export const data: NavData[] = [
         desc: '本文介绍了原子化CSS的概念以及UnoCSS的使用方法,并提供了一个自定义UnoCSS插件的实现示例,用于支持rpx单位和常用样式类。',
         link: '/posts/uno-css-jp',
       },
-
+      {
+        title: 'Vue组件PDF导出',
+        desc: '本文介绍了Vue组件PDF导出的实现原理和具体实现方案。',
+        link: '/posts/vueToPdf',
+      },
     ],
   },
   {
