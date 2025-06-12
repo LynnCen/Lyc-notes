@@ -50,6 +50,7 @@ BrowserTools MCP 为 AI 代码编辑器和智能体提供了以下强大功能�
 
 - **直接下载**：[点击下载扩展](https://github.com/AgentDeskAI/browser-tools-mcp/releases/download/v1.2.0/BrowserTools-1.2.0-extension.zip)
 - **从 GitHub 下载**：
+
   ```bash
   git clone https://github.com/AgentDeskAI/browser-tools-mcp.git
   ```
@@ -71,8 +72,6 @@ BrowserTools MCP 为 AI 代码编辑器和智能体提供了以下强大功能�
 
 ### 第三步：在 Cursor 中配置 BrowserTools MCP
 
-
-
 1. **打开 Cursor 设置**：
    - 进入 Cursor Settings
    - 转到 Features，滚动到 MCP Servers
@@ -81,17 +80,7 @@ BrowserTools MCP 为 AI 代码编辑器和智能体提供了以下强大功能�
    - 点击"Add new MCP server"
    - 给它一个唯一名称（如：browser-tools）
    - 设置类型为"command"
-   - 设置命令为：
-
-   **macOS/Linux:**
-   ```bash
-   npx @agentdeskai/browser-tools-mcp@1.2.0
-   ```
-
-   **Windows:**
-   ```bash
-   npx @agentdeskai/browser-tools-mcp@1.2.0
-   ```
+   - 设置命令为
 
 ```json
 {
@@ -109,15 +98,21 @@ BrowserTools MCP 为 AI 代码编辑器和智能体提供了以下强大功能�
 ```
 
 3. **确认连接**：
+
    - 等待几秒钟或点击刷新按钮
    - 确认 MCP 服务器已连接，应该看到所有工具列表和工具名称旁边的绿色圆圈
 
 ### 第四步：运行 BrowserTools 服务器
 
 在终端中运行以下命令启动服务器（聚合来自 Chrome 扩展的日志并设置截图捕获的 WebSocket）：
+(注意顺序，先运行browser-tools-server，再运行browser-tools-mcp)：
 
 ```bash
-npx @agentdeskai/browser-tools-server@1.2.0
+npx @agentdeskai/browser-tools-server
+```
+
+```bash
+npx @agentdeskai/browser-tools-mcp
 ```
 
 > [!NOTE]
@@ -144,15 +139,18 @@ npx @agentdeskai/browser-tools-server@1.2.0
 安装完成后，你可以在 Cursor 中使用自然语言与 BrowserTools MCP 交互：
 
 ### 调试相关
+
 - "这个功能不工作...进入调试模式！"
 - "检查控制台和网络日志，看看哪里出错了？"
 - "UI 看起来不太对，能截个图吗？"
 
 ### 编辑和优化
+
 - "你能编辑当前选中的元素来实现 x、y 和 z 吗？"
 - "我需要改进 SEO 和性能...进入审计模式"
 
 ### 检查和监控
+
 - "查看网络请求，看看 API 调用是否正常"
 - "运行性能审计，找出页面加载缓慢的原因"
 
@@ -180,21 +178,27 @@ BrowserTools MCP 提供了以下工具，你可以通过 AI 助手调用：
 ### 常见问题
 
 #### 1. 截图工具失败
+
 确保使用明确的版本号：
+
 ```bash
 npx @agentdeskai/browser-tools-mcp@1.2.0
 ```
 
 #### 2. 找不到截图
+
 截图默认保存在下载文件夹的 `/mcp-screenshots` 目录中。你也可以在 BrowserToolsMCP 开发工具面板中设置自定义路径。
 
 #### 3. 看不到任何日志
+
 确保在要捕获日志的浏览器标签页中打开 Chrome 开发工具控制台。
 
 #### 4. 日志过多
+
 关闭其他打开 Chrome 开发工具的标签页，BrowserToolsMCP 会捕获多个标签页的日志。
 
 #### 5. 日志不断消失
+
 每次刷新页面或重启运行 browser-tool-mcp 服务器的 Node 进程时，日志都会被清除。
 
 ### 调试 MCP 连接
@@ -210,22 +214,26 @@ tail -n 20 -F ~/Library/Application\ Support/Cursor/**/*MCP.log
 为了充分验证 BrowserTools MCP 的功能，计划进行以下测试：
 
 ### 基础功能测试
+
 - [ ] 截图功能测试
 - [ ] 控制台日志获取测试
 - [ ] 网络请求监控测试
 - [ ] DOM 元素选择测试
 
 ### 审计功能测试
+
 - [ ] SEO 审计功能测试
 - [ ] 性能审计功能测试
 - [ ] 可访问性审计测试
 - [ ] NextJS 专用审计测试
 
 ### 智能模式测试
+
 - [ ] 调试模式综合测试
 - [ ] 审计模式综合测试
 
 ### 集成测试
+
 - [ ] 与 Cursor 的集成稳定性测试
 - [ ] 多标签页环境下的功能测试
 - [ ] 长时间运行稳定性测试
