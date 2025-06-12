@@ -130,8 +130,30 @@ export const nav: DefaultTheme.Config['nav'] = [
           }
         ]
       },
+      {
+        text: '设计模式',
+        link: '/designPatterns/index'
+      }
 
     ],
+  },
+  {
+    text: 'AI',
+    items: [
+      {
+        text: 'MCP',
+        items: [
+          {
+            text: 'BrowserTools MCP',
+            link: '/AI/mcp/browserTools'
+          },
+          {
+            text: 'Figma Dev Mode MCP',
+            link: '/AI/mcp/figma'
+          }
+        ]
+      }
+    ]
   },
   {
     text: 'SoftExame',

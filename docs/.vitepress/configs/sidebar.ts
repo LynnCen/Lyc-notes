@@ -712,6 +712,35 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
 
     }
   ],
+  '/AI/': [
+    {
+      text: 'AI',
+      link: '/AI/index'
+    },
+    {
+      text: 'MCP',
+      items: [
+        {
+          text: 'BrowserTools MCP',
+          link: '/AI/mcp/browserTools'
+        },
+        {
+          text: 'Figma Dev Mode MCP',
+          link: '/AI/mcp/figma'
+        }
+      ]
+    }
+  ],
+  '/designPatterns/': [
+    {
+      text: '设计模式',
+      link: '/designPatterns/index'
+    },
+    {
+      text: '模版方法',
+      link: '/designPatterns/模版方法'
+    }
+  ],
   // '/posts/': [
   //   {
   //     text: '数据预加载',
