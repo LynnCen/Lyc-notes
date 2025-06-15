@@ -56,6 +56,11 @@ export const data: NavData[] = [
         desc: '本文介绍了Vue组件PDF导出的实现原理和具体实现方案。',
         link: '/posts/vueToPdf',
       },
+      {
+        title: 'SEO优化策略深度解析',
+        desc: '本文介绍了SSR项目SEO优化的实现原理和具体实现方案。',
+        link: '/posts/seo',
+      },
     ],
   },
   {
