@@ -70,17 +70,15 @@
 
 ### 📱 前端开发模式
 
-- [MVC/MVP/MVVM](./modern/mvc-mvp-mvvm.md) - 架构模式
+- [MVC 模式](./modern/mvc.md) - 模型-视图-控制器架构
+- [MVP 模式](./modern/mvp.md) - 模型-视图-展示器架构
+- [MVVM 模式](./modern/mvvm.md) - 模型-视图-视图模型架构
 - [发布订阅模式 (Pub/Sub)](./modern/pub-sub.md) - 事件驱动
-- [模块模式 (Module)](./modern/module.md) - 代码组织
 - [依赖注入 (Dependency Injection)](./modern/dependency-injection.md) - 控制反转
 
 ### 🌐 后端开发模式
 
-- [仓储模式 (Repository)](./modern/repository.md) - 数据访问抽象
-- [工作单元 (Unit of Work)](./modern/unit-of-work.md) - 事务管理
-- [规约模式 (Specification)](./modern/specification.md) - 业务规则封装
-- [CQRS](./modern/cqrs.md) - 命令查询职责分离
+- [CQRS](./microservices/cqrs.md) - 命令查询职责分离
 
 ### ☁️ 微服务模式
 
@@ -128,7 +126,7 @@
 
 3. **现代开发模式**
    - [依赖注入](./modern/dependency-injection.md) - 现代框架基础
-   - [CQRS](./modern/cqrs.md) - 高性能架构
+   - [CQRS](./microservices/cqrs.md) - 高性能架构
    - [事件溯源](./microservices/event-sourcing.md) - 分布式系统
 
 ## 🛠️ 编程语言支持
