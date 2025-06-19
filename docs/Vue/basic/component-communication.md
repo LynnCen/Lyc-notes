@@ -589,15 +589,17 @@ ref引用提供了一种直接访问子组件实例的方式，允许父组件�
 
 #### 3.4.1 ref引用原理
 
-ref引用打破了Vue的单向数据流原则，提供了一种"逃生舱"机制。它应该谨慎使用，主要用于以下场景：
-- 聚焦输入框、滚动到指定位置等DOM操作
-- 调用子组件的公共方法
-- 访问子组件的特定状态（如表单验证状态）
+ref 引用提供了一种父组件直接访问子组件实例的方式，这打破了 Vue 严格的单向数据流原则，因此被称为一种"逃生舱"机制。虽然强大，但它会增加组件之间的耦合度，使得子组件的内部实现暴露给父组件，降低了组件的封装性和可复用性。因此，它应该被谨慎使用，通常作为最后的选择。
 
-**使用注意事项：**
-- 避免在ref回调中直接修改子组件的数据
-- 优先考虑使用Props和Events
-- ref引用会使组件之间的耦合度增加
+**推荐使用场景：**
+- **程序化DOM操作**：如自动聚焦输入框、触发元素动画、滚动到特定位置等。
+- **调用子组件的公共API**：例如，调用子组件的 `reset()` 或 `validate()` 方法。
+- **访问子组件的内部状态**：在某些集成场景下，可能需要读取子组件的特定状态（例如表单验证状态、组件尺寸等）。
+
+**核心原则：**
+- **优先使用 Props 和 Events**：始终首先考虑能否通过标准的父子通信方式解决问题。
+- **显式暴露 (`defineExpose`)**：子组件应通过 `defineExpose` 显式地、有选择地暴露一个稳定的公共 API，而不是暴露整个组件实例。
+- **避免修改子组件状态**：父组件应主要调用方法或读取状态，而不是直接修改子组件的内部数据。如果需要修改，最好让子组件提供一个专门的方法来完成。
 
 #### 3.4.2 基础用法
 
@@ -1394,51 +1396,107 @@ const { theme, toggleTheme } = useTheme()
 </script>
 ```
 
-### 5.2 $attrs属性透传
+### 5.2 $attrs 与 useAttrs 属性透传
 
-$attrs是Vue提供的一种属性透传机制，它可以将父组件传递的所有非prop属性自动传递给子组件。这在创建高阶组件或包装组件时非常有用。
+在 Vue 中，`$attrs` 是一个非常有用的特性，它包含父组件传递的所有属性，但**不包括**子组件已声明的 `props` 和 `emits`。这包括 HTML 属性（如 `class`, `style`, `id`）和 `v-on` 事件监听器。这个机制在创建高阶组件或包装原生 HTML 元素时尤其强大，因为它允许你将属性"透传"给内部的元素。
 
-#### 5.2.1 透传原理
+#### 5.2.1 工作原理与 `useAttrs`
+
+- **模板访问**: 在组件的 `<template>` 中，你可以直接使用 `$attrs` 对象。通过 `v-bind="$attrs"`，你可以将所有外部属性一次性绑定到一个内部元素上。
+
+- **脚本访问 (`<script setup>`)**: 在 `<script setup>` 环境中，必须使用 `useAttrs()` 组合式函数来访问这些属性。`useAttrs()` 返回一个响应式的对象，它会随着父组件属性的更新而同步更新。
+
+- **`inheritAttrs: false`**: 默认情况下，组件的根元素会自动继承所有未被识别为 prop 的属性。当你使用 `v-bind="$attrs"` 手动将属性应用到某个特定子元素时，这种默认行为可能会导致属性被应用两次（一次在根元素，一次在你指定的元素上）。为了避免这种情况，应该使用 `defineOptions({ inheritAttrs: false })` 来禁用默认的继承行为，这样你就可以完全控制属性的应用位置。
+
+#### 5.2.2 透传示例
+
+让我们创建一个 `CustomButton` 组件，它包装了原生的 `<button>` 元素，并将所有外部属性（如 `class`, `id`, `disabled` 和 `@click` 监听器）都透传给它。
 
 ```vue
-<!-- 祖先组件 -->
+<!-- ParentComponent.vue -->
 <template>
-  <MiddleComponent 
-    class="container" 
-    data-id="123"
-    @click="handleClick"
-    title="标题"
-  />
-</template>
-
-<!-- 中间组件（透传所有属性） -->
-<template>
-  <DeepComponent v-bind="$attrs" />
-</template>
-
-<!-- 深层组件（接收透传的属性） -->
-<template>
-  <div 
-    :class="$attrs.class"
-    :data-id="$attrs['data-id']"
-    @click="$attrs.onClick"
-  >
-    {{ $attrs.title }}
+  <div>
+    <h3>Custom Button Wrapper</h3>
+    <CustomButton
+      class="btn-primary"
+      @click="showAlert"
+      :disabled="isButtonDisabled"
+      data-test-id="custom-btn"
+    >
+      Click Me
+    </CustomButton>
+    <button @click="isButtonDisabled = !isButtonDisabled" style="margin-left: 10px;">
+      Toggle Disabled
+    </button>
   </div>
 </template>
 
 <script setup>
-// 禁用自动属性继承
+import { ref } from 'vue'
+import CustomButton from './CustomButton.vue'
+
+const isButtonDisabled = ref(false)
+
+const showAlert = () => {
+  alert('Button clicked!')
+}
+</script>
+
+<style>
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.btn-primary:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+</style>
+```
+
+```vue
+<!-- CustomButton.vue -->
+<template>
+  <!-- 将所有外部属性绑定到 button 元素上 -->
+  <button v-bind="attrs">
+    <slot></slot>
+  </button>
+</template>
+
+<script setup>
+import { useAttrs, onMounted } from 'vue'
+
+// 禁用默认的属性继承行为
 defineOptions({
   inheritAttrs: false
+})
+
+// 在 <script setup> 中获取所有非 prop/emit 的属性
+const attrs = useAttrs()
+
+// 在脚本中可以访问这些属性
+onMounted(() => {
+  // attrs 是一个响应式对象
+  console.log('Attributes received by CustomButton:', attrs)
+  // 例如，访问 data-test-id
+  console.log('Test ID:', attrs['data-test-id'])
 })
 </script>
 ```
 
-**透传特点：**
-- **自动透传**: 非prop属性自动传递给子组件
-- **可控透传**: 可以选择性地透传特定属性
-- **事件透传**: 支持事件监听器的透传
+**代码解析:**
+1.  **`ParentComponent.vue`**: 向 `CustomButton` 传递了 `class`, `@click`, `:disabled`, 和 `data-test-id`。这些都不是 `CustomButton` 中定义的 `props`。
+2.  **`CustomButton.vue`**:
+    *   `defineOptions({ inheritAttrs: false })` 是关键。它告诉 Vue 不要将这些外部属性自动应用到 `CustomButton` 组件的根元素（即 `<button>`）。
+    *   `const attrs = useAttrs()` 捕获了所有传入的属性，并将它们放入一个响应式的 `attrs` 对象中。
+    *   `v-bind="attrs"` (在模板中也可以写成 `v-bind="$attrs"`) 将 `attrs` 对象中的所有键值对作为属性应用到 `<button>` 元素上。这包括了 `class`、`disabled` 状态，甚至是 `onClick` 事件监听器。
+    *   `onMounted` 钩子展示了如何在脚本中以编程方式访问这些透传的属性。
 
 ---
 
