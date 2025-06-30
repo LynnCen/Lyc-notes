@@ -729,6 +729,15 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           link: '/AI/mcp/figma'
         }
       ]
+    },
+    {
+      text: 'Dify',
+      items: [
+        {
+          text: 'Dify介绍',
+          link: '/AI/Dify/index'
+        }
+      ]
     }
   ],
   '/designPatterns/': [

@@ -152,6 +152,15 @@ export const nav: DefaultTheme.Config['nav'] = [
             link: '/AI/mcp/figma'
           }
         ]
+      },
+      {
+        text: 'Dify',
+        items: [
+          {
+            text: 'Dify',
+            link: '/AI/Dify/index'
+          }
+        ]
       }
     ]
   },
