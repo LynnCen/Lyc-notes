@@ -83,9 +83,11 @@
 本站基于 [VitePress](https://vitepress.dev/) 构建，并使用了 [TailwindCSS](https://tailwindcss.com/) 进行样式定制。
 
 <details>
+
 <summary>点击查看本地开发指南</summary>
 
 ### 环境要求
+
 - **Node.js** >= 16.0.0
 - **pnpm** >= 7.0.0
 
