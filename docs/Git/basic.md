@@ -50,17 +50,57 @@ git reset --soft HEAD^
 git reset --hard 版本号(commit id)
 ```
 
+### 撤销修改
+
+```bash
+git checkout -- 文件名
+```
+
+### 删除文件
+
+```bash
+git rm 文件名
+```
+
+### 添加远程仓库
+
+```bash
+git remote add origin 远程仓库地址
+```
+
+### 推送远程仓库
+
+```bash
+git push origin master
+```
+
+### 删除远程仓库
+
+```bash
+git remote -v # 查看远程仓库
+```
+
+```bash
+git remote rm origin # 删除远程仓库
+```
+
+### 克隆远程仓库
+
+```bash
+git clone 远程仓库地址
+```
+
 ### 身份信息
 
 github 贡献值不显示问题：
 
 提交必须使用与github账号关联的电子邮箱地址
 
-- ` git config user.email`
-- `  git config --global user.email 邮箱地址` # 对所有仓库设置电子邮箱地址
-- `  git config --local user.email 邮箱地址` # 仅对当前仓库设置电子邮箱地址
+- `git config user.email`
+- `git config --global user.email 邮箱地址` # 对所有仓库设置电子邮箱地址
+- `git config --local user.email 邮箱地址` # 仅对当前仓库设置电子邮箱地址
 
-### 分支
+### 分支管理
 
 - `git branch 分支名` 创建分支
 - `git checkout 分支名` 切换分支
