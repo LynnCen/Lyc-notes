@@ -102,17 +102,59 @@ github 贡献值不显示问题：
 
 ### 分支管理
 
-- `git branch 分支名` 创建分支
-- `git checkout 分支名` 切换分支
-- `git merge 分支名` 合并分支
-- `git branch -d 分支名` 删除分支
-- `git branch -D 分支名` 强制删除分支
+```bash
+git branch -b dev # 创建并切换到 dev 分支
+## 等于
+ git branch dev
+ git checkout dev
+# Switched to branch 'dev'
+```
+
+**查看分支**
+
+```bash
+git branch
+dev
+* master
+```
+
+**切换分支**
+
+```bash
+git checkout 分支名
+# Switched to branch 'dev'
+
+git checkout master
+# Switched to branch 'master'
+```
+
+**switch**
+
+我们注意到切换分支使用`git checkout <branch>`，而前面讲过的撤销修改则是`git checkout -- <file>`，同一个命令，有两种作用，确实有点令人迷惑。
+
+实际上，切换分支这个动作，用switch更科学。因此，最新版本的Git提供了新的`git switch`命令来切换分支：
+
+```bash
+git switch -c  dev # 创建并切换到 dev 分支
+
+git switch master # 切换到 master 分支
+```
+
+**删除分支**
+
+```bash
+git branch -d 分支名
+
+git branch -d dev # 删除 dev 分支
+```
 
 ### 合并
 
-- `git merge 分支名` 合并分支
-- `git merge --no-ff 分支名` 合并分支并生成合并提交
-- `git merge --squash 分支名` 合并分支并生成合并提交
+合并分支
+
+```bash
+git merge dev # 合并 dev 分支到 master 分支
+```
 
 ### 标签
 
