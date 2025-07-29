@@ -156,8 +156,6 @@ git branch -d dev # 删除 dev 分支
 git merge dev # 合并 dev 分支到 master 分支
 ```
 
-### 标签
+### 解决冲突
 
-- `git tag 标签名` 创建标签
-- `git tag -a 标签名 -m "描述"` 创建标签
-- `git tag -d 标签名` 删除标签
+
