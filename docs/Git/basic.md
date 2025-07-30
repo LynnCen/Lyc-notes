@@ -143,9 +143,11 @@ git switch master # 切换到 master 分支
 **删除分支**
 
 ```bash
-git branch -d 分支名
+git branch -d 分支名 # 删除分支 如果分支没有合并到master，则不能删除
+```
 
-git branch -d dev # 删除 dev 分支
+```bash
+git branch -D 分支名 # 删除分支
 ```
 
 ### 合并
@@ -158,4 +160,102 @@ git merge dev # 合并 dev 分支到 master 分支
 
 ### 解决冲突
 
+### 储藏修改
+
+description: 当开发过程中，需要切换到其他分支进行开发，但是又不想提交当前分支的修改，可以使用储藏修改。
+
+```bash
+git stash # 储藏修改
+```
+
+```bash
+git stash list # 查看储藏的修改
+```
+
+```bash
+git stash pop # 恢复储藏的修改 pop 恢复并删除储藏
+```
+
+```bash
+git stash apply # 恢复储藏的修改 apply 恢复但不删除储藏
+```
+
+```bash
+git stash drop # 删除储藏
+```
+
+```bash
+git stash clear # 清空储藏
+```
+
+### 推送分支
+
+```bash
+git push origin 分支名 # 推送分支到远程仓库
+```
+
+### 拉取远程分支
+
+```bash
+git pull origin 分支名 # 拉取远程仓库的指定分支到本地
+```
+
+### 变基Rebase
+
+description: 变基是将当前分支的修改应用到目标分支上，而不是创建新的提交。
+
+```bash
+git rebase 目标分支 # 变基 未填写目标分支，则变基到当前分支
+```
+
+- rebase操作可以把本地未push的分叉提交历史整理成直线；
+- rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。
+
+## 标签管理
+
+> 发布一个版本时，我们通常先在版本库中打一个标签（tag），这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一个快照。
+> Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针（跟分支很像对不对？但是分支可以移动，标签不能移动），所以，创建和删除标签都是瞬间完成的。
+
+
+### 创建标签
+
+创建的标签通常是基于最新的commit，也可以基于某个commit
+
+```bash
+git tag v1.0 # 创建标签
+```
+
+```bash
+git tag v1.0 版本号 # 创建标签 版本号通常是基于某个commit的hash值
+```
+
+### 查看标签
+
+```bash
+git tag # 查看所有标签
+```
+
+```bash
+git show v1.0 # 查看标签信息
+```
+
+### 操作标签
+
+  **删除标签**
+
+```bash
+git tag -d v1.0 # 删除标签
+```
+
+**推送标签**
+
+```bash
+git push origin v1.0 # 推送标签到远程仓库
+```
+
+**删除远程标签**
+
+```bash
+git push origin --delete v1.0 # 删除远程标签
+```
 
