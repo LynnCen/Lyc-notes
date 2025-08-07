@@ -4,7 +4,7 @@
 
 👋 Hi there! I'm LynCen, a passionate frontend developer from China 🇨🇳
 
-🔭 I'm currently working at Alibaba as a Frontend Engineer
+🔭 I'm currently working at gaoding as a Frontend Engineer
 
 🌱 I'm currently learning and exploring Web3, Rust and Cloud Native
 
@@ -22,7 +22,6 @@ I love open source and building tools that help developers be more productive. L
 - 🗺️ 地图: Cesium, AMap, Mapbox
 - ⚙️ 后端: Node.js, Express, NestJS
 - 🚀 DevOps: Docker, Jenkins, GitHub Actions
-- 🔍 测试: Jest, Cypress, Puppeteer
 
 ## 💼 工作经历
 
@@ -34,13 +33,13 @@ I love open source and building tools that help developers be more productive. L
 ## 📫 联系方式
 
 - 📧 Email: zhonglingcai466@gmail.com
-- 📱 Phone: 17369797751
+- 📱 Phone: 173xxxx7751
 - 📝 Blog: [https://lynncen.github.io/Lyc-notes/](https://lynncen.github.io/Lyc-notes/)
 - 💻 GitHub: [https://github.com/LynCen](https://github.com/LynCen)
 
 ## 🎓 教育背景
 
-- 📚 复旦大学 | 电子信息 | 硕士 (软件学院)
-- 📚 丽水学院 | 数字媒体技术 | 本科 (计算机系)
+- 📚 复旦大学 | 电子信息(软件工程) | 硕士
+- 📚 丽水学院 | 数字媒体技术(计算机动画) | 本科
 
 > "Stay hungry, stay foolish." - Steve Jobs
