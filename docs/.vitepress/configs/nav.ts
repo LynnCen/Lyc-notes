@@ -161,6 +161,15 @@ export const nav: DefaultTheme.Config['nav'] = [
             link: '/AI/Dify/index'
           }
         ]
+      },
+      {
+        text:'Posts',
+        items: [
+          {
+            text: 'LLM',
+            link: '/posts/llm'
+          }
+        ]
       }
     ]
   },
@@ -169,7 +178,11 @@ export const nav: DefaultTheme.Config['nav'] = [
     items: [
       {
         text: '软考-软件设计师',
-        link: '/softExame/index'
+        link: '/softExam/index'
+      },
+      {
+        text:'软考-系统架构设计师',
+        link:'/softExam/systemArchitect'
       }
     ]
   },
