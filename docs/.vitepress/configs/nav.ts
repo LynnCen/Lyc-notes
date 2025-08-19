@@ -178,11 +178,11 @@ export const nav: DefaultTheme.Config['nav'] = [
     items: [
       {
         text: '软考-软件设计师',
-        link: '/softExam/index'
+        link: '/softExam/软件设计师/index'
       },
       {
         text:'软考-系统架构设计师',
-        link:'/softExam/systemArchitect'
+        link:'/softExam/架构师/index'
       }
     ]
   },

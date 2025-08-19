@@ -690,23 +690,27 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
   '/softExame/': [
     {
       text: '软考-软件设计师',
-      link: '/softExame/index'
+      link: '/softExam/软件设计师/index'
+    },
+    {
+      text: '软考-系统架构设计师',
+      link: '/softExam/架构师/index'
     },
     {
       text: '时间规划',
-      link: '/softExame/schedule'
+      link: '/softExam/软件设计师/schedule'
     },
     {
       text: '软件工程',
-      link: '/softExame/软件工程'
+      link: '/softExam/软件工程'
     },
     {
       text: '面向对象',
-      link: '/softExame/面向对象'
+      link: '/softExam/面向对象'
     },
     {
       text: '数据库',
-      link: '/softExame/database'
+      link: '/softExam/database'
     },
     {
 
