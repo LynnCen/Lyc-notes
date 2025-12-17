@@ -42,6 +42,18 @@ Moreover, it allows us to communicate with people from different countries, whic
 
 In conclusion, the cross-cultural communication abilities is indispensable to everyone. It is high time that we took effective measures to cultivate this ability.
 
+### 第二套
+
+suppose your university is conducting a survey to collect students' opinions on the appropriate use of AI technology in assisting learning. You are now to write an essay to express your view.
+
+Nowadays, there is a growing discussion about the appropriate use of AI technology in assisting learning. It has sparked heated debate among college students. It is generally believed that AI technology plays a vital role in our daily study. To elaborate on my point, we should consider it from the following perspectives.
+
+To begin with, AI technology helps us improve our learning efficiency and develop practical abilities. This means that if we use AI tools to review difficult concepts and practice exercises, we can make steady progress in our studies.
+
+Moreover, AI-assisted learning plays an important role in our future career. There is no denying that AI enables us to acquire new skills more quickly and adapt to the changing job market, which is beneficial to our future development.
+
+In conclusion, the appropriate use of AI technology is indispensable to modern education. It is high time that we took effective measures to use AI responsibly and wisely. Only in this way can we have a bright future.
+
 ## 四级作文万能模版整理
 
 ### 一、三段通用模版
@@ -55,8 +67,7 @@ To elaborate on my point, we should consider it from the following perspectives.
 
 第二段（论证分析）总结构：
 
-To begin with, [argument 1].  
-This means that if we [具体做法], we can [具体收益].
+To begin with, [argument 1]. is characterized by its wide variety of xxx. So that it is not only help you to accumulate adequate knowledge of xxx around the world, bug also arouse your passion for the xxx and bring you an opportunity to make new friends.
 
 Moreover, [argument 2].  
 There is no denying that [topic] enables us to [具体能力/结果], which is beneficial to our future study / career / personal development.
@@ -64,8 +75,7 @@ There is no denying that [topic] enables us to [具体能力/结果], which is b
 第三段（总结建议）：
 
 In conclusion, [topic] is indispensable to everyone.  
-It is high time that we took effective measures to [重视/培养/解决…].  
-Only in this way can we have a bright / promising future.
+It is high time that we took effective measures to cultivate xxx habit.  
 
 ### 二、第二段常用论点方向与示例
 
@@ -118,3 +128,22 @@ When more people realize the importance of [topic], our society will become more
 Environmental protection 示例：  
 Environmental awareness is of great importance to the sustainable development of our society.  
 If everyone saves energy and reduces waste in daily life, we can protect our planet for future generations.
+
+Nowadays, there is a growing discussion about the appropriate use of AI technology in assisting learning.
+It has sparked heated debate among college students.
+It is generally believed that AI plays a vital role in our daily study.
+To elaborate on my point, we should consider it from the following perspectives.
+
+To begin with, AI-assisted learning is characterized by its wide variety of educational tools.
+So that it not only helps you to accumulate adequate knowledge of different subjects around the world, but also arouses your passion for learning and brings you an opportunity to make new friends in online study groups.
+
+Moreover, AI technology can provide personalized learning suggestions.
+There is no denying that AI enables us to improve our study efficiency and accuracy, which is beneficial to our future academic and career development.
+
+In conclusion, AI technology is indispensable to modern education.
+It is high time that we took effective measures to use AI responsibly, such as setting clear guidelines and avoiding over-reliance on it.
+
+
+## 翻译
+
+In recent years, northeast china is vigorously developing the ice and snow resources. For example, harbin utilized the adequate ice and snow resources to build the "Big Ice and Snow World" which is characterized by ist localized features 
