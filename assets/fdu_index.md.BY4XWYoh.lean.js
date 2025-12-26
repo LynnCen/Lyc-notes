@@ -1,0 +1,1 @@
+import{_ as e,c as t,o as a}from"./chunks/framework.LvkWsMUa.js";const _=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"fdu/index.md","filePath":"fdu/index.md","lastUpdated":1766731792000}'),d={name:"fdu/index.md"};function n(r,o,s,c,i,p){return a(),t("div")}const m=e(d,[["render",n]]);export{_ as __pageData,m as default};
