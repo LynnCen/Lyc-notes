@@ -609,7 +609,7 @@ filterMessages() → ❌ 隐藏（不展示）
 | T+3000ms | 收到resp_1 | tracking: {expected:4, received:1} |
 | T+5000ms | 收到resp_2 | tracking: {expected:4, received:2} |
 | T+7000ms | 收到resp_3 | tracking: {expected:4, received:3} |
-| T+9000ms | 收到resp_4 | tracking: {expected:4, received:4, ✅completed} |
+| T+9000ms | 收到resp_4 | tracking: {expected:4, received:4, completed: true} |
 
 #### 代码执行流程
 

@@ -1,5 +1,5 @@
 # WebPack性能优化
-<link rel="stylesheet" type="text/css" href="styles.css" ></link>
+<link rel="stylesheet" type="text/css" href="styles.css" />
 
 ## 加快打包速度
 ### 使用 `speed-measure-webpack-plugin` 插件测量打包速度
