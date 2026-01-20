@@ -70,5 +70,10 @@ export default withMermaid(defineConfig({
 
   vite: {
     plugins: [MarkdownPreview()],
+    build: {
+      rollupOptions: {
+        external: ['d3-sankey'],
+      },
+    },
   },
 })) 

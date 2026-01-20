@@ -12,6 +12,10 @@ patchedDependencies:
 importers:
 
   .:
+    dependencies:
+      d3-sankey:
+        specifier: ^0.12.3
+        version: 0.12.3
     devDependencies:
       '@femm/prettier':
         specifier: ^1.1.0
