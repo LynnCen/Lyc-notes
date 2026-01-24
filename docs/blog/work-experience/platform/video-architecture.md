@@ -158,7 +158,7 @@ export class CallStateManager {
 
 - 即时重连：网络波动5秒内的快速重连
 - 延迟重连：较长时间断线的重试机制
-- [退避算法](/algorithm/退避算法)：控制重连频率和次数
+- [退避算法](/fundamentals/algorithms/退避算法)：控制重连频率和次数
 - 状态同步：确保重连后的状态一致性
 
 ```ts

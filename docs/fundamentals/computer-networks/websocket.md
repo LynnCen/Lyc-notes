@@ -163,7 +163,7 @@ class WS {
 
 **目的：在连接断开时自动重连，避免客户端断开连接后无法接收服务端推送消息。**
 
-**核心思路：检测到连接断开时自动重连，判断是否达到最大重试次数，根据[退避算法](/algorithm/退避算法)控制重试间隔。**
+**核心思路：检测到连接断开时自动重连，判断是否达到最大重试次数，根据[退避算法](/fundamentals/algorithms/退避算法)控制重试间隔。**
 
 ```mermaid
 graph TD
@@ -1187,7 +1187,7 @@ export class WebSocketClient extends EventEmitter {
 
 ## 通信机制对比
 
-详情看：[现代Web实时通信技术全景对比：HTTP、WebSocket、SSE、长短轮询](/posts/communicationMechanisms.md)
+详情看：[现代Web实时通信技术全景对比：HTTP、WebSocket、SSE、长短轮询](/blog/articles/posts/communicationMechanisms.md)
 
 ## 参考
 

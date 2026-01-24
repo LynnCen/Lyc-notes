@@ -429,7 +429,7 @@ function ChatComponent() {
 
 **目标**
 - 实现智能轮询机制
-- 支持[指数退避](/algorithm/退避算法.md)
+- 支持[指数退避](/fundamentals/algorithms/退避算法.md)
 - 控制请求频率
 - 处理异常情况
 

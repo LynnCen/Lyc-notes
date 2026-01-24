@@ -437,7 +437,7 @@ async queueForSync(conversation: Conversation): Promise<void> {
 
 2. **指数退避重试策略**
 
-> [退避算法](/algorithm/退避算法)
+> [退避算法](/fundamentals/algorithms/退避算法)
 > 
 同步层实现了智能的指数退避重试机制，在网络不稳定时能够自适应调整重试间隔：
 ```ts
@@ -1142,7 +1142,7 @@ export class ConflictResolver {
 
 1. **LRU缓存机制**
 
-> [LRU算法](/algorithm/LRU)
+> [LRU算法](/fundamentals/algorithms/LRU)
 存储层实现了内存级LRU（最近最少使用）缓存，加速热点会话和消息的访问：
 ```ts
 private conversationCache: LRUCache<Conversation>;
@@ -1274,7 +1274,7 @@ private async retryOperation<T>(operation: () => Promise<T>): Promise<T> {
 故障恢复与重试机制的特点：
 
 - 自动错误恢复：临时性错误可自动重试，提高系统稳定性
-- [指数退避](/algorithm/退避算法)策略：采用指数级增长的重试间隔，避免系统过载
+- [指数退避](/fundamentals/algorithms/退避算法)策略：采用指数级增长的重试间隔，避免系统过载
 - 有限重试次数：设置最大重试次数，防止无限重试消耗资源
 - 透明重试：对上层业务逻辑透明，简化错误处理
 
