@@ -30,7 +30,7 @@ export const nav: DefaultTheme.Config['nav'] = [
           {
             text: 'React',
             activeMatch: '/frontend/react/',
-            link: 'frontend/react/core/intro'
+            link: 'frontend/react/record/thinking'
           },
           {
             text: 'Vue',
@@ -177,7 +177,7 @@ export const nav: DefaultTheme.Config['nav'] = [
       },
       {
         text:'软考-系统架构设计师',
-        link:'/certifications/software-exam/架构师/index'
+        link:'/certifications/software-exam/架构师/01绪论'
       }
     ]
   },

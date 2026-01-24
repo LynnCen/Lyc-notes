@@ -131,19 +131,6 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
   ],
   '/frontend/react/': [
     {
-      text: 'React源码详解',
-      items: [
-        {
-          text: '第一篇 React运行全流程',
-          link: '/frontend/react/core/intro'
-        },
-        {
-          text: '第二篇 JSX 是如何转换为 React.createElement',
-          link: '/frontend/react/core/createElement'
-        }
-      ]
-    },
-    {
       text: 'React实践',
       items: [
         {
@@ -692,7 +679,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
     },
     {
       text: '软考-系统架构设计师',
-      link: '/certifications/software-exam/架构师/index'
+      link: '/certifications/software-exam/架构师/01绪论'
     },
     {
       text: '时间规划',
