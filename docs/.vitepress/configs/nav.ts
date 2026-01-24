@@ -9,18 +9,18 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: 'Javascript基础',
-            activeMatch: 'Javascript/basic/',
-            link: 'Javascript/basic/你不知道的js'
+            activeMatch: 'frontend/javascript/basic/',
+            link: 'frontend/javascript/basic/你不知道的js'
           },
           {
             text: 'Javascript进阶',
-            activeMatch: 'Javascript/Advance/',
-            link: 'Javascript/Advance/executionContext'
+            activeMatch: 'frontend/javascript/Advance/',
+            link: 'frontend/javascript/Advance/executionContext'
           },
           {
             text: 'Typescript',
-            activeMatch: '/typescript/',
-            link: '/typescript/记录'
+            activeMatch: '/frontend/typescript/',
+            link: '/frontend/typescript/记录'
           },
         ]
       },
@@ -29,13 +29,13 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: 'React',
-            activeMatch: '/react/',
-            link: 'react/core/intro'
+            activeMatch: '/frontend/react/',
+            link: 'frontend/react/core/intro'
           },
           {
             text: 'Vue',
-            activeMatch: '/Vue/',
-            link: 'Vue/basic'
+            activeMatch: '/frontend/vue/',
+            link: 'frontend/vue/basic'
           }
         ]
       },
@@ -44,23 +44,18 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: 'WebPack',
-            activeMatch: '/webpack/',
-            link: 'webpack/performance'
+            activeMatch: '/frontend/webpack/',
+            link: 'frontend/webpack/performance'
           },
           {
             text: 'Node',
-            activeMatch: '/node/',
-            link: 'node/packages'
-          },
-          {
-            text: 'Vite',
-            activeMatch: '/vite/',
-            link: 'vite/basic'
+            activeMatch: '/frontend/node/',
+            link: 'frontend/node/packages'
           },
           {
             text: 'Git',
-            activeMatch: '/git/',
-            link: 'git/basic'
+            activeMatch: '/frontend/git/',
+            link: 'frontend/git/basic'
           }
         ],
       },
@@ -69,8 +64,8 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: '浏览器原理',
-            activeMatch: '/browser/',
-            link: '/browser/Chrome架构'
+            activeMatch: '/frontend/browser/',
+            link: '/frontend/browser/Chrome架构'
           }
         ]
       },
@@ -85,7 +80,7 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: '计算机组成原理基础',
-            link: '/组成原理/chapter1'
+            link: '/fundamentals/computer-organization/chapter1'
           }
         ]
       },
@@ -94,11 +89,11 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: '数据结构基础',
-            link: '/dataStructure/chapter1'
+            link: '/fundamentals/data-structures/chapter1'
           },
           {
             text: '课后习题',
-            link: '/dataStructure/chapter1_ex'
+            link: '/fundamentals/data-structures/chapter1_ex'
           }
         ]
 
@@ -108,7 +103,7 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: '操作系统基础',
-            link: '/os/chapter1',
+            link: '/fundamentals/operating-systems/chapter1',
           }
         ]
       },
@@ -117,7 +112,7 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: '计算机网络基础',
-            link: '/计网/chapter1',
+            link: '/fundamentals/computer-networks/chapter1',
           }
         ]
       },
@@ -126,13 +121,13 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: '408真题',
-            link: '/408/2009',
+            link: '/fundamentals/exam-408/2009',
           }
         ]
       },
       {
         text: '设计模式',
-        link: '/designPatterns/index'
+        link: '/frontend/design-patterns/index'
       }
 
     ],
@@ -145,11 +140,11 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: 'BrowserTools MCP',
-            link: '/AI/mcp/browserTools'
+            link: '/ai/mcp/browserTools'
           },
           {
             text: 'Figma Dev Mode MCP',
-            link: '/AI/mcp/figma'
+            link: '/ai/mcp/figma'
           }
         ]
       },
@@ -158,7 +153,7 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: 'Dify',
-            link: '/AI/Dify/index'
+            link: '/ai/Dify/index'
           }
         ]
       },
@@ -167,7 +162,7 @@ export const nav: DefaultTheme.Config['nav'] = [
         items: [
           {
             text: 'LLM',
-            link: '/posts/llm'
+            link: '/ai/posts/llm'
           }
         ]
       }
@@ -178,11 +173,11 @@ export const nav: DefaultTheme.Config['nav'] = [
     items: [
       {
         text: '软考-软件设计师',
-        link: '/softExam/软件设计师/index'
+        link: '/certifications/software-exam/软件设计师/index'
       },
       {
         text:'软考-系统架构设计师',
-        link:'/softExam/架构师/index'
+        link:'/certifications/software-exam/架构师/index'
       }
     ]
   },
