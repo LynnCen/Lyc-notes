@@ -53,7 +53,7 @@ features:
       src: /icons/Postgraduate。.svg
     title: Academic Journey
     details: <small class="bottom-small">Charting the path through higher education and research</small>
-    link: /certifications/
+    link: /certifications/software-exam/架构师/01绪论
     linkText: ▶►
 ---
 

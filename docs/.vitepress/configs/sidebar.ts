@@ -98,7 +98,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
           text: '测试',
           link: '/frontend/vue/ecosystem/test'
         },
-        
+
       ]
     },
     {
@@ -687,7 +687,7 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
     },
     {
       text: '软件工程',
-      link: '/certifications/software-exam/软件工程'
+      link: '/certifications/software-exam/softExam/softwareEngineering'
     },
     {
       text: '面向对象',
