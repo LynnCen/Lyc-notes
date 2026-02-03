@@ -368,7 +368,8 @@ graph TB
 
 项目的 GitLab CI 配置采用**组件化设计**,主配置文件 `.gitlab-ci.yml` 非常简洁:
 
-```yaml:1:24:.gitlab-ci.yml
+```yaml
+# .gitlab-ci.yml
 spec:
   inputs:
     catalog_update:
@@ -404,7 +405,8 @@ include:
 
 Pipeline 由 7 个 Stage 组成，各 Stage 职责明确，串行执行以保证流程顺序性：
 
-```yaml:25:32:.gitlab-ci.yml
+```yaml
+# .gitlab-ci.yml
 stages:
   - bot         # 自动化维护任务
   - check       # 代码质量检查
@@ -528,7 +530,8 @@ graph LR
 
 #### 3.1.1 Turbo 配置
 
-```json:1:90:turbo.json
+```json
+// turbo.json
 {
     "$schema": "https://turbo.build/schema.json",
     "globalPassThroughEnv": [
@@ -690,7 +693,8 @@ graph LR
 
 #### 3.2.1 Workspace 配置
 
-```yaml:1:30:pnpm-workspace.yaml
+```yaml
+# pnpm-workspace.yaml
 packages:
   - apps/*
   - apps/insmind
@@ -726,7 +730,8 @@ packages:
 
 **Catalog 依赖目录** (pnpm workspace catalog 功能):
 
-```yaml:30:100:pnpm-workspace.yaml
+```yaml
+# pnpm-workspace.yaml (catalog section)
 catalog:
   '@actions/core': ^1.11.1
   '@actions/exec': ^1.1.1
@@ -742,8 +747,9 @@ catalog:
 
 **项目使用的自动化工具**:
 
-```json:10:12:package.json
-"bot:catalog": "node scripts/gitlab-mr-bot/dist/cli.js mr --source-branch chore/update-catalog --target-branch master --title \"chore: update catalog\" --description \"Automated catalog update\" --commit-message \"chore: update catalog\" --labels \"automation,catalog\" --reviewers \"@tangbing,@qiancong,@juanbai\" -- pnpm run catalog",
+```json
+// package.json
+"bot:catalog": "node scripts/gitlab-mr-bot/dist/cli.js mr --source-branch chore/update-catalog --target-branch master --title \"chore: update catalog\" --description \"Automated catalog update\" --commit-message \"chore: update catalog\" --labels \"automation,catalog\" --reviewers \"@tangbing,@qiancong,@juanbai\" -- pnpm run catalog"
 ```
 
 定期自动更新 catalog 并创建 MR 供审查。
@@ -758,8 +764,8 @@ Bot Stage 包含多个自动化维护任务:
 
 #### 4.1.1 Catalog 自动更新
 
-```yaml:39:49:.gitlab-ci.yml
-# 定时运行 catalog 更新任务
+```yaml
+# .gitlab-ci.yml - 定时运行 catalog 更新任务
 catalog update:
   stage: bot
   tags:
@@ -828,8 +834,8 @@ class CatalogManager {
 
 #### 4.1.2 自动发布版本
 
-```yaml:51:68:.gitlab-ci.yml
-# 定时运行版本 MR 合并任务
+```yaml
+# .gitlab-ci.yml - 定时运行版本 MR 合并任务
 auto publish versions:
   stage: bot
   tags:
@@ -884,7 +890,8 @@ pnpm run check-type    # 类型检查
 
 ### 4.3 Test Stage - 自动化测试
 
-```json:58:61:turbo.json
+```json
+// turbo.json
 "test": {
     "outputs": ["output/coverage/**", "junit.xml"],
     "dependsOn": ["^build"]
@@ -911,7 +918,8 @@ graph LR
 
 **测试排除配置**:
 
-```json:243:256:package.json
+```json
+// package.json
 "testExcludePackages": [
     "@gdesign/commerce-core",
     "@gdesign/smart-subtask",
@@ -981,7 +989,8 @@ sequenceDiagram
 
 Deliverable Stage 生成可部署的制品:
 
-```json:68:71:turbo.json
+```json
+// turbo.json
 "deliverable": {
     "dependsOn": ["build"],
     "outputs": ["output/deliverable/**"]
@@ -999,7 +1008,8 @@ Deliverable Stage 生成可部署的制品:
 
 **应用示例配置**:
 
-```json:19:27:apps/gaoding/turbo.json
+```json
+// apps/gaoding/turbo.json
 "deliverable": {
     "passThroughEnv": [
         "OSS_ACCESS_KEY_ID",
@@ -1013,7 +1023,8 @@ Deliverable Stage 生成可部署的制品:
 
 ### 4.6 Deploy Stage - 环境部署
 
-```json:72:76:turbo.json
+```json
+// turbo.json
 "deploy": {
     "dependsOn": ["deliverable"],
     "outputs": [],
@@ -1023,10 +1034,11 @@ Deliverable Stage 生成可部署的制品:
 
 **多环境部署**:
 
-```json:34:36:package.json
+```json
+// package.json
 "deploy:production": "CI_ENVIRONMENT_TYPE=production CI_ENVIRONMENT_INSTANCE=default APP_API_ENV=prod turbo run deploy --output-logs=new-only",
 "deploy:review": "CI_ENVIRONMENT_TYPE=review CI_ENVIRONMENT_INSTANCE=$([ \"$CI_PIPELINE_SOURCE\" = \"merge_request_event\" ] && echo \"mr$CI_MERGE_REQUEST_IID\" || echo \"default\") APP_API_ENV=fat sh scripts/turbo-analyzer/turbo-with-report.sh turbo run deploy --output-logs=new-only",
-"deploy:staging": "CI_ENVIRONMENT_TYPE=staging CI_ENVIRONMENT_INSTANCE=default APP_API_ENV=stage sh scripts/turbo-analyzer/turbo-with-report.sh turbo run deploy --output-logs=new-only",
+"deploy:staging": "CI_ENVIRONMENT_TYPE=staging CI_ENVIRONMENT_INSTANCE=default APP_API_ENV=stage sh scripts/turbo-analyzer/turbo-with-report.sh turbo run deploy --output-logs=new-only"
 ```
 
 **环境隔离策略**:
@@ -1073,7 +1085,8 @@ CI_ENVIRONMENT_INSTANCE=$(
 
 ### 4.7 Verify Stage - 部署验证
 
-```json:82:85:turbo.json
+```json
+// turbo.json
 "verify": {
     "dependsOn": ["deploy"],
     "outputs": ["output/verify/**"]
@@ -1174,19 +1187,22 @@ sequenceDiagram
 
 **Catalog 自动更新**:
 
-```json:10:10:package.json
+```json
+// package.json - bot:catalog
 "bot:catalog": "node scripts/gitlab-mr-bot/dist/cli.js mr --source-branch chore/update-catalog --target-branch master --title \"chore: update catalog\" --description \"Automated catalog update\" --commit-message \"chore: update catalog\" --labels \"automation,catalog\" --reviewers \"@tangbing,@qiancong,@juanbai\" -- pnpm run catalog"
 ```
 
 **编辑器代码自动更新**:
 
-```json:11:11:package.json
+```json
+// package.json - bot:editor-code-update
 "bot:editor-code-update": "node scripts/gitlab-mr-bot/dist/cli.js mr --source-branch chore/editor-code-update --target-branch master --title \"chore: update editor code\" --description \"Automated editor code update\" --commit-message \"chore: update editor code\" --labels \"automation,editor\" --reviewers \"@juanbai,@zhangliang,@facai\" -- npx turbo run editor-code-update"
 ```
 
 **包索引自动生成**:
 
-```json:12:12:package.json
+```json
+// package.json - bot:generate-packages-index
 "bot:generate-packages-index": "node scripts/gitlab-mr-bot/dist/cli.js mr --source-branch chore/update-packages-index --target-branch master --title \"chore: update packages index\" --description \"Automated packages index update\" --commit-message \"chore: update packages index\" --labels \"automation,docs\" --reviewers \"@tangbing,@qiancong,@juanbai\" -- pnpm run docs:generate-packages-index"
 ```
 
@@ -1266,7 +1282,8 @@ sequenceDiagram
 
 #### 5.2.4 关键代码片段
 
-```javascript:485:532:scripts/merge-versions-mr.mjs
+```javascript
+// scripts/merge-versions-mr.mjs
 async function freezeBranch() {
     if (isBranchFrozen) {
         console.log(`   ℹ️  分支 ${TARGET_BRANCH} 已经冻结`);
@@ -1325,8 +1342,9 @@ async function freezeBranch() {
 
 项目使用自定义的 `turbo-analyzer` 包装脚本来增强 Turbo 的可观测性:
 
-```bash:1:15:scripts/turbo-analyzer/turbo-with-report.sh
+```bash
 #!/bin/sh
+# scripts/turbo-analyzer/turbo-with-report.sh
 
 # Turbo 包装脚本 - 在 CI 环境中自动生成可视化报表
 # 使用方法: ./scripts/turbo-analyzer/turbo-with-report.sh turbo run build --filter=@app/*
@@ -1354,7 +1372,8 @@ async function freezeBranch() {
 
 **远程缓存** (Turbo Remote Cache):
 
-```json:40:42:turbo.json
+```json
+// turbo.json - globalPassThroughEnv
 "TURBO_API",
 "TURBO_TEAM",
 "TURBO_TOKEN"
@@ -1438,14 +1457,15 @@ graph TB
 
 ### 7.3 版本发布策略
 
-```json:22:28:package.json
+```json
+// package.json - changeset scripts
 "changeset": "echo '对 Cursor 说：创建变更集' && exit 1",
 "changeset:publish": "pnpm publish -r --filter=!@app/* --no-git-checks && changeset tag",
 "changeset:snapshot:enter": "touch .changeset/snapshot",
 "changeset:snapshot:exit": "rm -f .changeset/snapshot",
 "changeset:snapshot:publish": "pnpm publish -r --filter=!@app/* --no-git-checks",
 "changeset:snapshot:version": "changeset version --snapshot snapshot",
-"changeset:version": "changeset version",
+"changeset:version": "changeset version"
 ```
 
 **发布模式**:
@@ -1482,7 +1502,8 @@ graph TB
 
 #### 8.1.1 Dockerfile 示例
 
-```dockerfile:1:25:apps/example-app/Dockerfile
+```dockerfile
+# apps/example-app/Dockerfile
 # Base image
 #----------------------------------------------------------------------------
 FROM gaoding-registry-vpc.cn-hangzhou.cr.aliyuncs.com/gaodingx/base-image:node-20-onbuild AS base
@@ -1680,7 +1701,8 @@ variables:
 
 **环境变量注入**:
 
-```json:19:44:turbo.json
+```json
+// turbo.json
 "globalPassThroughEnv": [
     "APOLLO_TOKEN",
     "APP_API_ENV",

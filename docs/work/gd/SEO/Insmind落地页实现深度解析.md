@@ -190,10 +190,11 @@ routes/(vue3)/(landing)/
 
 落地页路由采用**兜底路由**策略，匹配所有未被其他路由捕获的路径：
 
-```160:162:apps/insmind/routemap.server.json
-      "pathname": "{/:lang(id|es|pt-br|fr|ru|th|vi|ko|it|de|ja|zh-cn|zh-tw|tr|pl|nl|ar)}?{/:landing}?/",
-      "module": "./routes/(vue3)/(landing)/[[landing]]@route.tsx"
-    }
+```json
+{
+  "pathname": "{/:lang(id|es|pt-br|fr|ru|th|vi|ko|it|de|ja|zh-cn|zh-tw|tr|pl|nl|ar)}?{/:landing}?/",
+  "module": "./routes/(vue3)/(landing)/[[landing]]@route.tsx"
+}
 ```
 
 **路由优先级**：
@@ -205,7 +206,8 @@ routes/(vue3)/(landing)/
 
 Content Code 是轻舟CMS系统的内容唯一标识，规则是将URL路径中的 `/` 替换为 `_`：
 
-```10:36:apps/insmind/utils/url.ts
+```typescript
+// apps/insmind/utils/url.ts
 export const urlToContentCode = (url: string) => {
     const { pathname } = new URL(url);
 
@@ -243,7 +245,8 @@ export const urlToContentCode = (url: string) => {
 
 ### 路由处理流程
 
-```31:92:apps/insmind/routes/(vue3)/(landing)/[[landing]]@route.tsx
+```typescript
+// apps/insmind/routes/(vue3)/(landing)/[[landing]]@route.tsx
 export const handler = defineRouteHandler<IPageData>({
     async GET(ctx) {
         const landing = urlToContentCode(ctx.request.url);
@@ -339,7 +342,8 @@ getLandingResource() 请求CMS API
 
 ### CMS数据获取
 
-```127:258:apps/insmind/services/qingzhou/index.ts
+```typescript
+// apps/insmind/services/qingzhou/index.ts
 async function getLandingResource(position: string) {
     // 来自落地页的界面配置请求
     const { pits } = await getPositionResourcesByOpenEditor({
@@ -482,7 +486,8 @@ async function getLandingResource(position: string) {
 
 ### 数据缓存策略
 
-```132:142:apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue
+```typescript
+// apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue
 const resource = ref<ILandingResource>([]);
 resource.value = await cacheProvider(props.landing, async () => {
     const res = await getLandingResource(props.landing);
@@ -510,7 +515,8 @@ resource.value = await cacheProvider(props.landing, async () => {
 
 落地页采用**配置驱动**的组件渲染模式，根据CMS返回的 `material_type` 动态加载对应组件：
 
-```49:85:apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue
+```typescript
+// apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue
 const COMPONENT_MAP = {
     'module_home_banner': defineAsyncComponent(() => import('../home-banner/index.vue')),
     'module-title': defineAsyncComponent(() => import('../title/index.vue')),
@@ -557,32 +563,33 @@ const COMPONENT_MAP = {
 
 ### 组件渲染逻辑
 
-```5:29:apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue
-    <template v-for="(item, index) in resource" :key="`${item.material_type}_${index}`">
-        <!-- anchor dom -->
-        <i :id="item.materials[0]?.title"></i>
-        <template v-if="item.material_type === 'creator-input' && item?.materials.length > 0">
-            <CreatorInput
-                :headerVisible="false"
-                :creatorResourceMap="creatorResourceMap"
-                :style="{
-                    background: 'linear-gradient(180deg, #FFF 0%, #F6F7F9 46.18%, #F6F7F9 100%)',
-                    paddingTop: '48px',
-                    paddingBottom: '48px',
-                }"
-            />
-        </template>
-        <template v-else>
-            <component
-                :is="COMPONENT_MAP[item.material_type]"
-                :resource="item.materials"
-                :isSupportPasteFile="getIsSupportPasteFile(item)"
-                :landing="getPageName()"
-                @mouseenter="handleMouseEnter(item)"
-                @mouseleave="handleMouseLeave()"
-            />
-        </template>
+```vue
+<!-- apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue -->
+<template v-for="(item, index) in resource" :key="`${item.material_type}_${index}`">
+    <!-- anchor dom -->
+    <i :id="item.materials[0]?.title"></i>
+    <template v-if="item.material_type === 'creator-input' && item?.materials.length > 0">
+        <CreatorInput
+            :headerVisible="false"
+            :creatorResourceMap="creatorResourceMap"
+            :style="{
+                background: 'linear-gradient(180deg, #FFF 0%, #F6F7F9 46.18%, #F6F7F9 100%)',
+                paddingTop: '48px',
+                paddingBottom: '48px',
+            }"
+        />
     </template>
+    <template v-else>
+        <component
+            :is="COMPONENT_MAP[item.material_type]"
+            :resource="item.materials"
+            :isSupportPasteFile="getIsSupportPasteFile(item)"
+            :landing="getPageName()"
+            @mouseenter="handleMouseEnter(item)"
+            @mouseleave="handleMouseLeave()"
+        />
+    </template>
+</template>
 ```
 
 **渲染流程**：
@@ -594,7 +601,8 @@ const COMPONENT_MAP = {
 
 ### 文件上传功能优化
 
-```87:117:apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue
+```typescript
+// apps/insmind/routes/(vue3)/(landing)/components/main/index@widget.vue
 // 支持上传的工具
 const matchUploadTools = [
     'module_landing_banner',
@@ -641,7 +649,8 @@ const getIsSupportPasteFile = function (item: ILandingResource[0]) {
 
 落地页自动生成多种类型的 Schema.org 结构化数据，提升搜索引擎理解：
 
-```23:119:apps/insmind/utils/seo-ld.ts
+```typescript
+// apps/insmind/utils/seo-ld.ts
 export function getLandingLDData(pits: ILandingResource, landing: string, url: string) {
     const ld: string[] = [ORGANIZATION];
     try {
@@ -751,8 +760,9 @@ export function getLandingLDData(pits: ILandingResource, landing: string, url: s
 
 ### Meta标签注入
 
-```47:86:apps/insmind/routes/(vue3)/(landing)/[[landing]]@route.tsx
-                meta: mergeMeta(ctx.meta, {
+```typescript
+// apps/insmind/routes/(vue3)/(landing)/[[landing]]@route.tsx
+meta: mergeMeta(ctx.meta, {
                     title,
                     description,
                     script: ldContent.map((content) => ({
@@ -826,7 +836,8 @@ const COMPONENT_MAP = {
 - 使用 `createCacheRequest` 包装API请求
 - 客户端请求缓存，服务端不缓存（保证实时性）
 
-```105:122:apps/insmind/services/qingzhou/index.ts
+```typescript
+// apps/insmind/services/qingzhou/index.ts
 const getPositionResources: typeof _getPositionResources = createCacheRequest(
     _getPositionResources,
     (params) => {
@@ -858,7 +869,8 @@ const getPositionResourcesByOpenEditor: typeof _getPositionResources = createCac
 - 提升首屏渲染速度（TTFB）
 
 **中间件优化**：
-```18:35:apps/insmind/routes/(middlewares)/await-all-ready.ts
+```typescript
+// apps/insmind/routes/(middlewares)/await-all-ready.ts
 export default defineMiddlewareHandler(async (context, next) => {
     if (context.renderer && context.module) {
         const awaitAllReadyConfig = context.module.config?.awaitAllReady ?? false;
@@ -890,12 +902,13 @@ export default defineMiddlewareHandler(async (context, next) => {
 
 支持18种语言的URL前缀：
 
-```19:24:apps/insmind/routes/(vue3)/(landing)/renderer/vue3.ts
-            {
-                path: '/:lang(id|es|pt-br|fr|ru|th|vi|ko|it|de|ja|zh-cn|zh-tw|tr|pl|nl|ar)?/:landing?',
-                name: 'landing',
-                component: () => import('../components/main/index@widget.vue'),
-            },
+```typescript
+// apps/insmind/routes/(vue3)/(landing)/renderer/vue3.ts
+{
+    path: '/:lang(id|es|pt-br|fr|ru|th|vi|ko|it|de|ja|zh-cn|zh-tw|tr|pl|nl|ar)?/:landing?',
+    name: 'landing',
+    component: () => import('../components/main/index@widget.vue'),
+},
 ```
 
 **语言列表**：
@@ -921,16 +934,17 @@ export default defineMiddlewareHandler(async (context, next) => {
 
 多语言URL的Content Code生成规则：
 
-```26:33:apps/insmind/utils/url.ts
-    // 如果只有一个路径，则需要判断一下是不是多语言页面的首页
-    if (pathArr.length === 1) {
-        const lang = transUrlLangToI18nLang(pathArr[0]);
+```typescript
+// apps/insmind/utils/url.ts
+// 如果只有一个路径，则需要判断一下是不是多语言页面的首页
+if (pathArr.length === 1) {
+    const lang = transUrlLangToI18nLang(pathArr[0]);
 
-        // 如果路径第一部分字符是多语言标识，则返回多语言首页
-        if (SUPPORT_LANGS.some((item) => item === lang)) {
-            return `${pathArr[0]}_${DEFAULT_LANDING_PAGE}`;
-        }
+    // 如果路径第一部分字符是多语言标识，则返回多语言首页
+    if (SUPPORT_LANGS.some((item) => item === lang)) {
+        return `${pathArr[0]}_${DEFAULT_LANDING_PAGE}`;
     }
+}
 ```
 
 **示例**：
