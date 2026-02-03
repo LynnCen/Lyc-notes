@@ -10,6 +10,8 @@ export default withMermaid(defineConfig({
   outDir: '../dist',
   base: APP_BASE_PATH ? `/${APP_BASE_PATH}/` : '/',
 
+  ignoreDeadLinks: true,
+
   lang: 'zh-CN',
   title: '林岑LynnCenʘᴗʘ ',
   description: '林岑的成长之路，包含前端常用知识、源码阅读笔记、各种奇淫技巧、日常提效工具等',
@@ -76,4 +78,4 @@ export default withMermaid(defineConfig({
       },
     },
   },
-})) 
+}))
