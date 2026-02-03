@@ -548,11 +548,11 @@ https://esm.dancf.com/workspace:@company/utils@abc1234/package.json
 
 **完整流程**：
 
-![Workspace Import Map 流程](../RFC%2020%20%20Importmap%20生成工具%20WPM3/attachments/importmap-workspace.png)
+![Workspace Import Map 流程](./attachments/importmap-workspace.png)
 
 **WPM2 Import Map 生成流程**：
 
-![WPM2 流程](../RFC%2020%20%20Importmap%20生成工具%20WPM3/attachments/wpm2%20importmap%20生成.png)
+![WPM2 流程](./attachments/wpm2%20importmap%20生成.png)
 
 ---
 
@@ -930,7 +930,6 @@ pnpm build:importmap
 
 - [Import Map 与 ESM CDN 介绍](01-基础概念-importmap与ESM-CDN介绍.md)
 - [RFC 15: WPM2](02-工具演进-RFC15-WPM2.md)
-- [RFC 17: Monorepo CI/CD 工作流设计](../RFC%2017%20%20Monorepo%20包和应用%20CI%20CD%20工作流设计/page.md)
 
 ### 8.2 技术资源
 

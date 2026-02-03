@@ -47,7 +47,7 @@ _.clone({})
 
 **错误信息**：
 
-![裸模块导入错误](../importmap%20&%20ESM%20CDN%20介绍/attachments/image2022-12-8_13-41-45.png)
+![裸模块导入错误](./attachments/image2022-12-8_13-41-45.png)
 
 **错误原因**：
 - 浏览器不知道 `'lodash'` 指向哪个文件
@@ -364,7 +364,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) {
 
 **架构图**：
 
-![CDN 工作流程](../importmap%20&%20ESM%20CDN%20介绍/attachments/image2022-6-16_15-25-5.png)
+![CDN 工作流程](./attachments/image2022-6-16_15-25-5.png)
 
 **工作流程**：
 
@@ -839,9 +839,9 @@ auth.js 已缓存，无需重复下载！
 
 **示例图**：
 
-![插件干扰示例1](../importmap%20&%20ESM%20CDN%20介绍/attachments/image2022-12-7_15-7-3.png)
+![插件干扰示例1](./attachments/image2022-12-7_15-7-3.png)
 
-![插件干扰示例2](../importmap%20&%20ESM%20CDN%20介绍/attachments/image2022-12-8_13-40-34.png)
+![插件干扰示例2](./attachments/image2022-12-8_13-40-34.png)
 
 #### 解决方案
 
@@ -877,7 +877,7 @@ auth.js 已缓存，无需重复下载！
 
 **提示界面**：
 
-![用户提示](../importmap%20&%20ESM%20CDN%20介绍/attachments/image2022-12-7_14-42-24.png)
+![用户提示](./attachments/image2022-12-7_14-42-24.png)
 
 **实施方式**：
 - ✅ 在 HTML 的 `<head>` 中尽早放置检测代码
