@@ -910,8 +910,6 @@ app.use(async (ctx, next) => {
 
 #### 架构设计
 
-![Cloudflare Workers 架构](attachments/image2024-3-11_16-42-0.png)
-
 **架构说明**：
 - **边缘节点**：Cloudflare Workers 在全球边缘节点运行
 - **缓存层**：Workers 缓存响应，减少回源

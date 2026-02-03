@@ -11,6 +11,6 @@ import { data } from './data';
 
 </script>
 
-<style src="../../../resources/index.scss"></style>
+<style src="../resources/index.scss"></style>
 
 <MNavLinks v-for="{title, items} in data" :title="title" :items="items"/>
