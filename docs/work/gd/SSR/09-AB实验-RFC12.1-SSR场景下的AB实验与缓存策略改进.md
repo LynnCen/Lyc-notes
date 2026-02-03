@@ -106,7 +106,7 @@
 
 **案例**：首页编辑推荐区域
 
-![频繁的内容替换](../RFC%2012.1%20%20SSR%20场景下的%20AB%20实验与缓存策略改进/attachments/image2024-6-24_17-2-59.png)
+![频繁的内容替换](./attachments/image2024-6-24_17-2-59.png)
 
 **问题流程**：
 
@@ -477,7 +477,7 @@ async function handleSSRRequest(req, res) {
 
 **整体流程**：
 
-![SSR AB 实验流程](../RFC%2012.1%20%20SSR%20场景下的%20AB%20实验与缓存策略改进/attachments/SSR%20AB%20.png)
+![SSR AB 实验流程](./attachments/SSR%20AB%20.png)
 
 **流程说明**：
 
@@ -785,7 +785,7 @@ Cache-Control: max-age=60, stale-while-revalidate=604800, stale-if-error=604800
 - 带来 2^7 = 128 个缓存版本 ❌
 ```
 
-![实验运行时长](../RFC%2012.1%20%20SSR%20场景下的%20AB%20实验与缓存策略改进/attachments/image2024-6-26_18-20-59.png)
+![实验运行时长](./attachments/image2024-6-26_18-20-59.png)
 
 **问题分析**：
 
