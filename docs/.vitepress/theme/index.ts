@@ -6,6 +6,12 @@ import { createMediumZoomProvider } from './composables/useMediumZoom'
 
 import MLayout from './components/MLayout.vue'
 import MNavLinks from './components/MNavLinks.vue'
+import MHomeFeature from './components/MHomeFeature.vue'
+import MProjectCard from './components/MProjectCard.vue'
+import MModuleCard from './components/MModuleCard.vue'
+import MProjectShowcase from './components/MProjectShowcase.vue'
+import MContentNav from './components/MContentNav.vue'
+import MModuleOverview from './components/MModuleOverview.vue'
 
 import './styles/index.scss'
 
@@ -31,6 +37,12 @@ export default {
     app.provide('DEV', process.env.NODE_ENV === 'development')
 
     app.component('MNavLinks', MNavLinks)
+    app.component('MHomeFeature', MHomeFeature)
+    app.component('MProjectCard', MProjectCard)
+    app.component('MModuleCard', MModuleCard)
+    app.component('MProjectShowcase', MProjectShowcase)
+    app.component('MContentNav', MContentNav)
+    app.component('MModuleOverview', MModuleOverview)
 
     if (typeof window !== 'undefined') {
       watch(
