@@ -26,11 +26,12 @@ hero:
       theme: alt
 
 features:
-  - icon: 🚀
-    title: Open Source
-    details: Creator of GitLab MCP, LynKit, TransLink i18n, and Picto. Building tools that empower developers worldwide.
-    link: /open-source/
-    linkText: Explore Projects
+  - icon: 🏗️
+    title: Web Frontend
+    details: React, Vue, TypeScript, browser internals, build tools, and modern frontend development patterns.
+    link: /frontend/
+    linkText: Read More
+
 
   - icon: 🤖
     title: AI & Agent
@@ -44,11 +45,11 @@ features:
     link: /cv/
     linkText: Discover
 
-  - icon: 🏗️
-    title: Web Frontend
-    details: React, Vue, TypeScript, browser internals, build tools, and modern frontend development patterns.
-    link: /frontend/
-    linkText: Read More
+  - icon: 🚀
+    title: Open Source
+    details: Creator of GitLab MCP, LynKit, TransLink i18n, and Picto. Building tools that empower developers worldwide.
+    link: /open-source/
+    linkText: Explore Projects
 
   - icon: 📐
     title: Design Patterns
