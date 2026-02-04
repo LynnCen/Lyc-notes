@@ -4,73 +4,69 @@ layoutClass: 'm-home-layout'
 
 hero:
   name: Lynn Cen
-  text: Web Developer Blog
-  tagline: Exploring the digital frontier, one line of code at a time
+  text: Senior Frontend Engineer
+  tagline: Crafting delightful web experiences. Open source contributor with a passion for AI, graphics, and scalable architecture.
   image:
     src: /LynnCenLogo.png
     alt: Lynn Cen
   actions:
+    - text: GitLab MCP
+      link: https://github.com/LynnCen/gitlab-mcp
+    - text: LynKit
+      link: https://lynncen.github.io/LynKit/
+      theme: alt
+    - text: TransLink
+      link: https://github.com/LynnCen/translink-i18n
+      theme: alt
+    - text: Picto
+      link: https://github.com/LynnCen/picto
+      theme: alt
     - text: About Me
       link: /about/about
-    - text: WebFrontEnd Navigation
-      link: /resources/
       theme: alt
-    - text: mmPlayer
-      link: https://netease-music.fe-mm.com
+
 features:
-  - icon:
-      src: /icons/blogIcon.svg
-    title: Developer Tools
-    details: The right tools make all the difference. Discover software, plugins, and extensions that enhance productivity and streamline development workflows.
-    link: /blog/articles/posts/
-    linkText: Explore
-  - icon: 📖
-    title: Algorithms & Data Structures
-    details: Dive into the core algorithms powering modern systems, including 
-      <strong>Exponential Backoff</strong> for resilient networking and 
-      <strong>LRU Cache</strong> for optimized memory management. <small> ( ͡° ͜ʖ ͡°) </small><br />
-    link: /fundamentals/algorithms/LRU
+  - icon: 🚀
+    title: Open Source
+    details: Creator of GitLab MCP, LynKit, TransLink i18n, and Picto. Building tools that empower developers worldwide.
+    link: /open-source/
+    linkText: Explore Projects
+
+  - icon: 🤖
+    title: AI & Agent
+    details: Deep dive into LLM applications, Agent architecture, LangGraph integration, and AI-powered development tools.
+    link: /ai/
     linkText: Learn More
-  - icon:
-      src: /icons/react.svg
-    title: React Ecosystem
-    details: Master the art of React Hooks (づ｡◕‿‿◕｡)づ <br /> Discover powerful custom hooks to supercharge your applications 🚀
-    link: /frontend/react/customHook/hooks
+
+  - icon: 🎨
+    title: Graphics & Rendering
+    details: Infinite canvas engines, WebGL/Canvas2D tutorials, computer graphics fundamentals, and image processing.
+    link: /cv/
     linkText: Discover
-  - icon:
-      src: /icons/浏览器.svg
-    title: Browser Insights
-    details: Uncover the inner workings of modern browsers and performance optimization techniques <br /> Witness the incredible magic behind web rendering o_o ....
-    link: /frontend/browser/Chrome架构
-    linkText: Explore
-  - icon:
-      src: /icons/数据结构1.svg
-    title: Computer Science Fundamentals
-    details: Essential knowledge that forms the foundation of software engineering <br /> Tackling surprising challenges and common pitfalls
+
+  - icon: 🏗️
+    title: Web Frontend
+    details: React, Vue, TypeScript, browser internals, build tools, and modern frontend development patterns.
+    link: /frontend/
+    linkText: Read More
+
+  - icon: 📐
+    title: Design Patterns
+    details: GoF patterns, microservices patterns like CQRS and Event Sourcing, and modern frontend patterns in practice.
+    link: /design-patterns/
+    linkText: Study
+
+  - icon: 📚
+    title: CS Fundamentals
+    details: Data structures, algorithms, computer networks, operating systems, and software engineering principles.
     link: /fundamentals/
-    linkText: Dive In
-  - icon:
-      src: /icons/Postgraduate。.svg
-    title: Academic Journey
-    details: <small class="bottom-small">Charting the path through higher education and research</small>
-    link: /certifications/software-exam/架构师/01绪论
-    linkText: ▶►
+    linkText: Explore
 ---
 
 <style>
-/*Magical rotation effect*/
+/* Magical rotation effect */
 .m-home-layout .image-src:hover {
   transform: translate(-50%, -50%) rotate(666turn);
   transition: transform 59s 1s cubic-bezier(0.3, 0, 0.8, 1);
-}
-
-.m-home-layout .details small {
-  opacity: 0.8;
-}
-
-.m-home-layout .bottom-small {
-  display: block;
-  margin-top: 2em;
-  text-align: right;
 }
 </style>
