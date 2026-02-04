@@ -701,31 +701,62 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
 
     }
   ],
-  '/ai/': [
+  '/ai/mcp/': [
     {
-      text: 'AI',
-      link: '/ai/index'
-    },
-    {
-      text: 'MCP',
+      text: 'MCP 协议',
       items: [
-        {
-          text: 'BrowserTools MCP',
-          link: '/ai/mcp/browserTools'
-        },
-        {
-          text: 'Figma Dev Mode MCP',
-          link: '/ai/mcp/figma'
-        }
+        { text: '← 返回 AI 模块', link: '/ai/' },
+        { text: 'BrowserTools MCP', link: '/ai/mcp/browserTools' },
+        { text: 'Cursor MCP', link: '/ai/mcp/cursor-mcp' },
+        { text: 'Figma MCP', link: '/ai/mcp/figma' }
       ]
-    },
+    }
+  ],
+  '/ai/Dify/': [
     {
-      text: 'Dify',
+      text: 'Dify 平台',
       items: [
-        {
-          text: 'Dify介绍',
-          link: '/ai/Dify/index'
-        }
+        { text: '← 返回 AI 模块', link: '/ai/' },
+        { text: 'Dify 介绍', link: '/ai/Dify/index' }
+      ]
+    }
+  ],
+  '/ai/sam/': [
+    {
+      text: 'SAM 图像分割',
+      items: [
+        { text: '← 返回 AI 模块', link: '/ai/' },
+        { text: 'SAM 概述', link: '/ai/sam/' },
+        { text: 'SAM 主体选择深度解析', link: '/ai/sam/SAM主体选择深度解析' }
+      ]
+    }
+  ],
+  '/ai/机器学习/': [
+    {
+      text: '机器学习',
+      items: [
+        { text: '← 返回 AI 模块', link: '/ai/' },
+        { text: '逻辑回归', link: '/ai/机器学习/逻辑回归' },
+        { text: '其他机器学习方法', link: '/ai/机器学习/其他机器学习方法' }
+      ]
+    }
+  ],
+  '/ai/深度学习/': [
+    {
+      text: '深度学习',
+      items: [
+        { text: '← 返回 AI 模块', link: '/ai/' },
+        { text: '卷积神经网络基础', link: '/ai/深度学习/卷积神经网络基础' }
+      ]
+    }
+  ],
+  '/ai/posts/': [
+    {
+      text: 'LLM 基础',
+      items: [
+        { text: '← 返回 AI 模块', link: '/ai/' },
+        { text: 'AI 基础', link: '/ai/posts/ai' },
+        { text: 'LLM 概述', link: '/ai/posts/LLM' }
       ]
     }
   ],
@@ -737,6 +768,117 @@ export const sidebar: DefaultTheme.Config['sidebar'] = {
     {
       text: '模版方法',
       link: '/frontend/design-patterns/模版方法'
+    }
+  ],
+  // CV 模块 - 图形与渲染
+  '/cv/计算机图形学原理/': [
+    {
+      text: '计算机图形学原理',
+      items: [
+        { text: '← 返回图形模块', link: '/cv/' },
+        { text: '教学大纲', link: '/cv/计算机图形学原理/00-教学大纲与目录' },
+        { text: '图形学概述', link: '/cv/计算机图形学原理/01-图形学概述' },
+        { text: '向量与线性代数', link: '/cv/计算机图形学原理/02-向量与线性代数基础' },
+        { text: '矩阵与变换', link: '/cv/计算机图形学原理/03-矩阵与变换' },
+        { text: '齐次坐标与投影', link: '/cv/计算机图形学原理/04-齐次坐标与投影' },
+        { text: '2D 图形绘制算法', link: '/cv/计算机图形学原理/05-2D图形绘制算法' },
+        { text: '曲线与曲面', link: '/cv/计算机图形学原理/06-曲线与曲面' },
+        { text: '几何建模基础', link: '/cv/计算机图形学原理/07-几何建模基础' },
+        { text: '可见性与遮挡', link: '/cv/计算机图形学原理/08-可见性与遮挡' },
+        { text: '光照与着色模型', link: '/cv/计算机图形学原理/09-光照与着色模型' },
+        { text: '纹理映射', link: '/cv/计算机图形学原理/10-纹理映射' },
+        { text: '碰撞检测算法', link: '/cv/计算机图形学原理/11-碰撞检测算法' },
+        { text: '空间索引与加速', link: '/cv/计算机图形学原理/12-空间索引与加速结构' },
+        { text: '图像处理基础', link: '/cv/计算机图形学原理/13-图像处理基础' },
+        { text: '颜色科学', link: '/cv/计算机图形学原理/14-颜色科学' },
+        { text: '前沿技术', link: '/cv/计算机图形学原理/15-前沿技术与发展方向' }
+      ]
+    }
+  ],
+  '/cv/Canvas2D基础/': [
+    {
+      text: 'Canvas2D 基础',
+      items: [
+        { text: '← 返回图形模块', link: '/cv/' },
+        { text: '教学大纲', link: '/cv/Canvas2D基础/00-教学大纲与目录' },
+        { text: 'Canvas 元素与环境', link: '/cv/Canvas2D基础/01-Canvas元素与绑制环境' },
+        { text: '基础图形绑制', link: '/cv/Canvas2D基础/02-基础图形绑制' },
+        { text: '路径与贝塞尔曲线', link: '/cv/Canvas2D基础/03-路径与贝塞尔曲线' },
+        { text: '样式与颜色系统', link: '/cv/Canvas2D基础/04-样式与颜色系统' },
+        { text: '变换与坐标系统', link: '/cv/Canvas2D基础/05-变换与坐标系统' },
+        { text: '图像与像素操作', link: '/cv/Canvas2D基础/06-图像与像素操作' },
+        { text: '合成与混合模式', link: '/cv/Canvas2D基础/07-合成与混合模式' },
+        { text: '文本渲染', link: '/cv/Canvas2D基础/08-文本渲染' },
+        { text: '动画与帧循环', link: '/cv/Canvas2D基础/09-动画与帧循环' },
+        { text: '离屏渲染与优化', link: '/cv/Canvas2D基础/10-离屏渲染与性能优化' },
+        { text: '实战案例', link: '/cv/Canvas2D基础/11-实战案例与最佳实践' }
+      ]
+    }
+  ],
+  '/cv/WebGL基础/': [
+    {
+      text: 'WebGL 基础',
+      items: [
+        { text: '← 返回图形模块', link: '/cv/' },
+        { text: '教学大纲', link: '/cv/WebGL基础/00-教学大纲与目录' },
+        { text: 'WebGL 概述与搭建', link: '/cv/WebGL基础/01-WebGL概述与环境搭建' },
+        { text: '渲染管线详解', link: '/cv/WebGL基础/02-渲染管线详解' },
+        { text: '着色器与 GLSL', link: '/cv/WebGL基础/03-着色器与GLSL' },
+        { text: '缓冲区与顶点数据', link: '/cv/WebGL基础/04-缓冲区与顶点数据' },
+        { text: '纹理与采样', link: '/cv/WebGL基础/05-纹理与采样' },
+        { text: '矩阵变换与相机', link: '/cv/WebGL基础/06-矩阵变换与相机' },
+        { text: '光照与材质', link: '/cv/WebGL基础/07-光照与材质' },
+        { text: '帧缓冲与离屏', link: '/cv/WebGL基础/08-帧缓冲与离屏渲染' },
+        { text: '混合与深度测试', link: '/cv/WebGL基础/09-混合与深度测试' },
+        { text: 'WebGL2 新特性', link: '/cv/WebGL基础/10-WebGL2新特性' },
+        { text: '性能优化与调试', link: '/cv/WebGL基础/11-性能优化与调试' },
+        { text: '实战案例集', link: '/cv/WebGL基础/12-实战案例集' }
+      ]
+    }
+  ],
+  '/cv/PixiJS实战/': [
+    {
+      text: 'PixiJS 实战',
+      items: [
+        { text: '← 返回图形模块', link: '/cv/' },
+        { text: '教学大纲', link: '/cv/PixiJS实战/00-教学大纲与目录' },
+        { text: '快速入门', link: '/cv/PixiJS实战/01-PixiJS概述与快速入门' },
+        { text: 'Application 与渲染器', link: '/cv/PixiJS实战/02-Application与渲染器' },
+        { text: '显示对象体系', link: '/cv/PixiJS实战/03-显示对象体系' },
+        { text: 'Container 与场景图', link: '/cv/PixiJS实战/04-Container容器与场景图' },
+        { text: 'Sprite 与纹理', link: '/cv/PixiJS实战/05-Sprite精灵与纹理' },
+        { text: 'Graphics 图形', link: '/cv/PixiJS实战/06-Graphics图形绘制' },
+        { text: 'Text 文本', link: '/cv/PixiJS实战/07-Text文本渲染' },
+        { text: 'Transform 变换', link: '/cv/PixiJS实战/08-Transform变换系统' },
+        { text: '交互与事件', link: '/cv/PixiJS实战/09-交互与事件系统' },
+        { text: '资源加载', link: '/cv/PixiJS实战/10-纹理管理与资源加载' },
+        { text: '滤镜与特效', link: '/cv/PixiJS实战/11-滤镜与特效' },
+        { text: '遮罩与混合', link: '/cv/PixiJS实战/12-遮罩与混合模式' },
+        { text: 'Ticker 与动画', link: '/cv/PixiJS实战/13-Ticker与动画' },
+        { text: '性能优化', link: '/cv/PixiJS实战/14-性能优化实践' },
+        { text: '高级特性', link: '/cv/PixiJS实战/15-高级特性与扩展' }
+      ]
+    }
+  ],
+  '/cv/无限画布/': [
+    {
+      text: '无限画布',
+      items: [
+        { text: '← 返回图形模块', link: '/cv/' },
+        { text: '教学大纲', link: '/cv/无限画布/00-教学大纲与目录' },
+        { text: '代码路径与模块', link: '/cv/无限画布/01-代码路径与模块映射' },
+        { text: '基础概念与选型', link: '/cv/无限画布/02-基础概念与技术选型' },
+        { text: '坐标系统与变换', link: '/cv/无限画布/03-坐标系统与矩阵变换' },
+        { text: 'Viewport 视口', link: '/cv/无限画布/04-Viewport视口管理' },
+        { text: 'VmEngine 引擎', link: '/cv/无限画布/05-VmEngine视图模型引擎' },
+        { text: '元素生命周期', link: '/cv/无限画布/06-元素生命周期与渲染' },
+        { text: '事件与碰撞检测', link: '/cv/无限画布/07-事件系统与碰撞检测' },
+        { text: '手势与交互', link: '/cv/无限画布/08-手势与交互处理' },
+        { text: '插件系统', link: '/cv/无限画布/09-插件系统架构' },
+        { text: '性能优化', link: '/cv/无限画布/10-性能优化策略' },
+        { text: '导出与截图', link: '/cv/无限画布/11-导出与截图' },
+        { text: '总结与实践', link: '/cv/无限画布/12-总结与最佳实践' }
+      ]
     }
   ],
   // '/posts/': [

@@ -29,6 +29,130 @@
   }
 }
 
+/* Feature Cards 美化 */
+.VPFeatures {
+  .VPFeature {
+    position: relative;
+    background: linear-gradient(135deg, var(--vp-c-bg-soft) 0%, var(--vp-c-bg) 100%);
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+
+    /* 顶部渐变条 */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--vp-c-brand-1), var(--vp-c-brand-2), var(--vp-c-brand-3));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 背景光晕 */
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        circle at top left,
+        rgba(var(--vp-c-brand-1-rgb), 0.08) 0%,
+        transparent 50%
+      );
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    &:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--vp-c-brand-1);
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 0 0 1px var(--vp-c-brand-soft);
+
+      &::before {
+        transform: scaleX(1);
+      }
+
+      &::after {
+        opacity: 1;
+      }
+
+      .icon {
+        transform: scale(1.15) rotate(5deg);
+      }
+
+      .title {
+        color: var(--vp-c-brand-1);
+      }
+
+      .link-text {
+        transform: translateX(4px);
+      }
+
+      .link-text::after {
+        transform: translateX(4px);
+        opacity: 1;
+      }
+    }
+
+    .icon {
+      font-size: 2.25rem;
+      margin-bottom: 0.75rem;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--vp-c-text-1);
+      transition: color 0.3s ease;
+    }
+
+    .details {
+      font-size: 0.9rem;
+      color: var(--vp-c-text-2);
+      line-height: 1.7;
+    }
+
+    .link-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--vp-c-brand-1);
+      transition: all 0.3s ease;
+
+      &::after {
+        content: '→';
+        opacity: 0.7;
+        transition: all 0.3s ease;
+      }
+    }
+  }
+}
+
+/* Dark mode adjustments */
+.dark .VPFeatures .VPFeature {
+  background: linear-gradient(135deg, var(--vp-c-bg-soft) 0%, rgba(30, 30, 32, 0.8) 100%);
+
+  &:hover {
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--vp-c-brand-soft),
+      0 0 40px rgba(var(--vp-c-brand-1-rgb), 0.1);
+  }
+}
+
 /* 自定义块样式 */
 .custom-block .custom-block-title {
   font-size: 16px;
