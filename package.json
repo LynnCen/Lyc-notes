@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "vitepress dev docs --port=8733",
-    "build": "vitepress build docs",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' vitepress build docs",
     "preview": "vitepress preview docs --port 8730",
     "prepare": "husky install",
     "format": "prettier --write ."

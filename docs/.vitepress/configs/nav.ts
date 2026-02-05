@@ -1,194 +1,165 @@
 import type { DefaultTheme } from 'vitepress'
 
 export const nav: DefaultTheme.Config['nav'] = [
+  // 前端技术栈
   {
-    text: 'WebFront',
+    text: 'Frontend',
+    activeMatch: '/frontend/',
     items: [
       {
-        text: '前端基础',
+        text: '概览',
+        link: '/frontend/'
+      },
+      {
+        text: '框架',
         items: [
-          {
-            text: 'Javascript基础',
-            activeMatch: 'Javascript/basic/',
-            link: 'Javascript/basic/你不知道的js'
-          },
-          {
-            text: 'Javascript进阶',
-            activeMatch: 'Javascript/Advance/',
-            link: 'Javascript/Advance/executionContext'
-          },
-          {
-            text: 'Typescript',
-            activeMatch: '/typescript/',
-            link: '/typescript/记录'
-          },
+          { text: 'React', link: '/frontend/react/customHook/hooks' },
+          { text: 'Vue', link: '/frontend/vue/schudle' }
         ]
       },
       {
-        text:'Framework',
+        text: '语言',
         items: [
-          {
-            text: 'React',
-            activeMatch: '/react/',
-            link: 'react/core/intro'
-          },
-          {
-            text: 'Vue',
-            activeMatch: '/Vue/',
-            link: 'Vue/basic'
-          }
+          { text: 'TypeScript', link: '/frontend/typescript/记录' },
+          { text: 'JavaScript', link: '/frontend/javascript/Advance/executionContext' }
         ]
       },
       {
-        text: 'Engineering',
+        text: '浏览器 & 工程化',
         items: [
-          {
-            text: 'WebPack',
-            activeMatch: '/webpack/',
-            link: 'webpack/performance'
-          },
-          {
-            text: 'Node',
-            activeMatch: '/node/',
-            link: 'node/packages'
-          },
-          {
-            text: 'Vite',
-            activeMatch: '/vite/',
-            link: 'vite/basic'
-          },
-          {
-            text: 'Git',
-            activeMatch: '/git/',
-            link: 'git/basic'
-          }
-        ],
-      },
-      {
-        text:'浏览器',
-        items: [
-          {
-            text: '浏览器原理',
-            activeMatch: '/browser/',
-            link: '/browser/Chrome架构'
-          }
+          { text: '浏览器原理', link: '/frontend/browser/Chrome架构' },
+          { text: 'Webpack', link: '/frontend/webpack/basic' },
+          { text: 'Git', link: '/frontend/git/basic' }
         ]
-      },
-  
-    ],
+      }
+    ]
   },
+
+  // 图形与渲染
   {
-    text: 'ComputerBasics',
+    text: 'Graphics',
+    activeMatch: '/cv/',
     items: [
       {
-        text: '计算机组成原理',
+        text: '概览',
+        link: '/cv/'
+      },
+      {
+        text: '理论基础',
         items: [
-          {
-            text: '计算机组成原理基础',
-            link: '/组成原理/chapter1'
-          }
+          { text: '图形学原理', link: '/cv/计算机图形学原理/00-教学大纲与目录' }
         ]
       },
       {
-        text: '数据结构',
+        text: '渲染技术',
         items: [
-          {
-            text: '数据结构基础',
-            link: '/dataStructure/chapter1'
-          },
-          {
-            text: '课后习题',
-            link: '/dataStructure/chapter1_ex'
-          }
+          { text: 'Canvas2D', link: '/cv/Canvas2D基础/00-教学大纲与目录' },
+          { text: 'WebGL', link: '/cv/WebGL基础/00-教学大纲与目录' },
+          { text: 'PixiJS', link: '/cv/PixiJS实战/00-教学大纲与目录' }
         ]
+      },
+      {
+        text: '应用实战',
+        items: [
+          { text: '无限画布', link: '/cv/无限画布/00-教学大纲与目录' }
+        ]
+      }
+    ]
+  },
 
+  // AI & Agent
+  {
+    text: 'AI',
+    activeMatch: '/ai/',
+    items: [
+      {
+        text: '概览',
+        link: '/ai/'
       },
       {
-        text: '操作系统OS',
+        text: 'AI 工程',
         items: [
-          {
-            text: '操作系统基础',
-            link: '/os/chapter1',
-          }
+          { text: 'MCP 协议', link: '/ai/mcp/browserTools' },
+          { text: 'Dify 平台', link: '/ai/Dify/' },
+          { text: 'LLM 基础', link: '/ai/posts/LLM' }
         ]
       },
       {
-        text: '计算机网络',
+        text: '机器学习',
         items: [
-          {
-            text: '计算机网络基础',
-            link: '/计网/chapter1',
-          }
+          { text: '机器学习', link: '/ai/机器学习/逻辑回归' },
+          { text: '深度学习', link: '/ai/深度学习/卷积神经网络基础' },
+          { text: 'SAM', link: '/ai/sam/' }
         ]
-      },
+      }
+    ]
+  },
+
+  // 计算机基础
+  {
+    text: 'CS Basics',
+    activeMatch: '/fundamentals/|/design-patterns/',
+    items: [
       {
-        text: '408',
+        text: '计算机基础',
         items: [
-          {
-            text: '408真题',
-            link: '/408/2009',
-          }
+          { text: '数据结构', link: '/fundamentals/data-structures/chapter1' },
+          { text: '操作系统', link: '/fundamentals/operating-systems/chapter1' },
+          { text: '计算机网络', link: '/fundamentals/computer-networks/chapter1' },
+          { text: '计算机组成', link: '/fundamentals/computer-organization/chapter1' }
         ]
       },
       {
         text: '设计模式',
-        link: '/designPatterns/index'
+        items: [
+          { text: '设计模式概览', link: '/design-patterns/' },
+          { text: '408 真题', link: '/fundamentals/exam-408/2009' }
+        ]
+      },
+      {
+        text: '算法',
+        items: [
+          { text: 'LeetCode', link: '/algorithms/leetcode' },
+          { text: 'LRU 算法', link: '/algorithms/LRU' }
+        ]
       }
+    ]
+  },
 
-    ],
-  },
+  // 技术博客
   {
-    text: 'AI',
+    text: 'Blog',
+    activeMatch: '/blog/',
+    link: '/blog/'
+  },
+
+  // 更多
+  {
+    text: 'More',
     items: [
       {
-        text: 'MCP',
+        text: '开源项目',
         items: [
-          {
-            text: 'BrowserTools MCP',
-            link: '/AI/mcp/browserTools'
-          },
-          {
-            text: 'Figma Dev Mode MCP',
-            link: '/AI/mcp/figma'
-          }
+          { text: '项目列表', link: '/open-source/' },
+          { text: 'GitLab MCP', link: 'https://github.com/LynnCen/gitlab-mcp' },
+          { text: 'LynKit', link: 'https://lynncen.github.io/LynKit/' }
         ]
       },
       {
-        text: 'Dify',
+        text: '软考',
         items: [
-          {
-            text: 'Dify',
-            link: '/AI/Dify/index'
-          }
+          { text: '系统架构师', link: '/software-exam/架构师/README' },
+          { text: '软件设计师', link: '/software-exam/软件设计师/README' }
         ]
       },
       {
-        text:'Posts',
+        text: '其他',
         items: [
-          {
-            text: 'LLM',
-            link: '/posts/llm'
-          }
+          { text: '面试题库', link: '/interview/js' },
+          { text: '工作文档', link: '/work/gd/业务介绍' },
+          { text: '关于我', link: '/about/about' }
         ]
       }
     ]
-  },
-  {
-    text: 'SoftExame',
-    items: [
-      {
-        text: '软考-软件设计师',
-        link: '/softExam/软件设计师/index'
-      },
-      {
-        text:'软考-系统架构设计师',
-        link:'/softExam/架构师/index'
-      }
-    ]
-  },
-  {
-    text: 'Interview',
-    activeMatch: '/interview/',
-    link: '/interview/js'
-  },
+  }
 ]
