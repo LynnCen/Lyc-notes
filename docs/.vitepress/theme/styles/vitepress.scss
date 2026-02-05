@@ -97,11 +97,6 @@
       .link-text {
         transform: translateX(4px);
       }
-
-      .link-text::after {
-        transform: translateX(4px);
-        opacity: 1;
-      }
     }
 
     .icon {
@@ -131,12 +126,6 @@
       font-weight: 600;
       color: var(--vp-c-brand-1);
       transition: all 0.3s ease;
-
-      &::after {
-        content: '→';
-        opacity: 0.7;
-        transition: all 0.3s ease;
-      }
     }
   }
 }
