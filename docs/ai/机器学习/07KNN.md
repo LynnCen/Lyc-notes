@@ -230,4 +230,199 @@ sklearn 中 KNN 默认 `metric="minkowski"`，常配合 `p=2` 使用。
 
 ---
 
-*文档已按 KNN 流程与距离度量两条线整理，并补充公式与表格，便于复习与查阅。*
+# 鸢尾花实战与超参数调优
+
+## 一、鸢尾花数据集
+
+### 1.1 数据集介绍
+
+| 项目 | 说明 |
+|------|------|
+| **规模** | 150 条样本，每类 50 条，3 类均匀分布 |
+| **类别** | 山鸢尾(Iris Setosa)、变色鸢尾(Iris versicolor)、弗吉尼亚鸢尾(Iris Virginica) |
+| **特征** | 4 个：花萼长度/宽度(sepal length/width)、花瓣长度/宽度(petal length/width)，单位 cm |
+| **记忆** | p 开头是花瓣(petal)，其余是花萼(sepal) |
+
+分类依据：通过花瓣和花萼的形态差异区分三个品种。示例：山鸢尾 花萼 5.1×3.5 cm、花瓣 1.4×0.2 cm；变色鸢尾 花萼 6.4×3.5 cm、花瓣 4.5×1.2 cm；弗吉尼亚鸢尾 花萼 5.9×3.0 cm、花瓣 5.0×1.8 cm。
+
+### 1.2 数据加载与属性
+
+- **加载**：`load_iris()`，必须带括号调用。
+- **常用属性**：
+
+| 属性 | 含义 |
+|------|------|
+| `.data` | 特征矩阵 150×4 |
+| `.target` | 标签数组，取值 0/1/2 |
+| `.feature_names` | 特征名称（含单位，如 `'sepal length (cm)'`） |
+| `.target_names` | 类别名称 |
+| `.DESCR` | 数据集描述与统计信息 |
+
+```python
+from sklearn.datasets import load_iris
+
+iris_data = load_iris()
+print(iris_data.data[:5])
+print(iris_data.target)
+print(iris_data.feature_names)
+print(iris_data.target_names)
+```
+
+### 1.3 转为 DataFrame 与可视化
+
+- **转换**：`pd.DataFrame(iris_data.data, columns=iris_data.feature_names)`，列名需与 `feature_names` 完全一致（含空格、单位、英文括号）。
+- **添加标签**：`iris_df['label'] = iris_data.target`。
+- **绘图**：`seaborn.lmplot(x, y, data=iris_df, hue='label', fit_reg=False)`。`hue` 按类别着色；`fit_reg=False` 关闭回归线。
+
+---
+
+## 二、KNN 鸢尾花分类流程
+
+### 2.1 整体流程
+
+1. 获取数据集：`load_iris()`
+2. 数据基本处理：划分训练/测试集
+3. 特征工程：标准化（StandardScaler）
+4. 模型训练：KNeighborsClassifier
+5. 模型预测与评估：predict / score / accuracy_score
+
+### 2.2 依赖与数据划分
+
+```python
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+iris_data = load_iris()
+X_train, X_test, y_train, y_test = train_test_split(
+    iris_data.data, iris_data.target, test_size=0.2, random_state=22
+)
+```
+
+### 2.3 标准化（重要）
+
+| 方法 | 用途 | 使用场景 |
+|------|------|----------|
+| `fit` | 只计算统计量（如均值、方差） | 仅拟合计 |
+| `fit_transform` | 计算并转换 | **训练集** |
+| `transform` | 用已有统计量转换 | **测试集**（避免数据泄露） |
+
+```python
+scaler = StandardScaler()
+x_train = scaler.fit_transform(X_train)
+x_test = scaler.transform(X_test)   # 测试集只用 transform
+```
+
+### 2.4 模型训练与预测
+
+```python
+model = KNeighborsClassifier(n_neighbors=3)  # 或 5 等
+model.fit(x_train, y_train)
+
+y_pred = model.predict(x_test)
+# 或 model.predict_proba(x_test) 得到概率
+acc = accuracy_score(y_test, y_pred)   # 或 model.score(x_test, y_test)
+```
+
+- **predict**：返回类别标签；**predict_proba**：返回各类别概率（每行和为 1）。
+- 新数据预测前必须用**同一 scaler** 做 `transform`。
+
+### 2.5 特征关系与选择
+
+- 花瓣长度 + 花瓣宽度：类别更集中、边界更清晰，与 DESCR 中高相关性一致。
+- 花萼长度 + 花瓣宽度：第 0 类易分，第 1、2 类有重叠。
+- 可通过多组特征组合 + 散点图选择区分度更好的特征。
+
+---
+
+## 三、超参数选择：交叉验证与网格搜索
+
+### 3.1 交叉验证（CV）
+
+- **思想**：将训练集划分为 n 份，轮流用 1 份做验证、其余做训练，共 n 次，取平均得分。
+- **CV=10**：10 折交叉验证。用于更稳定地评估模型，避免单次划分偶然性。
+
+### 3.2 网格搜索（Grid Search）
+
+- **作用**：在给定超参数候选（如 `n_neighbors: [1,3,5,7]`）上自动训练评估，选出最优组合。
+- **与 CV 结合**：每组参数都用交叉验证评分，得到更可靠的最优参数。
+
+### 3.3 GridSearchCV API
+
+| 参数 | 含义 |
+|------|------|
+| `estimator` | 实例化后的模型（如 KNeighborsClassifier()） |
+| `param_grid` | 字典，如 `{'n_neighbors': [4,5,7,9]}` |
+| `cv` | 折数，如 4 或 5 |
+
+| 属性 | 含义 |
+|------|------|
+| `best_score_` | 交叉验证最佳得分 |
+| `best_estimator_` | 最优参数对应的模型（**应用时应用此模型**） |
+| `cv_results_` | 每次 CV 的详细结果（可转 DataFrame 存 CSV） |
+
+**注意**：`estimator.score(X_test, y_test)` 是**最后一轮**验证的模型得分，不一定等于 `best_score_`。应使用 `best_estimator_` 做最终预测。
+
+### 3.4 代码示例
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+scaler = StandardScaler()
+x_train = scaler.fit_transform(X_train)
+x_test = scaler.transform(X_test)
+
+param_grid = {'n_neighbors': [4, 5, 7, 9]}
+estimator = GridSearchCV(
+    KNeighborsClassifier(), param_grid, cv=4
+)
+estimator.fit(x_train, y_train)
+
+print(estimator.best_score_)
+print(estimator.best_estimator_)
+best_model = estimator.best_estimator_
+acc = best_model.score(x_test, y_test)
+```
+
+---
+
+## 四、特征预处理与 API 小结
+
+### 4.1 归一化与标准化
+
+| 方法 | 公式 | API | 特点 |
+|------|------|-----|------|
+| 归一化 | (x−min)/(max−min)，缩放到 [0,1] | MinMaxScaler | 受极值影响大 |
+| 标准化 | (x−μ)/σ，均值为 0、方差为 1 | StandardScaler | 更鲁棒，常用 |
+
+### 4.2 API 小结
+
+- 分类：`KNeighborsClassifier(n_neighbors=5)`
+- 回归：`KNeighborsRegressor(n_neighbors=5)`
+- 预处理：`StandardScaler()` / `MinMaxScaler()`；测试集只用 `transform`。
+
+---
+
+## 五、知识小结（鸢尾花与调参）
+
+| 知识点 | 核心内容 | 易混淆点 / 注意 | 难度 |
+|--------|----------|------------------|------|
+| 鸢尾花数据集 | 150 条、3 类、4 特征（花萼/花瓣长宽）；p=花瓣 | 类别名、特征名与 feature_names 对应 | ⭐⭐ |
+| 数据加载与格式 | load_iris() 必须加括号；DataFrame 列名与 feature_names 一致 | 中英文符号、空格、单位 | ⭐⭐ |
+| 数据可视化 | sns.lmplot(x, y, data, hue='label', fit_reg=False) | hue 为字符串列名；plt.xlabel 不是 xLabel | ⭐⭐⭐ |
+| 标准化 | 训练集 fit_transform，测试集 transform | 测试集不重新 fit，避免泄露 | ⭐⭐⭐ |
+| KNN 训练流程 | 加载 → 划分 → 标准化 → 实例化 → fit → predict/score | 新数据预测前要同样标准化 | ⭐⭐⭐ |
+| predict vs predict_proba | predict 返回类别；predict_proba 返回概率（行和为 1） | 评估时区分验证集与测试集 | ⭐⭐⭐ |
+| fit/transform/fit_transform | fit 计算参数，transform 应用参数，fit_transform 计算并应用 | 面试高频 | ⭐⭐⭐⭐ |
+| 交叉验证 | n 折轮流做验证集，取平均得分 | CV 值表示折数 | ⭐⭐ |
+| 网格搜索 | 遍历参数组合，结合 CV 选最优 | param_grid 字典，key 为参数名 | ⭐⭐⭐⭐ |
+| GridSearchCV 使用 | best_score_、best_estimator_、cv_results_ | 最终用 best_estimator_，不是默认 estimator | ⭐⭐⭐⭐ |
+
+---
+
+*文档包含 KNN 原理、电影分类、距离度量、鸢尾花实战与超参数调优，便于复习与查阅。*
