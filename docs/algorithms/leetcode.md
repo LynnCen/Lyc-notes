@@ -541,3 +541,454 @@ left=0, right=2
 - [合并两个有序数组](https://leetcode.cn/problems/merge-sorted-array/)
 - [第K个最小的数对和](https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/)
 - [寻找两个有序数组的中位数](https://leetcode.cn/problems/median-of-two-sorted-arrays/)
+
+# LRU 缓存
+
+## 题目描述
+
+请你设计并实现一个满足 **LRU (最近最少使用)** 缓存约束的数据结构。
+
+实现 `LRUCache` 类：
+
+- `LRUCache(int capacity)` 以正整数作为容量 `capacity` 初始化 LRU 缓存
+- `int get(int key)` 如果关键字 `key` 存在于缓存中，则返回关键字的值，否则返回 -1
+- `void put(int key, int value)` 如果关键字 `key` 已经存在，则变更其数据值 `value`；如果不存在，则向缓存中插入该组 `key-value`。如果插入操作导致关键字数量超过 `capacity`，则应该**逐出最久未使用的关键字**。
+
+函数 `get` 和 `put` 必须以 **O(1)** 的平均时间复杂度运行。
+
+**示例：**
+```
+输入
+["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]
+[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+
+输出
+[null, null, null, 1, null, -1, null, -1, 3, 4]
+
+解释
+LRUCache lRUCache = new LRUCache(2);
+lRUCache.put(1, 1); // 缓存是 {1=1}
+lRUCache.put(2, 2); // 缓存是 {1=1, 2=2}
+lRUCache.get(1);    // 返回 1，此时 1 被访问，变为最近使用
+lRUCache.put(3, 3); // 逐出 2（最久未使用），缓存是 {1=1, 3=3}
+lRUCache.get(2);    // 返回 -1
+lRUCache.put(4, 4); // 逐出 1，缓存是 {3=3, 4=4}
+lRUCache.get(1);    // 返回 -1
+lRUCache.get(3);    // 返回 3
+lRUCache.get(4);    // 返回 4
+```
+
+## 题目分析
+
+- **LRU**：Least Recently Used，淘汰最久未使用的项
+- **get**：若存在则返回值，并将该 key 标记为「最近使用」；否则返回 -1
+- **put**：若存在则更新值并标记为最近使用；若不存在则插入，超出容量时淘汰最久未使用的项
+- **O(1) 要求**：查找、插入、删除、更新访问顺序都要 O(1)
+
+---
+
+## 解法一：暴力解法 - 数组 + 线性查找
+
+### 思路
+
+用数组存储 `[key, value]` 对，按访问顺序排列（末尾为最近使用，头部为最久未使用）。
+
+- **get**：线性扫描查找 key，若找到则取出并移到末尾，否则返回 -1
+- **put**：线性扫描查找 key，若找到则更新并移到末尾；否则插入末尾。若超出容量，删除头部元素
+
+### 复杂度分析
+
+- **时间复杂度**：get O(n)，put O(n)
+- **空间复杂度**：O(capacity)
+
+### 代码实现
+
+```typescript
+class LRUCache {
+    private capacity: number;
+    private cache: Array<[number, number]> = [];  // [key, value]
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+    }
+
+    get(key: number): number {
+        const idx = this.cache.findIndex(([k]) => k === key);
+        if (idx === -1) return -1;
+        const [, value] = this.cache[idx];
+        this.cache.splice(idx, 1);        // 移除
+        this.cache.push([key, value]);    // 移到末尾（最近使用）
+        return value;
+    }
+
+    put(key: number, value: number): void {
+        const idx = this.cache.findIndex(([k]) => k === key);
+        if (idx !== -1) {
+            this.cache.splice(idx, 1);
+        } else if (this.cache.length >= this.capacity) {
+            this.cache.shift();  // 逐出最久未使用（头部）
+        }
+        this.cache.push([key, value]);
+    }
+}
+```
+
+### 缺点
+
+`findIndex`、`splice`、`shift` 均为 O(n)，无法满足 O(1) 要求。
+
+---
+
+## 解法二：HashMap + 数组维护顺序
+
+### 思路
+
+用 `Map` 做 O(1) 查找，用数组维护访问顺序。查找 O(1)，但更新顺序仍需在数组中移动元素，为 O(n)。
+
+### 复杂度分析
+
+- **时间复杂度**：get 查找 O(1)、更新顺序 O(n)；put 同理
+- **空间复杂度**：O(capacity)
+
+### 代码实现
+
+```typescript
+class LRUCache {
+    private capacity: number;
+    private map: Map<number, number> = new Map();
+    private order: number[] = [];  // 按访问顺序存储 key，末尾为最近使用
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+    }
+
+    get(key: number): number {
+        if (!this.map.has(key)) return -1;
+        const value = this.map.get(key)!;
+        // 更新顺序：从 order 中移除再追加到末尾
+        const idx = this.order.indexOf(key);
+        this.order.splice(idx, 1);
+        this.order.push(key);
+        return value;
+    }
+
+    put(key: number, value: number): void {
+        if (this.map.has(key)) {
+            const idx = this.order.indexOf(key);
+            this.order.splice(idx, 1);
+        } else if (this.map.size >= this.capacity) {
+            const lru = this.order.shift()!;
+            this.map.delete(lru);
+        }
+        this.map.set(key, value);
+        this.order.push(key);
+    }
+}
+```
+
+### 缺点
+
+`indexOf`、`splice`、`shift` 仍为 O(n)，未达到 O(1)。
+
+---
+
+## 解法三：最优解 - Map 利用有序性（JavaScript/TypeScript）
+
+### 思路
+
+JavaScript 的 `Map` 会**按插入顺序**迭代。利用这一点：
+
+- **get**：若存在，先 `delete` 再 `set`，相当于把该 key 移到「最近使用」位置
+- **put**：若存在，先 `delete` 再 `set`；若不存在且超容，删除**第一个** key（迭代器第一个即为最久未使用），再 `set`
+
+`Map` 的 `get`、`set`、`delete` 以及获取第一个 key 均为 O(1)。
+
+### 复杂度分析
+
+- **时间复杂度**：get O(1)，put O(1)
+- **空间复杂度**：O(capacity)
+
+### 代码实现
+
+```typescript
+class LRUCache {
+    private capacity: number;
+    private cache: Map<number, number>;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.cache = new Map();
+    }
+
+    get(key: number): number {
+        if (!this.cache.has(key)) return -1;
+        const value = this.cache.get(key)!;
+        this.cache.delete(key);
+        this.cache.set(key, value);  // 移到末尾 = 最近使用
+        return value;
+    }
+
+    put(key: number, value: number): void {
+        if (this.cache.has(key)) {
+            this.cache.delete(key);
+        } else if (this.cache.size >= this.capacity) {
+            const lruKey = this.cache.keys().next().value;
+            this.cache.delete(lruKey);
+        }
+        this.cache.set(key, value);
+    }
+}
+```
+
+---
+
+## 解法四：最优解 - HashMap + 双向链表（通用写法）
+
+### 思路
+
+适用于不依赖 `Map` 有序性的语言（如 Java、C++）：用 HashMap 做 O(1) 查找，用双向链表维护访问顺序，头尾操作均为 O(1)。
+
+- **链表**：头部为最久未使用，尾部为最近使用
+- **get**：在 HashMap 中查找，若存在则将节点移到尾部
+- **put**：若存在则更新并移到尾部；若不存在则新建节点插到尾部，超容则删除头部节点
+
+### 复杂度分析
+
+- **时间复杂度**：get O(1)，put O(1)
+- **空间复杂度**：O(capacity)
+
+### 代码实现
+
+```typescript
+class DLinkedNode {
+    key: number;
+    value: number;
+    prev: DLinkedNode | null = null;
+    next: DLinkedNode | null = null;
+    constructor(key: number, value: number) {
+        this.key = key;
+        this.value = value;
+    }
+}
+
+class LRUCache {
+    private capacity: number;
+    private map: Map<number, DLinkedNode> = new Map();
+    private head: DLinkedNode;  // 哨兵，head.next 为最久未使用
+    private tail: DLinkedNode;  // 哨兵，tail.prev 为最近使用
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.head = new DLinkedNode(-1, -1);
+        this.tail = new DLinkedNode(-1, -1);
+        this.head.next = this.tail;
+        this.tail.prev = this.head;
+    }
+
+    private addToTail(node: DLinkedNode): void {
+        node.prev = this.tail.prev;
+        node.next = this.tail;
+        this.tail.prev!.next = node;
+        this.tail.prev = node;
+    }
+
+    private removeNode(node: DLinkedNode): void {
+        node.prev!.next = node.next;
+        node.next!.prev = node.prev;
+    }
+
+    private moveToTail(node: DLinkedNode): void {
+        this.removeNode(node);
+        this.addToTail(node);
+    }
+
+    get(key: number): number {
+        if (!this.map.has(key)) return -1;
+        const node = this.map.get(key)!;
+        this.moveToTail(node);
+        return node.value;
+    }
+
+    put(key: number, value: number): void {
+        if (this.map.has(key)) {
+            const node = this.map.get(key)!;
+            node.value = value;
+            this.moveToTail(node);
+            return;
+        }
+        if (this.map.size >= this.capacity) {
+            const lru = this.head.next!;
+            this.removeNode(lru);
+            this.map.delete(lru.key);
+        }
+        const node = new DLinkedNode(key, value);
+        this.map.set(key, node);
+        this.addToTail(node);
+    }
+}
+```
+
+---
+
+## 四种解法对比
+
+| 解法 | get | put | 空间 | 特点 |
+|------|-----|-----|------|------|
+| 数组 + 线性查找 | O(n) | O(n) | O(n) | 暴力，易实现 |
+| HashMap + 数组顺序 | O(n) | O(n) | O(n) | 查找 O(1)，更新顺序 O(n) |
+| Map 有序性（JS/TS） | O(1) | O(1) | O(n) | 最简，依赖语言特性 |
+| HashMap + 双向链表 | O(1) | O(1) | O(n) | 通用最优解，可移植 |
+
+---
+
+## 核心技巧总结
+
+1. **访问即更新**：get 和 put 命中时都要把该 key 标记为「最近使用」
+2. **淘汰策略**：超出容量时删除「最久未使用」的项
+3. **O(1) 实现**：查找用 HashMap；顺序更新用双向链表（或利用 Map 有序性）
+4. **哨兵节点**：双向链表用 head/tail 哨兵可简化边界处理
+
+---
+
+## 相关题目
+
+- [LFU 缓存](https://leetcode.cn/problems/lfu-cache/)
+- [设计循环队列](https://leetcode.cn/problems/design-circular-queue/)
+
+# 最长连续序列
+
+## 题目描述
+
+给定一个未排序的整数数组 `nums`，找出**数字连续**的最长序列的长度。（不要求序列元素在原数组中连续。）
+
+请你设计并实现**时间复杂度为 O(n)** 的算法解决此问题。
+
+**示例 1：**
+```
+输入：nums = [100,4,200,1,3,2]
+输出：4
+解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+```
+
+**示例 2：**
+```
+输入：nums = [0,3,7,2,5,8,4,6,0,1]
+输出：9
+解释：最长连续序列是 [0,1,2,3,4,5,6,7,8]，长度为 9。
+```
+
+**示例 3：**
+```
+输入：nums = [1,0,1,2]
+输出：3
+解释：最长连续序列是 [0,1,2]，长度为 3。
+```
+
+## 题目分析
+
+- **连续**：指数值上连续，如 1,2,3,4，与在原数组中的位置无关
+- **重复**：如 [1,0,1,2] 中 1 只算一次，序列为 [0,1,2]，长度为 3
+- **O(n) 要求**：不能排序（排序为 O(n log n)），需要线性扫描 + O(1) 查找（用 Set/Map）
+
+---
+
+## 解法一：排序 + 一次遍历
+
+### 思路
+
+先排序，再遍历一次，用当前是否等于「上一数+1」来维护当前连续段长度。
+
+### 复杂度分析
+
+- **时间复杂度**：O(n log n)，由排序决定
+- **空间复杂度**：O(log n) 排序栈 或 O(n) 若使用额外数组
+
+### 代码实现
+
+```typescript
+function longestConsecutive(nums: number[]): number {
+    if (nums.length === 0) return 0;
+    nums.sort((a, b) => a - b);
+    let maxLen = 1;
+    let curLen = 1;
+    for (let i = 1; i < nums.length; i++) {
+        if (nums[i] === nums[i - 1]) continue;           // 重复跳过
+        if (nums[i] === nums[i - 1] + 1) {
+            curLen++;
+        } else {
+            maxLen = Math.max(maxLen, curLen);
+            curLen = 1;
+        }
+    }
+    return Math.max(maxLen, curLen);
+}
+```
+
+### 缺点
+
+不满足 O(n) 要求。
+
+---
+
+## 解法二：Set + 只从「序列起点」扩展（O(n) 最优）
+
+### 思路
+
+- 把所有数放进 `Set`，去重且 O(1) 查找
+- **关键**：只从「某个连续序列的起点」开始往后数。若 `num - 1` 在 Set 里，说明当前 num 不是起点，跳过，避免重复统计同一段
+- 若 `num - 1` 不在 Set 里，则从 num 开始往后数（num, num+1, num+2...），直到不在 Set 中，得到以 num 为起点的连续段长度
+- 每个数最多被访问两次：一次作为非起点被跳过，一次在从起点扩展时被数到，故总时间 O(n)
+
+### 复杂度分析
+
+- **时间复杂度**：O(n)
+- **空间复杂度**：O(n)，Set 存所有数
+
+### 代码实现
+
+```typescript
+function longestConsecutive(nums: number[]): number {
+    const set = new Set(nums);
+    let maxLen = 0;
+    for (const num of set) {
+        if (set.has(num - 1)) continue;  // 不是起点，跳过
+        let cur = num;
+        let len = 0;s
+        while (set.has(cur)) {
+            len++;
+            cur++;
+        }
+        maxLen = Math.max(maxLen, len);
+    }
+    return maxLen;
+}
+```
+
+### 要点
+
+- 只有「没有 num-1」的 num 才作为起点向后扩展，保证每段连续序列只被数一次
+- 用 Set 去重，重复值不影响结果
+
+---
+
+## 两种解法对比
+
+| 解法 | 时间复杂度 | 空间复杂度 | 是否满足要求 |
+|------|-----------|-----------|--------------|
+| 排序 + 遍历 | O(n log n) | O(log n) 或 O(n) | 否 |
+| Set + 只从起点扩展 | O(n) | O(n) | 是 |
+
+---
+
+## 核心技巧总结
+
+1. **连续序列**：按数值连续，与下标无关；重复数只算一次
+2. **避免重复统计**：只从「序列起点」（即 num-1 不存在）开始向后数
+3. **O(n) 实现**：Set 去重 + O(1) 查找；每个数至多参与两次操作
+
+---
+
+## 相关题目
+
+- [存在重复元素](https://leetcode.cn/problems/contains-duplicate/)
+- [数组中的第 K 个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/)
