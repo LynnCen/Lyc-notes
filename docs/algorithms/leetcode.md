@@ -1,3 +1,129 @@
+# 两数之和
+
+## 题目描述
+
+给定一个整数数组 `nums` 和一个整数目标值 `target`，请你在该数组中找出**和为目标值** `target` 的那 **两个** 整数，并返回它们的数组下标。
+
+你可以假设每种输入只会对应一个答案。但是，数组中同一个元素在答案里不能重复出现。
+
+你可以按任意顺序返回答案。
+
+**示例 1：**
+
+```
+输入：nums = [2,7,11,15], target = 9
+输出：[0,1]
+解释：因为 nums[0] + nums[1] == 9 ，返回 [0, 1] 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [3,2,4], target = 6
+输出：[1,2]
+```
+
+**示例 3：**
+
+```
+输入：nums = [3,3], target = 6
+输出：[0,1]
+```
+
+---
+
+## 题目分析
+
+这题本质是在问：对每个数 `x = nums[i]`，你想知道数组里有没有另一个数 `y` 使得 `x + y = target`。
+
+换句话说：当 `x` 固定时，只要能快速找到 `y = target - x` 是否存在即可。
+
+所以问题可以改写成：**当你遍历到 `nums[i]` 时，能否快速判断「之前见过的数里有没有 `target - nums[i]`」？**
+
+- 如果每次都线性查找，单次查找 O(n)，总体 O(n²)。
+- 如果用哈希表记住「值 → 下标」，查找可均摊 O(1)，总体 O(n)。
+
+---
+
+## 解法一：暴力解法 - 双重循环枚举
+
+### 思路
+
+枚举所有二元组合 `(i, j)`（其中 `i < j`），检查是否满足 `nums[i] + nums[j] === target`，找到就返回下标。
+
+### 复杂度分析
+
+- **时间复杂度**：O(n²)
+- **空间复杂度**：O(1)
+
+### 代码实现
+
+```typescript
+function twoSum(nums: number[], target: number): number[] {
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      if (nums[i] + nums[j] === target) {
+        return [i, j];
+      }
+    }
+  }
+  return [];
+}
+```
+
+### 缺点
+
+当 `nums` 很大时，O(n²) 容易超时。
+
+---
+
+## 解法二：哈希表 - 一次遍历（最常用）
+
+### 思路
+
+从左到右遍历数组。对当前元素 `x = nums[i]`：
+
+1. 计算互补值 `need = target - x`
+2. 如果哈希表里已经记录过 `need` 的下标 `j`，说明 `nums[j] + nums[i] = target`，直接返回 `[j, i]`
+3. 否则把当前值 `x` 和下标 `i` 记录进哈希表，继续遍历
+
+注意顺序：**先查再存**。这样可以避免误用同一个元素（尤其是数组里只有一个 `target/2` 的情况）。
+
+### 复杂度分析
+
+- **时间复杂度**：O(n)（哈希查找/插入均摊 O(1)）
+- **空间复杂度**：O(n)（最坏情况下所有元素都存入哈希表）
+
+### 代码实现
+
+```typescript
+function twoSum(nums: number[], target: number): number[] {
+  const indexMap = new Map<number, number>(); // value -> index
+
+  for (let i = 0; i < nums.length; i++) {
+    const x = nums[i];
+    const need = target - x;
+
+    if (indexMap.has(need)) {
+      return [indexMap.get(need)!, i];
+    }
+
+    indexMap.set(x, i);
+  }
+
+  return [];
+}
+```
+
+### 为什么这样一定对？
+
+遍历到第 `i` 个元素时，哈希表里存的是 `0..i-1` 的信息。
+
+若答案是 `(j, i)` 且 `j < i`，那么当遍历到 `i` 时，`need = target - nums[i] = nums[j]` 一定已经被存过，因此能立刻找到。
+
+题目保证答案唯一，所以第一次命中就可以直接返回。
+
+
 # 无重复字符的最长子串
 
 ## 题目描述
@@ -2448,3 +2574,255 @@ reverseList(1) → 需 reverseList(2)
 - [反转链表 II](https://leetcode.cn/problems/reverse-linked-list-ii/)
 - [回文链表](https://leetcode.cn/problems/palindrome-linked-list/)
 - [K 个一组翻转链表](https://leetcode.cn/problems/reverse-nodes-in-k-group/)
+
+
+# 二分查找
+
+## 题目描述
+
+给定一个**有序（升序）**整数数组 `nums` 和一个目标值 `target`，在数组中查找 `target`，若存在则返回其下标，否则返回 -1。
+
+**示例 1：**
+```
+输入：nums = [-1,0,3,5,9,12], target = 9
+输出：4
+解释：9 出现在下标 4
+```
+
+**示例 2：**
+```
+输入：nums = [-1,0,3,5,9,12], target = 2
+输出：-1
+解释：2 不存在于数组中
+```
+
+**示例 3：**
+```
+输入：nums = [5], target = 5
+输出：0
+```
+
+## 题目分析
+
+- **前提**：数组有序，才能根据 `nums[mid]` 与 `target` 的大小关系缩小一半区间
+- **思路**：维护闭区间 `[left, right]`，取中点 `mid`，若 `nums[mid] == target` 则返回；若 `nums[mid] < target` 则到右半段 `[mid+1, right]` 找；否则到左半段 `[left, mid-1]` 找。若区间为空仍未找到则返回 -1
+- **边界**：`left <= right` 时区间有效；取 `mid` 常用 `left + ((right - left) >> 1)` 防溢出
+
+---
+
+## 解法一：基本二分（找任意一个等于 target 的下标）
+
+### 思路
+
+闭区间 `[left, right]`，当 `left <= right` 时：若 `nums[mid] == target` 返回 `mid`；若 `nums[mid] < target` 则 `left = mid + 1`；否则 `right = mid - 1`。循环结束未找到则返回 -1。
+
+### 复杂度分析
+
+- **时间复杂度**：O(log n)
+- **空间复杂度**：O(1)
+
+### 代码实现
+
+```typescript
+function search(nums: number[], target: number): number {
+    let left = 0;
+    let right = nums.length - 1;
+    while (left <= right) {
+        const mid = left + ((right - left) >> 1);
+        if (nums[mid] === target) return mid;
+        if (nums[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return -1;
+}
+```
+
+#### 具体例子（nums = [-1,0,3,5,9,12], target = 9）
+
+| 轮次 | left | right | mid | nums[mid] | 比较 | 下一步 |
+|------|------|-------|-----|-----------|------|--------|
+| 1 | 0 | 5 | 2 | 3 | 3 < 9 | left = 3 |
+| 2 | 3 | 5 | 4 | 9 | 9 == 9 | **返回 4** |
+
+**结果**：4。
+
+---
+
+## 解法二：左边界二分（找第一个 ≥ target 的下标）
+
+若需「第一个等于 target 的位置」或「插入位置」，可在循环中不提前 return，在 `nums[mid] >= target` 时收缩右边界并记录候选，最后根据题意返回。
+
+### 思路
+
+- 当 `nums[mid] >= target` 时，记录 `mid` 为候选，并令 `right = mid - 1` 继续在左半找更小的下标
+- 当 `nums[mid] < target` 时，`left = mid + 1`
+- 循环条件 `left <= right`，结束后候选即为「第一个 ≥ target 的下标」（若不存在则可为 length，表示都小于 target）
+
+### 代码实现（找第一个等于 target 的下标，不存在返回 -1）
+
+```typescript
+function searchLeft(nums: number[], target: number): number {
+    let left = 0;
+    let right = nums.length - 1;
+    let ans = -1;
+    while (left <= right) {
+        const mid = left + ((right - left) >> 1);
+        if (nums[mid] >= target) {
+            if (nums[mid] === target) ans = mid;
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return ans;
+}
+```
+
+---
+
+## 解法三：右边界二分（找最后一个 ≤ target 的下标）
+
+与左边界对称：当 `nums[mid] <= target` 时记录候选并 `left = mid + 1`；否则 `right = mid - 1`。可用来求「最后一个等于 target 的下标」。
+
+---
+
+## 核心技巧总结
+
+1. **区间**：闭区间 `[left, right]` 时用 `left <= right`，取 mid 后根据比较结果 `left = mid + 1` 或 `right = mid - 1`，避免死循环
+2. **mid 防溢出**：`mid = left + ((right - left) >> 1)` 或 `Math.floor((left + right) / 2)`
+3. **左/右边界**：要「第一个满足条件」就收缩右边界并记录；要「最后一个满足条件」就收缩左边界并记录
+
+---
+
+## 相关题目
+
+- [搜索插入位置](https://leetcode.cn/problems/search-insert-position/)
+- [在排序数组中查找元素的第一个和最后一个位置](https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/)
+- [x 的平方根](https://leetcode.cn/problems/sqrtx/)
+
+# x 的平方根
+
+## 题目描述
+
+给你一个非负整数 `x`，计算并返回 `x` 的**算术平方根**。由于返回类型是整数，结果只保留**整数部分**，小数部分将被舍去。
+
+**示例 1：**
+```
+输入：x = 4
+输出：2
+```
+
+**示例 2：**
+```
+输入：x = 8
+输出：2
+解释：8 的算术平方根是 2.82842...，舍去小数部分得到 2。
+```
+
+**示例 3：**
+```
+输入：x = 0
+输出：0
+```
+
+## 题目分析
+
+- **题意**：求最大的整数 `k` 满足 `k * k <= x`，即「k² ≤ x 的右边界」
+- **思路**：在范围 `[0, x]` 上二分（或缩小到 `[0, (x>>1)+1]` 避免 mid*mid 溢出考虑），若 `mid * mid <= x` 则记录候选并尝试更大（`left = mid + 1`），否则 `right = mid - 1`
+- **注意**：mid * mid 可能溢出，可用 `mid <= x / mid` 代替 `mid * mid <= x`（在 mid > 0 时等价）
+
+---
+
+## 解法一：二分查找（右边界）
+
+### 思路
+
+在 `[left, right]` 中找最大的 `k` 使得 `k * k <= x`。当 `mid * mid <= x`（或 `mid <= x / mid`）时，说明 mid 可能是答案，记录并 `left = mid + 1` 看能否更大；否则 `right = mid - 1`。循环条件 `left <= right`，结束后返回记录的候选。
+
+### 复杂度分析
+
+- **时间复杂度**：O(log x)
+- **空间复杂度**：O(1)
+
+### 代码实现
+
+```typescript
+function mySqrt(x: number): number {
+    if (x <= 1) return x;
+    let left = 1;
+    let right = x;
+    let ans = 0;
+    while (left <= right) {
+        const mid = left + ((right - left) >> 1);
+        if (mid <= x / mid) {
+            ans = mid;
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return ans;
+}
+```
+
+#### 具体例子（x = 8）
+
+求最大整数 k 满足 k² ≤ 8。
+
+| 轮次 | left | right | mid | mid ≤ 8/mid ? | 操作 | ans |
+|------|------|-------|-----|----------------|------|-----|
+| 1 | 1 | 8 | 4 | 4 ≤ 2 否 | right = 3 | 0 |
+| 2 | 1 | 3 | 2 | 2 ≤ 4 是 | ans=2, left=3 | 2 |
+| 3 | 3 | 3 | 3 | 3 ≤ 2 否 | right = 2 | 2 |
+| 结束 | 3 | 2 | — | left > right | 返回 ans | **2** |
+
+**结果**：2。
+
+---
+
+## 解法二：牛顿迭代（可选）
+
+### 思路
+
+利用牛顿法求根：从初值 `x0 = x`（或 x/2）开始，迭代 `x_{n+1} = (x_n + x/x_n) / 2`，收敛到 sqrt(x)。取整数部分时可在相邻两次迭代结果相差足够小或整数部分不再变化时停止。
+
+### 代码实现
+
+```typescript
+function mySqrtNewton(x: number): number {
+    if (x <= 1) return x;
+    let t = x;
+    while (t > x / t) {
+        t = Math.floor((t + x / t) / 2);
+    }
+    return Math.floor(t);
+}
+```
+
+---
+
+## 两种解法对比
+
+| 解法 | 思路 | 特点 |
+|------|------|------|
+| 二分 | 在 [1, x] 上找 k² ≤ x 的右边界 | 直观，易写，防溢出用 mid ≤ x/mid |
+| 牛顿迭代 | 迭代公式收敛到 sqrt(x) | 收敛快，代码短 |
+
+---
+
+## 核心技巧总结
+
+1. **题意**：等价于「最大的 k 满足 k² ≤ x」，即二分的右边界问题
+2. **防溢出**：用 `mid <= x / mid` 代替 `mid * mid <= x`（mid > 0）
+3. **边界**：x 为 0 或 1 时可直接返回 x；二分范围可从 1 开始
+
+---
+
+## 相关题目
+
+- [二分查找](https://leetcode.cn/problems/binary-search/)
+- [有效的完全平方数](https://leetcode.cn/problems/valid-perfect-square/)
+- [ Pow(x, n)](https://leetcode.cn/problems/powx-n/)
